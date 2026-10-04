@@ -51,7 +51,7 @@
 html {
   font-size: 62.5%;
   font-family: var(--font-sans-regular);
-  background-color: var(--color-dark);
+  background-color: #070708;
   color: var(--color-light);
 }
 
@@ -276,8 +276,8 @@ html {
   font-size: 62.5%;
   font-family: "PPSupplySansRegular";
   font-family: var(--font-sans-regular);
-  background-color: #101011;
-  background-color: var(--color-dark);
+  background-color: #070708;
+  background-color: #070708;
   color: #ffffff;
   color: var(--color-light);
 }
@@ -548,7 +548,7 @@ svg[data-v-71e9e103] {
 }
 .start-screen[data-v-34202237] {
   width: 100vw;
-  background-color: var(--color-dark-gray);
+  background-color: transparent;
   color: var(--color-dark);
   position: fixed;
   left: 0;
@@ -557,7 +557,7 @@ svg[data-v-71e9e103] {
   bottom: 0;
 }
 .start-screen.night-mode[data-v-34202237] {
-  background-color: var(--color-dark-blue);
+  background-color: transparent;
 }
 .start-screen__canvas-wrapper[data-v-741cd722] {
   width: 100%;

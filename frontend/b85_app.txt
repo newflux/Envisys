@@ -1,0 +1,786 @@
+<template>
+  <div id="app">
+    <div v-if="isDebug" style="position: fixed; top: 10px; left: 10px; z-index: 10000; color: white; background: #000; padding: 10px; border: 1px solid #333; font-family: monospace;">
+      <label>Reveal: {{ reveal.toFixed(2) }}</label><br/>
+      <input type="range" min="0" max="1" step="0.01" v-model.number="reveal" style="width: 200px" />
+    </div>
+<!----><!----><div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><div class="preloader" data-v-edead8a0 data-v-314f53c6><div class="preloader__inner" data-v-edead8a0><h4 class="preloader__text" data-v-edead8a0><span data-v-edead8a0></span> <span data-v-edead8a0> |</span></h4></div> <div class="preloader__progress" data-v-edead8a0></div></div> <main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
+  <div style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background: #070707; background: radial-gradient(circle at 50% 45%, #101010, #070707 70%);"></div>
+  <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22vw; font-weight: 700; color: #161616; letter-spacing: -0.02em; pointer-events: none; white-space: nowrap; font-family: 'Inter', 'Helvetica Neue', sans-serif; z-index: -1;">ENVISYS</div>
+  <div style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0;">
+    <div class="film-grain" ref="grainRef"></div>
+    <TresCanvas window-size :tone-mapping-exposure="exposure">
+      <TresColor args="['#050506']" attach="background" />
+      <TresFogExp2 args="['#050506', 0.05]" ref="fogRef" />
+      <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.05" :far="1500" />
+      <TresAmbientLight ref="ambientRef" color="#ffffff" :intensity="0" />
+      
+      <Suspense>
+        <Environment :background="false">
+          <Lightformer :position="[-5, 2, 2]" :scale="[1, 10, 1]" :intensity="1" color="#ffffff" :look-at="[0,2,0]" />
+          <Lightformer :position="[5, 2, 2]" :scale="[1, 10, 1]" :intensity="1" color="#ffffff" :look-at="[0,2,0]" />
+          <Lightformer :position="[0, 8, 2]" :rotation="[-Math.PI / 2, 0, 0]" :scale="[10, 1, 1]" :intensity="1" color="#ffffff" />
+        </Environment>
+      </Suspense>
+
+      <Suspense>
+        <OrbitControls v-if="isFree" />
+      </Suspense>
+
+      <Suspense>
+        <ContactShadows :position="[0, -2.04, 0]" :resolution="1024" :scale="20" :blur="2.5" :opacity="0.6" :far="3" color="#000000" />
+      </Suspense>
+
+      <!-- Chamber Spotlight (Soft cool-white) -->
+      <TresSpotLight ref="chamberSpot" :position="[0, 8, 12]" color="#e0f0ff" :intensity="0" :distance="40" :angle="0.5" :penumbra="1" :decay="2" :castShadow="false" />
+      
+      <!-- Floor Spill Light (Reduced orange) -->
+      <TresPointLight ref="spillLight" :position="[0, -1, 3]" color="#ff3d14" :intensity="0" :distance="12" :decay="2" />
+      
+      <Suspense>
+        <TresGroup>
+          <primitive v-if="chamberScene" :object="chamberScene" :scale="2.5" :position="[0, -2.05, 0]" />
+          <primitive v-if="warehouseScene" :object="warehouseScene" />
+        </TresGroup>
+      </Suspense>
+
+
+
+      <!-- Floating Dust Particles -->
+      <TresPoints ref="dustRef">
+        <TresBufferGeometry :position="[dustPositions, 3]" />
+        <TresPointsMaterial color="#ff5533" :size="0.04" :transparent="true" :opacity="0.4" :blending="2" :depthWrite="false" :fog="false" />
+      </TresPoints>
+
+      <Suspense>
+        <EffectComposerPmndrs>
+          <BloomPmndrs :luminanceThreshold="0.3" :mipmapBlur="true" :radius="0.35" :intensity="bloomIntensity" />
+          <VignettePmndrs :offset="0.3" :darkness="0.5" />
+        </EffectComposerPmndrs>
+      </Suspense>
+    </TresCanvas>
+  </div>
+<video playsinline="" loop="loop" muted="muted" crossOrigin="anonymous" style="visibility:hidden;position:absolute;pointer-events:none;" data-v-741cd722><source src="/models/tv_square.mp4" data-v-741cd722 /></video></div> <header class="start-header" data-v-36cf41b8 data-v-34202237><nav class="start-header__navigation" data-v-36cf41b8><ul class="start-header__navigation-list" data-v-4a566750 data-v-36cf41b8><li class="start-header__navigation-item" data-v-4a566750><a href="/about" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>About us</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><a href="/contacts" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>Contacts</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><button class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>FAQ</span></button></li></ul></nav> <div class="start-header__logo" data-v-36cf41b8><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__logo start-header__logo--nightmode" style="display:none;" data-v-36cf41b8><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__sound" style="display:flex; gap:20px; align-items:center;" data-v-36cf41b8><button class="sound-switcher" @click="toggleNightMode" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Mode</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button><button class="sound-switcher" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Sound</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button></div> <div class="dots start-header__dots" data-v-7d6eeb50 data-v-36cf41b8><div class="dot" data-v-7d6eeb50></div> <div class="dot" data-v-7d6eeb50></div></div></header> <footer class="start-screen__footer" data-v-7934099c data-v-34202237><div class="start-screen__footer-left p2" data-v-7934099c>
+    // Positioned at the axis of talent and content across film
+  </div> <div class="start-screen__footer-center" data-v-7934099c><p class="scroll-down p2" data-v-751b1c41 data-v-7934099c><span data-v-751b1c41>Scroll Down</span> <span class="scroll-down__icon" data-v-751b1c41></span></p></div> <div class="start-screen__footer-right" data-v-7934099c><p class="clock p2" data-v-43f4bbf8 data-v-7934099c>06 : 57 pm</p></div></footer></div></div> <!----></div></main> <div class="popup faq" style="display: none;" data-v-55603bb3 data-v-314f53c6><button aria-label="close modal" class="faq__close-button" data-v-372f1411 data-v-55603bb3><span data-v-372f1411></span> <span data-v-372f1411></span></button> <div class="faq__inner" data-v-55603bb3><div class="faq__content" data-v-55603bb3><div class="faq__item" data-v-a5afd848 data-v-55603bb3><h3 tabindex="0" role="button" class="faq__item-title p1" data-v-a5afd848><span class="faq__item-title-text" data-v-a5afd848>How to submit your work on Netpitch.io</span></h3> <div class="faq__item-text-wrapper" data-v-a5afd848><p class="faq__item-text p2" data-v-a5afd848>
+      Under the “Submit Your Pitch” tab, select whether you’re going to be submitting a film, television, or music and select “Click to Pitch”. Then, please read and follow the guidelines and provide your contact info, the info about the project, and your payment info and you’re good to go!
+    </p> <div class="faq__item-pb" data-v-a5afd848></div></div> <div class="faq__item-border" data-v-a5afd848></div></div><div class="faq__item" data-v-a5afd848 data-v-55603bb3><h3 tabindex="0" role="button" class="faq__item-title p1" data-v-a5afd848><span class="faq__item-title-text" data-v-a5afd848>How do I know if my submission was received?</span></h3> <div class="faq__item-text-wrapper" data-v-a5afd848><p class="faq__item-text p2" data-v-a5afd848>
+      After you provide your payment and the project is received by our system you will receive and email letting you know the process has been completed.
+    </p> <div class="faq__item-pb" data-v-a5afd848></div></div> <div class="faq__item-border" data-v-a5afd848></div></div><div class="faq__item" data-v-a5afd848 data-v-55603bb3><h3 tabindex="0" role="button" class="faq__item-title p1" data-v-a5afd848><span class="faq__item-title-text" data-v-a5afd848>When will I know the status of my project?</span></h3> <div class="faq__item-text-wrapper" data-v-a5afd848><p class="faq__item-text p2" data-v-a5afd848>
+      Within 10 business days after submission, you will hear from our review team whether the project will continue to be pitched or if the idea still needs some work beforehand, regardless you’ll be alerted via email.
+    </p> <div class="faq__item-pb" data-v-a5afd848></div></div> <div class="faq__item-border" data-v-a5afd848></div></div><div class="faq__item" data-v-a5afd848 data-v-55603bb3><h3 tabindex="0" role="button" class="faq__item-title p1" data-v-a5afd848><span class="faq__item-title-text" data-v-a5afd848>How long will it take for my idea to get produced?</span></h3> <div class="faq__item-text-wrapper" data-v-a5afd848><p class="faq__item-text p2" data-v-a5afd848>
+      The short answer is that it all depends. There are a multitude of factors anywhere from pairing projects with mandates to attracting the right talent to really put the project into motion. Initially if your idea is bought then you’ll have a contract to assure your stake in the project no matter how long it takes to get into production.
+    </p> <div class="faq__item-pb" data-v-a5afd848></div></div> <div class="faq__item-border" data-v-a5afd848></div></div><div class="faq__item" data-v-a5afd848 data-v-55603bb3><h3 tabindex="0" role="button" class="faq__item-title p1" data-v-a5afd848><span class="faq__item-title-text" data-v-a5afd848>How do I come up with a great idea that's likely to sell?</span></h3> <div class="faq__item-text-wrapper" data-v-a5afd848><p class="faq__item-text p2" data-v-a5afd848>
+      For beginners or those who haven’t written a full project is to read, read, and read as many great scripts as you can find to see how they are put together, pick your favorites and works you know well from the screen so as you read you can visualize how the project was made from paper to screen.
+
+The key is originality and telling a story that hasn’t been told yet that can appeal to a mass audience…which is easier said than done. Think about unique circumstances that haven’t been done but yet could still move a viewer from any walk of life. Be sure that your characters are well thought out and have depth to bring the viewers in. 
+
+Once you’ve got a draft down, the best writers will re-write a project several times to make sure that it flows properly and it’s ready for submission…so don’t be afraid to go back and amend what might not be working. When finished, if you’ve done your job you should be able to retell your story in 30 seconds to give people an idea of what it’s about from start to finish.
+    </p> <div class="faq__item-pb" data-v-a5afd848></div></div> <div class="faq__item-border" data-v-a5afd848></div></div></div></div></div> <div class="loader" data-v-0dfb4719 data-v-314f53c6><div class="loader__inner" data-v-0dfb4719></div> <!----></div> <div class="cursor" data-v-37e7b582 data-v-314f53c6><div class="cursor__inner" data-v-37e7b582><span data-v-37e7b582></span> <span data-v-37e7b582></span> <span data-v-37e7b582></span> <span data-v-37e7b582></span></div></div></div></div>
+  </div>
+</template>
+<script setup lang="ts">
+import { Environment, ContactShadows, Lightformer, OrbitControls } from '@tresjs/cientos'
+import { EffectComposerPmndrs, BloomPmndrs, VignettePmndrs, NoisePmndrs } from '@tresjs/post-processing'
+import { BlendFunction } from 'postprocessing'
+import { onMounted, ref, shallowRef } from 'vue'
+import gsap from 'gsap'
+import Lenis from 'lenis'
+import ScrollTrigger from 'gsap/ScrollTrigger'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { AnimationMixer, Box3, Vector3, MathUtils, MeshStandardMaterial, CanvasTexture } from 'three'
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js'
+
+import * as THREE from 'three'
+const urlParams = new URLSearchParams(window.location.search)
+const isDebug = urlParams.has('debug')
+const debugReveal = urlParams.has('reveal') ? parseFloat(urlParams.get('reveal') as string) : null
+const isFree = urlParams.has('free')
+const isFind = urlParams.has('find')
+const isTest = urlParams.has('test')
+
+const cameraRef = ref<any>(null)
+const fogRef = ref<any>(null)
+const ambientRef = ref<any>(null)
+const spillLight = ref<any>(null)
+const chamberSpot = ref<any>(null)
+const exposure = ref(0.7)
+const camState = { parallax: 8.0 }
+const reveal = ref(0)
+const bloomIntensity = ref(0.5)
+const spillOpacity = ref(0.05)
+
+const scrollProxy = { reveal: 0, door: 0, camZ: 0 }
+let lastScrollP = 0
+let currentYaw = 0
+
+function createRadialAlpha(size: number, fadeStart: number, fadeEnd: number) {
+  const canvas = document.createElement('canvas')
+  canvas.width = size; canvas.height = size
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
+  const grd = ctx.createRadialGradient(size/2, size/2, fadeStart, size/2, size/2, fadeEnd)
+  grd.addColorStop(0, 'white')
+  grd.addColorStop(1, 'black')
+  ctx.fillStyle = grd
+  ctx.fillRect(0, 0, size, size)
+  return new CanvasTexture(canvas)
+}
+
+function createEmissiveGradient() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 256
+  canvas.height = 256
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
+  const grd = ctx.createRadialGradient(128, 128, 0, 128, 128, 128)
+  grd.addColorStop(0, '#ff3d14')
+  grd.addColorStop(1, '#5a0a00')
+  ctx.fillStyle = grd
+  ctx.fillRect(0, 0, 256, 256)
+  return new CanvasTexture(canvas)
+}
+
+const windowEmissiveTex = createEmissiveGradient()
+
+const addFresnelRim = (mat: any, baseStrength: number) => {
+  mat.customProgramCacheKey = () => 'fresnelRim'
+  mat.onBeforeCompile = (shader: any) => {
+    shader.uniforms.uReveal = { value: 0.0 }
+    shader.uniforms.uBaseStr = { value: baseStrength }
+    mat.userData.shader = shader
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <common>',
+      `#include <common>
+       varying vec3 vViewPositionFresnel;
+       varying vec3 vNormalFresnel;`
+    )
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <worldpos_vertex>',
+      `#include <worldpos_vertex>
+       vViewPositionFresnel = -mvPosition.xyz;
+       vNormalFresnel = normalize(normalMatrix * normal);`
+    )
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <common>',
+      `#include <common>
+       uniform float uReveal;
+       uniform float uBaseStr;
+       varying vec3 vViewPositionFresnel;
+       varying vec3 vNormalFresnel;`
+    )
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <dithering_fragment>',
+      `#include <dithering_fragment>
+       vec3 normalF = normalize(vNormalFresnel);
+       vec3 viewDirF = normalize(vViewPositionFresnel);
+       float rimDot = max(dot(normalF, viewDirF), 0.0);
+       float rim = pow(1.0 - rimDot, 3.0);
+       float rimStrength = mix(0.25, 0.9, uReveal) * uBaseStr;
+       vec3 rimColor = vec3(0.81, 0.88, 1.0);
+       gl_FragColor.rgb += rimColor * rim * rimStrength;`
+    )
+  }
+}
+
+// Removed toggleNightMode — dark mode is permanent
+const toggleNightMode = () => {}
+
+// Animation state
+const doorAnim = { mixer: null as AnimationMixer | null, action: null as any, duration: 0, progress: 0 }
+
+onMounted(() => {
+  window.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'p') {
+      console.log(`[P] Chamber Position: 0, -2.05, 0 (fixed)`)
+      console.log(`[P] Camera Position:`, cameraRef.value?.position)
+      console.log(`[P] Garage Position:`, garageScene.value?.position, `Yaw:`, garageScene.value?.rotation.y)
+    }
+  })
+
+  setInterval(() => {
+    if (grainRef.value) {
+      grainRef.value.style.backgroundPosition = `${Math.floor(Math.random() * 100)}px ${Math.floor(Math.random() * 100)}px`
+    }
+  }, 80)
+})
+
+// Camera dynamic state
+let baseDistance = 0
+let baseSizeY = 0
+const baseCameraPos = new Vector3()
+const baseCameraTarget = new Vector3()
+let mouseOffsetX = 0
+let mouseOffsetY = 0
+let targetMouseOffsetX = 0
+let targetMouseOffsetY = 0
+let scrollP = 0
+
+// Scene instance
+const chamberScene = shallowRef<any>(null)
+const warehouseScene = shallowRef<any>(null)
+const grainRef = ref<HTMLElement | null>(null)
+
+// Light refs for GSAP master proxy
+const redLight1 = ref<any>(null)
+const panelLight1 = ref<any>(null)
+const panelLight2 = ref<any>(null)
+const panelLight3 = ref<any>(null)
+
+let interiorMat: any = null
+let bodyMat: any = null
+let silverMat: any = null
+let warehouseMatBaseColor = new Map<any, THREE.Color>()
+let warehouseMatNames = new Set<string>()
+const bulbMats: any[] = []
+
+// Dust Particles
+const dustRef = ref<any>(null)
+const dustCount = 200
+const dustPositions = new Float32Array(dustCount * 3)
+const dustVelocities = new Float32Array(dustCount)
+
+for (let i = 0; i < dustCount; i++) {
+  dustPositions[i * 3] = (Math.random() - 0.5) * 5
+  dustPositions[i * 3 + 1] = Math.random() * 5 - 2
+  dustPositions[i * 3 + 2] = (Math.random() - 0.5) * 5
+  dustVelocities[i] = Math.random() * 0.01 + 0.005
+}
+
+// Mouse parallax
+let targetMouseX = 0
+
+onMounted(() => {
+  gsap.registerPlugin(ScrollTrigger)
+  RectAreaLightUniformsLib.init()
+
+  // Force UI text to white for permanent dark mode
+  gsap.set('.link-switcher, .clock, .scroll-down, .sound-switcher__text, .start-screen__footer-left', {
+    color: '#ffffff',
+    fill: '#ffffff'
+  })
+
+  // 1. Lenis Smooth Scrolling (Bound to #scroller instead of window)
+  const scrollerEl = document.querySelector('#scroller') as HTMLElement;
+  const lenis = new Lenis({
+    wrapper: scrollerEl,
+    content: document.querySelector('.layout__page') as HTMLElement,
+    lerp: 0.1,
+    smoothWheel: true,
+  })
+  
+  window.addEventListener('mousemove', (e) => {
+    const nx = (e.clientX / window.innerWidth) * 2 - 1
+    const ny = -(e.clientY / window.innerHeight) * 2 + 1
+    targetMouseOffsetX = nx * 0.15
+    targetMouseOffsetY = ny * 0.08
+  })
+  window.addEventListener('mouseleave', () => {
+    targetMouseOffsetX = 0
+    targetMouseOffsetY = 0
+  })
+
+  lenis.on('scroll', ScrollTrigger.update)
+  gsap.ticker.add((time) => {
+    lenis.raf(time * 1000)
+    
+    const t = time
+    
+    // Use debug slider if active, otherwise use ScrollTrigger proxy
+    const r = isDebug ? (debugReveal !== null ? debugReveal : reveal.value) : scrollProxy.reveal
+    
+    if (bodyMat) {
+      bodyMat.envMapIntensity = 0.4
+      if (bodyMat.userData.shader) bodyMat.userData.shader.uniforms.uReveal.value = r
+    }
+    if (silverMat) {
+      silverMat.envMapIntensity = 0.4
+      if (silverMat.userData.shader) silverMat.userData.shader.uniforms.uReveal.value = r
+    }
+    
+    // Constant ambient light is required for the material color lerps to be visible!
+    // The lerp handles the 4% to 18% brightness rule.
+    if (ambientRef.value) ambientRef.value.intensity = 1.0
+    if (spillLight.value) spillLight.value.intensity = 15 * r
+    if (chamberSpot.value) chamberSpot.value.intensity = 20 + 20 * r
+    
+    // Window glow: lerp(0.15, 1.6, r). Idle pulse ±6%
+    if (interiorMat) {
+       const baseEmissive = 0.15 + 1.45 * r
+       const pulse = 1.0 + Math.sin(t * 2.0) * 0.06
+       interiorMat.emissiveIntensity = baseEmissive * pulse
+    }
+    
+    bloomIntensity.value = 0.3 + 0.5 * r
+    
+    // Warehouse logic
+    if (warehouseScene.value) {
+      warehouseMatBaseColor.forEach((baseColor, mat) => {
+        const colorScale = 0.04 + 0.14 * r
+        mat.color.setRGB(baseColor.r * colorScale, baseColor.g * colorScale, baseColor.b * colorScale)
+      })
+      // Lamps
+      bulbMats.forEach((mat) => {
+        mat.emissiveIntensity = r * 0.5
+      })
+    }
+    
+    if (doorAnim.mixer && doorAnim.action && doorAnim.duration) {
+      doorAnim.action.time = scrollProxy.door * doorAnim.duration
+      doorAnim.mixer.update(0)
+    }
+    
+    // Dust Animation
+    if (dustRef.value) {
+      const positions = dustRef.value.geometry.attributes.position.array
+      for (let i = 0; i < dustCount; i++) {
+        positions[i * 3 + 1] += dustVelocities[i]
+        if (positions[i * 3 + 1] > 3.0) {
+          positions[i * 3 + 1] = -2.0 // reset at floor
+        }
+      }
+      dustRef.value.geometry.attributes.position.needsUpdate = true
+    }
+
+    // Dynamic Render Loop Camera Control
+    if (cameraRef.value && baseDistance > 0 && !isFree) {
+      mouseOffsetX += (targetMouseOffsetX - mouseOffsetX) * 0.05
+      mouseOffsetY += (targetMouseOffsetY - mouseOffsetY) * 0.05
+
+      // Idle Drift
+      const driftX = Math.sin(t * 0.5) * 0.03
+      const driftY = Math.cos(t * 0.4) * 0.03
+
+      // Yaw rotation (parallax up to ±4°)
+      let targetYaw = targetMouseX * MathUtils.degToRad(4)
+      currentYaw += (targetYaw - currentYaw) * 0.05
+      if (chamberScene.value) {
+         chamberScene.value.rotation.y = currentYaw
+      }
+
+      const currentDist = baseDistance - (scrollProxy.camZ * (baseDistance * 0.4))
+      const currentTargetY = baseCameraTarget.y + (scrollProxy.camZ * (baseSizeY * 0.1))
+      const currentCamY = baseCameraPos.y + (scrollProxy.camZ * (baseSizeY * 0.2))
+
+      cameraRef.value.position.set(
+        baseCameraPos.x + mouseOffsetX + driftX,
+        currentCamY + mouseOffsetY + driftY,
+        baseCameraTarget.z + currentDist
+      )
+      
+      cameraRef.value.lookAt(baseCameraTarget.x, currentTargetY, baseCameraTarget.z)
+    }
+  })
+  gsap.ticker.lagSmoothing(0)
+
+  // 2. Custom Cursor & Interactive Background Glow
+  const cursor = document.querySelector('.cursor') as HTMLElement;
+  const layoutPage = document.querySelector('.layout__page') as HTMLElement;
+  
+  if (cursor) {
+    cursor.style.display = 'block';
+    window.addEventListener('mousemove', (e) => {
+      // Move cursor (centered on mouse)
+      gsap.to(cursor, {
+        x: e.clientX,
+        y: e.clientY,
+        xPercent: -50,
+        yPercent: -50,
+        duration: 0.1,
+        ease: 'power2.out'
+      })
+      
+      // Move CSS Gradient center
+      const mouseXPct = (e.clientX / window.innerWidth) * 100;
+      const mouseYPct = (e.clientY / window.innerHeight) * 100;
+      if (layoutPage) {
+        gsap.to(layoutPage, {
+          '--mouse-x': `${mouseXPct}%`,
+          '--mouse-y': `${mouseYPct}%`,
+          duration: 1,
+          ease: 'power2.out'
+        });
+      }
+      
+      // Update target for the render loop to interpolate
+      targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    });
+  }
+
+  // 3. Load both GLBs directly with GLTFLoader for material access + animation
+  const dracoLoader = new DRACOLoader()
+  dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
+  const gltfLoader = new GLTFLoader()
+  gltfLoader.setDRACOLoader(dracoLoader)
+
+  // Load CHAMBER — upgrade materials + hook up AnimationMixer
+  gltfLoader.load('/models/chamber_main.glb', (gltf) => {
+    // Precise material mapping based on the provided GLTF node names
+    gltf.scene.traverse((child: any) => {
+      if (child.isMesh && child.material) {
+        child.material.fog = false // Only the hall is fogged
+        
+        const mat = child.material
+        const name: string = mat.name || ''
+        
+        // ** THE BLENDER NORMALS FIX **
+        mat.side = 2 // THREE.DoubleSide
+        
+        if (name === 'Cavity_Exterior.001') {
+          // MeshStandardMaterial body
+          const stdMat = new MeshStandardMaterial({
+            color: '#030303',
+            roughness: 0.15,
+            metalness: 0.9,
+            envMapIntensity: 0.4
+          })
+          addFresnelRim(stdMat, 1.0)
+          child.material = stdMat
+          bodyMat = stdMat
+        } else if (name === 'Black') {
+          // Silver center column
+          mat.color?.set('#111111')
+          mat.metalness = 0.9
+          mat.roughness = 0.2
+          mat.envMapIntensity = 0.4
+          addFresnelRim(mat, 0.4)
+          silverMat = mat
+        } else if (name === 'Cavity_Interior.001') {
+          // Emissive interior walls
+          mat.color?.set('#1a0500')
+          mat.emissive?.set('#ffffff')
+          if (windowEmissiveTex) mat.emissiveMap = windowEmissiveTex
+          mat.emissiveIntensity = 0.6
+          mat.toneMapped = false
+          interiorMat = mat
+        } else if (name.toLowerCase().includes('logo')) {
+          mat.color?.set('#e6efe4')
+          // ensure no emissive blue
+          mat.emissive?.set('#000000')
+        } else if (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)) {
+          mat.toneMapped = false
+        } else {
+          // Fallback
+          mat.metalness = 0.5
+          mat.roughness = 0.5
+        }
+      }
+    })
+
+    // Store and hook up AnimationMixer to this exact scene
+    chamberScene.value = gltf.scene
+    
+    // Duplicate Coplanar Detector
+    gltf.scene.updateMatrixWorld(true)
+    const meshes: any[] = []
+    
+    gltf.scene.traverse((child: any) => {
+      if (child.isMesh && child.material) {
+        child.geometry.computeBoundingBox()
+        const box = child.geometry.boundingBox.clone()
+        box.applyMatrix4(child.matrixWorld)
+        
+        meshes.push({
+          child,
+          box,
+          name: child.name,
+          matName: child.material.name,
+          color: child.material.color ? child.material.color.getHexString() : 'N/A'
+        })
+      }
+    })
+
+    console.log('[DEBUG] Meshes parsed:', meshes)
+
+    for (let i = 0; i < meshes.length; i++) {
+      for (let j = i + 1; j < meshes.length; j++) {
+        const b1 = meshes[i].box
+        const b2 = meshes[j].box
+        if (b1.min.distanceTo(b2.min) < 0.001 && b1.max.distanceTo(b2.max) < 0.001) {
+          console.warn(`[DUPLICATE DETECTED] ${meshes[i].name} overlaps exactly with ${meshes[j].name}. Hiding duplicate.`)
+          meshes[j].child.visible = false
+        }
+      }
+    }
+    
+    // Compute exact bounding box post-scale
+    const box = new Box3().setFromObject(gltf.scene)
+    const size = new Vector3()
+    box.getSize(size)
+    size.multiplyScalar(2.5) // The template applies 2.5 scale
+    baseSizeY = size.y
+    
+    const center = new Vector3()
+    box.getCenter(center)
+    center.multiplyScalar(2.5)
+    center.add(new Vector3(0, -2.05, 0)) // The template position
+    
+    baseCameraTarget.copy(center)
+    
+    // Compute distance for 45% frame height
+    const fov = 30
+    baseDistance = (size.y / 0.45) / (2 * Math.tan(MathUtils.degToRad(fov / 2)))
+    
+    // Lazy-load warehouse
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const startTime = performance.now()
+        gltfLoader.load('/models/3D_Warehouse_2_opt.glb', (gltf) => {
+          const loadTime = performance.now() - startTime
+          console.log(`[Perf] Warehouse Environment loaded in ${loadTime.toFixed(0)} ms`)
+          
+          const wBox = new Box3().setFromObject(gltf.scene)
+          const wSize = new Vector3()
+          wBox.getSize(wSize)
+          
+          // Meters per unit
+          const metersPerUnit = 0.3048
+          const hallScale = baseSizeY / (2.2 / metersPerUnit)
+          
+          gltf.scene.scale.setScalar(hallScale)
+          
+          // Floor logic
+          // The actual floor is the bottom of the bounding box.
+          const chamberFloorY = -2.05
+          const scaledMinY = wBox.min.y * hallScale
+          const offsetY = chamberFloorY - scaledMinY
+          
+          // We'll calculate offsetZ via placement grid search
+          let offsetZ = 20
+          let offsetX = 0
+          
+          const raycaster = new THREE.Raycaster()
+          const chamberW = size.x
+          const chamberD = size.z
+          const candidates = []
+          
+          const maxHallHeight = wSize.y * hallScale
+          
+          for (let hz = -60; hz <= 60; hz += 4) {
+            for (let hx = -20; hx <= 20; hx += 4) {
+              gltf.scene.position.set(hx, offsetY, hz)
+              gltf.scene.updateMatrixWorld(true)
+              
+              let valid = true
+              const points = [
+                new Vector3(0, chamberFloorY + baseSizeY, 0),
+                new Vector3(-chamberW/2, chamberFloorY + baseSizeY, -chamberD/2),
+                new Vector3(chamberW/2, chamberFloorY + baseSizeY, -chamberD/2),
+                new Vector3(-chamberW/2, chamberFloorY + baseSizeY, chamberD/2),
+                new Vector3(chamberW/2, chamberFloorY + baseSizeY, chamberD/2)
+              ]
+              
+              for (let pt of points) {
+                raycaster.set(pt, new Vector3(0, 1, 0))
+                const hits = raycaster.intersectObject(gltf.scene, true)
+                if (hits.length > 0) {
+                  const hit = hits[0]
+                  if (hit.distance < 0.8 * maxHallHeight) {
+                    valid = false
+                    break
+                  }
+                }
+              }
+              
+              if (valid) {
+                raycaster.set(new Vector3(0, chamberFloorY + 1, 0), new Vector3(0, 0, -1))
+                const hits = raycaster.intersectObject(gltf.scene, true)
+                let clearDist = 1000
+                if (hits.length > 0) clearDist = hits[0].distance
+                if (clearDist >= 40) {
+                  // Reward positive hz because that pushes hall back, making lamp rows visible behind
+                  candidates.push({ hx, hz, clearDist })
+                }
+              }
+            }
+          }
+          
+          candidates.sort((a, b) => b.hz - a.hz) // prefer maximum hz (lamp rows visible behind)
+          console.log('[Placement] Top 5 candidates:', candidates.slice(0, 5))
+          
+          if (candidates.length > 0) {
+            const best = candidates[0]
+            offsetX = best.hx
+            offsetZ = best.hz
+          }
+          
+          gltf.scene.position.set(offsetX, offsetY, offsetZ)
+          
+          // Print raycast hit for center
+          raycaster.set(new Vector3(0, chamberFloorY + baseSizeY, 0), new Vector3(0, 1, 0))
+          const centerHits = raycaster.intersectObject(gltf.scene, true)
+          if (centerHits.length > 0) {
+            console.log(`[Diagnose Placement] Upward ray from center hit: ${centerHits[0].object.name} at distance ${centerHits[0].distance.toFixed(2)}`)
+          }
+          
+          // Z of front wall
+          const scaledMaxZ = wBox.max.z * hallScale
+          const frontWallZ = scaledMaxZ + offsetZ
+          const depth = wSize.z * hallScale
+          const frontMargin = depth * 0.1
+          console.log(`[Placement] Hall Scale: ${hallScale.toFixed(3)}, OffsetY: ${offsetY.toFixed(3)}, OffsetZ: ${offsetZ.toFixed(3)}`)
+          console.log(`[Placement] Chamber stands at Z=0. Hall rear is at ${(-40).toFixed(1)}, front is at ${frontWallZ.toFixed(1)}. Camera is at ${baseDistance.toFixed(1)}.`)
+          console.log(`[Placement] Margin from camera to front wall: ${(frontWallZ - baseDistance).toFixed(1)} (Required: ${frontMargin.toFixed(1)})`)
+          
+          // Extract materials and hide glass
+          let meshCount = 0
+          gltf.scene.traverse((child: any) => {
+            if (child.isMesh && child.material) {
+              meshCount++
+              const mat = child.material
+              const matName = mat.name.toLowerCase()
+              
+              if (matName.includes('glass')) {
+                child.visible = false
+              } else if (mat.name.includes('827713812')) {
+                // Bulb material
+                mat.emissive.setHex(0xffaa55) // warm-white
+                mat.toneMapped = false
+                mat.emissiveIntensity = 0
+                bulbMats.push(mat)
+              } else {
+                if (!warehouseMatBaseColor.has(mat)) {
+                  warehouseMatBaseColor.set(mat, mat.color.clone())
+                  warehouseMatNames.add(mat.name)
+                }
+              }
+            }
+          })
+          
+          console.log('[Darkness] Applied lerp to materials:', Array.from(warehouseMatNames))
+          
+          warehouseScene.value = gltf.scene
+          
+          // Compute Fog densities
+          const fogTargetDist = baseDistance + (60 * hallScale)
+          const density0 = 1.7308 / fogTargetDist
+          const density1 = 0.957 / fogTargetDist
+          console.log(`[Fog] Distance ${fogTargetDist.toFixed(1)} -> Density0: ${density0.toFixed(4)}, Density1: ${density1.toFixed(4)}`)
+          
+          // Inject fog update directly into ticker
+          gsap.ticker.add(() => {
+            if (fogRef.value) {
+              const r = isDebug ? (debugReveal !== null ? debugReveal : reveal.value) : scrollProxy.reveal
+              fogRef.value.density = density0 + (density1 - density0) * r
+            }
+          })
+          
+          console.log(`[Warehouse] Meshes (Draw Calls): ${meshCount}`)
+        })
+      })
+    })
+    
+    // Lower camera base height to drop the horizon behind the base
+    // "Camera height is the floor top plus 0.3 x chamber height, looking at the chamber's center"
+    const chamberWorldHeight = baseSizeY
+    const chamberFloorY = -2.05
+    baseCameraPos.set(center.x, chamberFloorY + (0.3 * chamberWorldHeight), center.z + baseDistance)
+    baseCameraTarget.copy(center)
+    
+    if (cameraRef.value) {
+      cameraRef.value.position.copy(baseCameraPos)
+      cameraRef.value.lookAt(baseCameraTarget)
+    }
+
+    if (gltf.animations && gltf.animations.length > 0) {
+      doorAnim.mixer = new AnimationMixer(gltf.scene)
+      const action = doorAnim.mixer.clipAction(gltf.animations[0])
+      action.setLoop(THREE.LoopOnce, 1)
+      action.clampWhenFinished = true
+      action.paused = true
+      action.timeScale = 0
+      action.play()
+      doorAnim.action = action
+      doorAnim.duration = gltf.animations[0].duration
+      console.log('[Chamber] Ready. Animation:', gltf.animations[0].name, '| duration:', doorAnim.duration)
+    } else {
+      console.warn('[Chamber] No animations found in chamber_main.glb')
+    }
+  })
+
+  // 4. ScrollTrigger for Camera Z-Axis (Zoom + door animation)
+  setTimeout(() => {
+    if (cameraRef.value) {
+      // Master GSAP ScrollTrigger
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '.layout__page',
+          scroller: '#scroller',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 1,
+          onUpdate: () => {
+            const p = tl.progress()
+            const crosses = [0, 0.20, 0.40, 0.60]
+            crosses.forEach(cp => {
+              if ((lastScrollP <= cp && p >= cp) || (lastScrollP >= cp && p <= cp)) {
+                console.log(`[VERIFY] Scroll crossed ${cp*100}% | door: ${scrollProxy.door.toFixed(3)} | action time: ${(doorAnim.action ? doorAnim.action.time : 0).toFixed(3)}`)
+              }
+            })
+            lastScrollP = p
+          }
+        }
+      })
+
+      // Reveal 0 to 1 over first 35%
+      tl.to(scrollProxy, { reveal: 1, ease: 'none', duration: 0.35 }, 0)
+      // Door & CamZ from 15% to 60%
+      tl.to(scrollProxy, { door: 1, camZ: 1, ease: 'power2.inOut', duration: 0.45 }, 0.15)
+      
+      // Ensure the timeline spans the full scroll distance (duration 1)
+      tl.to({}, { duration: 1 }, 0)
+    }
+  }, 500)
+})
+</script>
+<style>
+@import "./assets/style.css";
+
+.film-grain {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+  opacity: 0.07;
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
+}
+
+.layout__page {
+  min-height: 200vh; /* Make it scrollable for testing Lenis */
+}
+
+body, #app {
+  background: transparent !important;
+  overflow-x: hidden;
+}
+
+* { pointer-events: auto !important; }
+.preloader, .loader, .popup.faq { display: none !important; }
+.start-screen-wrapper, .start-screen, .main-page, .layout, .layout__page { visibility: visible !important; opacity: 1 !important; }
+.start-header, .start-screen__footer, .nightmode-label { opacity: 1 !important; visibility: visible !important; }
+.start-screen__mode-switcher { visibility: visible !important; opacity: 1 !important; z-index: 50; cursor: pointer; }
+
+/* Let GSAP control cursor instead of absolute transform */
+.cursor { position: fixed !important; left: 0; top: 0; pointer-events: none !important; z-index: 9999; } .cursor * { pointer-events: none !important; }
+</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

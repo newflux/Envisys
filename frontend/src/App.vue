@@ -44,6 +44,23 @@
         <Lightformer :intensity="2" :position="[0, tunnelH/2 - 0.1, 0]" :scale="[tunnelW/2, tunnelD, 1]" :rotation="[-Math.PI/2, 0, 0]" />
       </Environment>
 
+      <!-- Background 3D Text Effect (/envisys) -->
+      <TresGroup ref="bgTextGroupRef" :position="[0, 4, -15]" :scale="0.45">
+        <!-- The actual 3D Text (troika-three-text) -->
+        <TresText
+          ref="bgTextRef"
+          text="/envisys"
+          font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjQ.ttf"
+          :fontSize="14"
+          :letterSpacing="-0.025"
+          color="white"
+          :fillOpacity="0.85"
+          anchorX="center"
+          anchorY="middle"
+          cast-shadow
+        />
+      </TresGroup>
+
       <!-- Back / Rim Lights from the demo (Soft but not pitch black) -->
       <TresPointLight :position="[10, -10, -20]" :intensity="30" color="#ffffff" :distance="40" />
       <TresPointLight :position="[-10, -10, -20]" :intensity="30" color="#ffffff" :distance="40" />
@@ -133,9 +150,13 @@
         <primitive v-if="transitionChamber" :object="transitionChamber" :scale="2.5" :position="[0, -2.05, 0]" />
       </TresGroup>
     </TresCanvas>
+
+    <!-- Subtle CSS Radial 'Disc' Blur -->
+    <!-- pointer-events: none ensures it doesn't block chamber clicks -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); mask-image: radial-gradient(circle at center, transparent 40%, black 100%); -webkit-mask-image: radial-gradient(circle at center, transparent 40%, black 100%); z-index: 10;"></div>
   </div><!-- /canvas-fixed-wrap -->
 
-</div> <header class="start-header" data-v-36cf41b8 data-v-34202237><nav class="start-header__navigation" data-v-36cf41b8><ul class="start-header__navigation-list" data-v-4a566750 data-v-36cf41b8><li class="start-header__navigation-item" data-v-4a566750><a href="/about" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>About us</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><a href="/contacts" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>Contacts</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><button class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>FAQ</span></button></li></ul></nav> <div class="start-header__logo" data-v-36cf41b8 style="display:none;"><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__logo start-header__logo--nightmode" style="display:block;" data-v-36cf41b8><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__sound" style="display:flex;gap:20px;align-items:center;" data-v-36cf41b8><button class="sound-switcher" @click="toggleNightMode" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Mode</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button><button class="sound-switcher" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Sound</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button></div> <div class="dots start-header__dots" data-v-7d6eeb50 data-v-36cf41b8><div class="dot" data-v-7d6eeb50></div> <div class="dot" data-v-7d6eeb50></div></div></header> <footer class="start-screen__footer" data-v-7934099c data-v-34202237><div class="start-screen__footer-left p2" data-v-7934099c>
+</div> <header class="start-header" data-v-36cf41b8 data-v-34202237><nav class="start-header__navigation" data-v-36cf41b8><ul class="start-header__navigation-list" data-v-4a566750 data-v-36cf41b8><li class="start-header__navigation-item" data-v-4a566750><a href="/about" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>About us</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><a href="/contacts" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>Contacts</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><button class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>FAQ</span></button></li></ul></nav> <div class="start-header__logo" data-v-36cf41b8 style="display:none;"><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__logo start-header__logo--nightmode" ref="navbarLogoRef" style="display:flex; align-items:center; opacity:0; transition:none; font-family: Inter, sans-serif; font-size: 1.5rem; font-weight: 500; letter-spacing: -0.025em; color: white;" data-v-36cf41b8>/envisys</div> <div class="start-header__sound" style="display:flex;gap:20px;align-items:center;" data-v-36cf41b8><button class="sound-switcher" @click="toggleNightMode" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Mode</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button><button class="sound-switcher" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Sound</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button></div> <div class="dots start-header__dots" data-v-7d6eeb50 data-v-36cf41b8><div class="dot" data-v-7d6eeb50></div> <div class="dot" data-v-7d6eeb50></div></div></header> <footer class="start-screen__footer" data-v-7934099c data-v-34202237><div class="start-screen__footer-left p2" data-v-7934099c>
     // Positioned at the axis of talent and content across film
   </div> <div class="start-screen__footer-center" data-v-7934099c><p class="scroll-down p2" data-v-751b1c41 data-v-7934099c><span data-v-751b1c41>Scroll Down</span> <span class="scroll-down__icon" data-v-751b1c41></span></p></div> <div class="start-screen__footer-right" data-v-7934099c><p class="clock p2" data-v-43f4bbf8 data-v-7934099c>06 : 57 pm</p></div></footer></div></div> <!----></div></main> <div class="popup faq" style="display:none;" data-v-55603bb3 data-v-314f53c6><button aria-label="close modal" class="faq__close-button" data-v-372f1411 data-v-55603bb3><span data-v-372f1411></span> <span data-v-372f1411></span></button> <div class="faq__inner" data-v-55603bb3><div class="faq__content" data-v-55603bb3></div></div></div> <div class="loader" data-v-0dfb4719 data-v-314f53c6><div class="loader__inner" data-v-0dfb4719></div> <!----></div> <div class="cursor" data-v-37e7b582 data-v-314f53c6><div class="cursor__inner" data-v-37e7b582><span data-v-37e7b582></span> <span data-v-37e7b582></span> <span data-v-37e7b582></span> <span data-v-37e7b582></span></div></div></div></div>
   </div>
@@ -150,7 +171,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { AnimationMixer, MathUtils, Box3, Vector3, MeshLambertMaterial, Color, CanvasTexture, RepeatWrapping } from 'three'
 import * as THREE from 'three'
-import { Environment, Lightformer, ContactShadows, MeshReflectionMaterial } from '@tresjs/cientos'
+import { Environment, Lightformer, ContactShadows, MeshReflectionMaterial, GLTFModel } from '@tresjs/cientos'
+import { extend } from '@tresjs/core'
+import { Text } from 'troika-three-text'
+
+extend({ Text })
 
 // --- 1. Transition Chamber Configuration ---
 // Adjust these to control the duplicate chamber that arrives at the end
@@ -391,6 +416,21 @@ const blob2Ref        = ref<HTMLElement | null>(null)
 const blob3Ref        = ref<HTMLElement | null>(null)
 const cloneARef       = ref<any>(null)
 const cloneBRef       = ref<any>(null)
+
+const bgTextGroupRef  = ref<any>(null)
+const bgTextRef       = ref<any>(null)
+const htmlOverlayRef  = ref<HTMLElement | null>(null)
+const navbarLogoRef   = ref<HTMLElement | null>(null)
+
+import { watchEffect } from 'vue'
+watchEffect(() => {
+  if (cameraRef.value) {
+    cameraRef.value.layers.enable(1)
+  }
+  if (bgTextRef.value) {
+    bgTextRef.value.layers.set(1)
+  }
+})
 const transitionChamberRef = ref<any>(null)
 const startScreenRef  = ref<any>(null)
 
@@ -422,7 +462,11 @@ const scrollProxy = {
   cloneFade: 1,  // Multiplies color and envMapIntensity
   fleetLightIntensity: 0, // Dynamically lights up the sides in Phase 3
   transitionZ: transitionChamberStartZ,
-  transitionScale: 0
+  transitionScale: 0,
+  textY: 5.5,
+  textScale: 0.45,
+  textOpacity: 1,
+  logoOpacity: 0
 }
 
 // Camera state
@@ -585,6 +629,31 @@ onMounted(() => {
       transitionChamberRef.value.visible = scrollProxy.transitionScale > 0
     }
 
+    // Update Phase 0 Text/Logo Handoff
+    if (bgTextGroupRef.value) {
+      // Rotational Parallax (Swinging):
+      // Extremely soft and subtle interaction per your request (barely moves).
+      const targetTextRotY = targetMouseX * -0.02
+      const targetTextX = targetMouseX * -0.15
+      const targetTextY = scrollProxy.textY + (targetMouseY * -0.05)
+      
+      bgTextGroupRef.value.rotation.y += (targetTextRotY - bgTextGroupRef.value.rotation.y) * 0.05
+      bgTextGroupRef.value.position.x += (targetTextX - bgTextGroupRef.value.position.x) * 0.1
+      bgTextGroupRef.value.position.y += (targetTextY - bgTextGroupRef.value.position.y) * 0.1
+      bgTextGroupRef.value.position.z = -15 // Hard anchored in center
+
+      bgTextGroupRef.value.scale.setScalar(scrollProxy.textScale)
+      // Hide completely when faded out to save rendering/raycasting
+      bgTextGroupRef.value.visible = scrollProxy.textOpacity > 0
+    }
+    if (bgTextRef.value) {
+      // Direct property assignment for Troika Text
+      bgTextRef.value.fillOpacity = scrollProxy.textOpacity * 0.85
+    }
+    if (navbarLogoRef.value) {
+      navbarLogoRef.value.style.opacity = scrollProxy.logoOpacity.toString()
+    }
+
     // Camera motion
     if (cameraRef.value && baseDistance > 0) {
       if (isDebug) {
@@ -725,10 +794,25 @@ function buildScrollTimeline() {
       }
     })
 
-    // ── Phase 1: Hold Straight (0% to 15%) ──
-    // The chamber sits perfectly straight while the user reads the initial intro text.
+    // ── Phase 0: Intro Dissolve (0 to 15) ──
+    // 1. Dolly-in camera and dissolve 3D text in place
+    tl.to(scrollProxy, {
+      textOpacity: 0,
+      logoOpacity: 1,
+      camZ: baseCameraPos.z - 3,
+      duration: 15,
+      ease: 'power2.inOut'
+    }, 0)
 
-    // ── Phase 2: The Spec Pan + 360 Spin (20% to 35%) ──
+    // ── Phase 1: Hold & Revert Dolly (15 to 35) ──
+    // Revert the camera back to starting angle before panning, as requested
+    tl.to(scrollProxy, {
+      camZ: baseCameraPos.z,
+      duration: 20,
+      ease: 'power2.inOut'
+    }, 15)
+
+    // ── Phase 2: The Spec Pan + 360 Spin (35 to 50) ──
     tl.to(scrollProxy, { 
       camX: -1.8, 
       camY: baseCameraPos.y + 0.5, 
@@ -737,13 +821,13 @@ function buildScrollTimeline() {
       lookY: baseCameraTarget.y + 1.2,                                  
       duration: 15, 
       ease: 'power3.inOut' 
-    }, 20)
+    }, 35)
     tl.fromTo(scrollProxy, 
       { chamberYaw: 0 }, 
       { chamberYaw: Math.PI * 2, duration: 15, ease: 'power2.inOut' }, 
-    20)
+    35)
 
-    // ── Phase 3: The South-West Spread Reveal (40% to 65%) ──
+    // ── Phase 3: The South-West Spread Reveal (55 to 80) ──
     tl.to(scrollProxy, { 
       camX: -9, // Stay safely inside the new wider left wall
       camY: baseCameraPos.y + 6,  
@@ -753,7 +837,7 @@ function buildScrollTimeline() {
       lookZ: 0,
       duration: 25, 
       ease: 'power2.inOut' 
-    }, 40)
+    }, 55)
     
     tl.to(scrollProxy, {
       cloneAx: -10, // Spread horizontally cleanly inside the wider tunnel
@@ -766,13 +850,13 @@ function buildScrollTimeline() {
       fleetLightIntensity: 80, // Light up the side clones!
       duration: 25,
       ease: 'power3.out' 
-    }, 40)
+    }, 55)
 
-    // ── Phase 4: Cinematic J-Curve Breach (65% to 100%) ──
+    // ── Phase 4: Cinematic J-Curve Breach (80 to 115) ──
     // Fade out clones over a short span as the section ends
-    tl.to(scrollProxy, { cloneFade: 0, duration: 3, ease: 'none' }, 65)
+    tl.to(scrollProxy, { cloneFade: 0, duration: 3, ease: 'none' }, 80)
     
-    // 1. Center the camera's X/Y quickly (65% to 75%)
+    // 1. Center the camera's X/Y quickly (80 to 90)
     tl.to(scrollProxy, { 
       camX: 0, 
       camY: baseCameraTarget.y + 0.8, 
@@ -783,15 +867,15 @@ function buildScrollTimeline() {
       fleetLightIntensity: 0, // Fade out side lights as we center
       duration: 10, 
       ease: "power2.inOut" 
-    }, 65)
+    }, 80)
 
-    // 2. Start opening the door seamlessly on approach (70% to 85%)
-    tl.to(scrollProxy, { door: 1, duration: 15, ease: "power2.inOut" }, 70)
+    // 2. Start opening the door seamlessly on approach (85 to 100)
+    tl.to(scrollProxy, { door: 1, duration: 15, ease: "power2.inOut" }, 85)
 
-    // 3. One fluid, non-stop Z-dive all the way in (65% to 100%)
-    tl.to(scrollProxy, { camZ: 1.2, duration: 35, ease: "power2.inOut" }, 65)
+    // 3. One fluid, non-stop Z-dive all the way in (80 to 115)
+    tl.to(scrollProxy, { camZ: 1.2, duration: 35, ease: "power2.inOut" }, 80)
 
-    // ── Phase 5: Next-Scene Transition Chamber (93% to 100%) ──
+    // ── Phase 5: Next-Scene Transition Chamber (108 to 115) ──
     tl.to(scrollProxy, {
       transitionZ: -5,
       transitionScale: 1,

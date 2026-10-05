@@ -33,11 +33,11 @@
 
   <!-- FIXED CANVAS WRAP -->
   <div class="canvas-fixed-wrap">
-    <TresCanvas window-size :clear-color="'#050505'" :clear-alpha="1" :tone-mapping-exposure="1" :pixel-ratio="pixelRatio">
+    <TresCanvas window-size :clear-color="'#050505'" :clear-alpha="1" :tone-mapping-exposure="1" :pixel-ratio="pixelRatio" :antialias="false" power-preference="high-performance">
       <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.01" :far="1500" />
       
-      <!-- Fog (Linear is mathematically much cheaper than Exponential) -->
-      <TresFog :args="['#050505', 20, 100]" />
+      <!-- Fog (Infinite void studio effect) -->
+      <TresFog :args="['#050505', 40, 150]" />
 
       <!-- Environment Lighting -->
       <Environment :background="false" :environment-intensity="0.3" :frames="1" :resolution="256">
@@ -67,14 +67,14 @@
         <TresMesh :rotation="[-Math.PI/2, 0, 0]" :position="[0, -2.05, 0]">
           <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
           <MeshReflectionMaterial 
-            v-if="!isMobile && floorSeamMap"
+            v-if="!isMobile && floorSeamMap && scrollProxy.transitionScale < 0.1"
             color="#101112"
             :map="floorSeamMap"
             :metalness="0.6"
-            :roughness="0.08"
-            :resolution="isMobile ? 256 : 512"
-            :blur="[100, 30]"
-            :mixBlur="0"
+            :roughness="0.15"
+            :resolution="256"
+            :blur="[20, 20]"
+            :mixBlur="0.3"
             :mixStrength="1.2"
             :mirror="0.7"
             :depthScale="0"
@@ -102,6 +102,12 @@
         </TresMesh>
       </TresGroup>
 
+      <!-- Main Chamber Shadow (Render Once) -->
+      <ContactShadows :position="[0, -2.04, 0]" :opacity="0.5" :blur="2.5" :resolution="256" :scale="10" :frames="1" />
+      
+      <!-- Clones Shadows (No v-if, bind scale to proxy) -->
+      <ContactShadows :position="[-12, -2.04, 0]" :opacity="0.5" :blur="2.5" :resolution="256" :scale="scrollProxy.cloneScale * 10" :frames="1" />
+      <ContactShadows :position="[12, -2.04, 0]" :opacity="0.5" :blur="2.5" :resolution="256" :scale="scrollProxy.cloneScale * 10" :frames="1" />
 
       <!-- Main chamber group -->
       <TresGroup 
@@ -129,7 +135,7 @@
     </TresCanvas>
   </div><!-- /canvas-fixed-wrap -->
 
-<video playsinline="" loop="loop" muted="muted" crossOrigin="anonymous" style="visibility:hidden;position:absolute;pointer-events:none;" data-v-741cd722><source src="/models/tv_square.mp4" data-v-741cd722 /></video></div> <header class="start-header" data-v-36cf41b8 data-v-34202237><nav class="start-header__navigation" data-v-36cf41b8><ul class="start-header__navigation-list" data-v-4a566750 data-v-36cf41b8><li class="start-header__navigation-item" data-v-4a566750><a href="/about" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>About us</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><a href="/contacts" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>Contacts</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><button class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>FAQ</span></button></li></ul></nav> <div class="start-header__logo" data-v-36cf41b8 style="display:none;"><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__logo start-header__logo--nightmode" style="display:block;" data-v-36cf41b8><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__sound" style="display:flex;gap:20px;align-items:center;" data-v-36cf41b8><button class="sound-switcher" @click="toggleNightMode" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Mode</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button><button class="sound-switcher" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Sound</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button></div> <div class="dots start-header__dots" data-v-7d6eeb50 data-v-36cf41b8><div class="dot" data-v-7d6eeb50></div> <div class="dot" data-v-7d6eeb50></div></div></header> <footer class="start-screen__footer" data-v-7934099c data-v-34202237><div class="start-screen__footer-left p2" data-v-7934099c>
+</div> <header class="start-header" data-v-36cf41b8 data-v-34202237><nav class="start-header__navigation" data-v-36cf41b8><ul class="start-header__navigation-list" data-v-4a566750 data-v-36cf41b8><li class="start-header__navigation-item" data-v-4a566750><a href="/about" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>About us</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><a href="/contacts" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>Contacts</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><button class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>FAQ</span></button></li></ul></nav> <div class="start-header__logo" data-v-36cf41b8 style="display:none;"><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__logo start-header__logo--nightmode" style="display:block;" data-v-36cf41b8><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__sound" style="display:flex;gap:20px;align-items:center;" data-v-36cf41b8><button class="sound-switcher" @click="toggleNightMode" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Mode</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button><button class="sound-switcher" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Sound</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button></div> <div class="dots start-header__dots" data-v-7d6eeb50 data-v-36cf41b8><div class="dot" data-v-7d6eeb50></div> <div class="dot" data-v-7d6eeb50></div></div></header> <footer class="start-screen__footer" data-v-7934099c data-v-34202237><div class="start-screen__footer-left p2" data-v-7934099c>
     // Positioned at the axis of talent and content across film
   </div> <div class="start-screen__footer-center" data-v-7934099c><p class="scroll-down p2" data-v-751b1c41 data-v-7934099c><span data-v-751b1c41>Scroll Down</span> <span class="scroll-down__icon" data-v-751b1c41></span></p></div> <div class="start-screen__footer-right" data-v-7934099c><p class="clock p2" data-v-43f4bbf8 data-v-7934099c>06 : 57 pm</p></div></footer></div></div> <!----></div></main> <div class="popup faq" style="display:none;" data-v-55603bb3 data-v-314f53c6><button aria-label="close modal" class="faq__close-button" data-v-372f1411 data-v-55603bb3><span data-v-372f1411></span> <span data-v-372f1411></span></button> <div class="faq__inner" data-v-55603bb3><div class="faq__content" data-v-55603bb3></div></div></div> <div class="loader" data-v-0dfb4719 data-v-314f53c6><div class="loader__inner" data-v-0dfb4719></div> <!----></div> <div class="cursor" data-v-37e7b582 data-v-314f53c6><div class="cursor__inner" data-v-37e7b582><span data-v-37e7b582></span> <span data-v-37e7b582></span> <span data-v-37e7b582></span> <span data-v-37e7b582></span></div></div></div></div>
   </div>
@@ -410,8 +416,8 @@ const scrollProxy = {
   lookX: 0, lookY: 0, lookZ: 0,
   camRoll: 0,
   fogFar: 35, // Dynamic fog distance
-  cloneAx: 0, cloneAy: 0, cloneAz: 0, 
-  cloneBx: 0, cloneBy: 0, cloneBz: 0,
+  cloneAx: 0, cloneAy: 0, cloneAz: -80, 
+  cloneBx: 0, cloneBy: 0, cloneBz: -80,
   cloneScale: 0, // Used to keep clones completely invisible until Phase 3
   cloneFade: 1,  // Multiplies color and envMapIntensity
   fleetLightIntensity: 0, // Dynamically lights up the sides in Phase 3
@@ -497,7 +503,26 @@ onMounted(() => {
   })
 
   // ── Main ticker (render loop logic) ────────────────────────────────────
+  let frameCount = 0
+  let lastFpsTime = performance.now()
+  let hasLoweredPixelRatio = false
+
   gsap.ticker.add((time) => {
+    // Adaptive Pixel Ratio Rule
+    if (!hasLoweredPixelRatio) {
+      frameCount++
+      const now = performance.now()
+      if (now - lastFpsTime >= 2000) {
+        const fps = (frameCount * 1000) / (now - lastFpsTime)
+        if (fps < 45) {
+          pixelRatio.value = Math.max(1, pixelRatio.value - 0.25)
+          hasLoweredPixelRatio = true
+        }
+        frameCount = 0
+        lastFpsTime = now
+      }
+    }
+
     lenis.raf(time * 1000)
 
     // Interactive Three Graces Spotlight
@@ -542,19 +567,11 @@ onMounted(() => {
       const updateClone = (cloneRef: any, x: number, y: number, z: number, cacheKey: string) => {
         cloneRef.position.set(isDebug ? 0 : x, isDebug ? y : y, isDebug ? 0 : z)
         cloneRef.scale.setScalar(isDebug ? 1 : scrollProxy.cloneScale)
-        cloneRef.visible = fade > 0 && scrollProxy.cloneScale > 0
         
-        // ONLY traverse and update materials if the fade value actually changed!
-        if (cloneRef.visible && (cloneRef.userData.lastFade !== fade)) {
-          cloneRef.userData.lastFade = fade
-          cloneRef.traverse((child: any) => {
-            if (child.isMesh && child.material && child.userData.origColor) {
-               child.material.color.copy(child.userData.origColor).multiplyScalar(fade)
-               if (child.material.envMapIntensity !== undefined) {
-                 child.material.envMapIntensity = child.userData.origEnvIntensity * fade
-               }
-            }
-          })
+        // Only toggle visibility. Do not traverse materials on every frame!
+        const isVisible = fade > 0 && scrollProxy.cloneScale > 0
+        if (cloneRef.visible !== isVisible) {
+          cloneRef.visible = isVisible
         }
       }
       
@@ -687,20 +704,8 @@ onMounted(() => {
       doorAnim.duration = gltf.animations[0].duration
     }
 
-    function cloneWithMaterials(sceneObj: any) {
-      const cloned = sceneObj.clone(true)
-      cloned.traverse((child: any) => {
-        if (child.isMesh && child.material) {
-          child.material = child.material.clone()
-          child.userData.origColor = child.material.color.clone()
-          child.userData.origEnvIntensity = child.material.envMapIntensity !== undefined ? child.material.envMapIntensity : 1
-        }
-      })
-      return cloned
-    }
-
-    cloneA.value = cloneWithMaterials(gltf.scene)
-    cloneB.value = cloneWithMaterials(gltf.scene)
+    cloneA.value = gltf.scene.clone(true)
+    cloneB.value = gltf.scene.clone(true)
     transitionChamber.value = gltf.scene.clone(true)
 
     buildScrollTimeline()
@@ -848,9 +853,7 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   z-index: 990;
   pointer-events: none;
   
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(40, 40, 40, 0.40); /* graphite 40% */
+  background: rgba(40, 40, 40, 0.85); /* graphite 85% */
   
   --cx: 50vw;
   --cy: 50vh;

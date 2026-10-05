@@ -1,9 +1,8 @@
 <template>
   <div id="app">
 
-  <!-- Dynamic Environment Background (Moved to root to escape layout wrappers) -->
-  <div class="page-background">
-    <canvas ref="bgCanvasRef" class="bg-grid-canvas"></canvas>
+  <!-- Dynamic Environment Background (Moved to external component) -->
+  <div class="page-background" style="background: #050505;">
     <div class="vignette"></div>
   </div>
 
@@ -34,16 +33,24 @@
 
   <!-- FIXED CANVAS WRAP -->
   <div class="canvas-fixed-wrap">
-    <TresCanvas window-size shadows alpha :clear-color="'#000000'" :clear-alpha="0" :tone-mapping-exposure="1">
+    <TresCanvas window-size :clear-color="'#050505'" :clear-alpha="1" :tone-mapping-exposure="1" :pixel-ratio="pixelRatio">
       <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.01" :far="1500" />
       
+      <!-- Fog (Linear is mathematically much cheaper than Exponential) -->
+      <TresFog :args="['#050505', 20, 100]" />
+
+      <!-- Environment Lighting -->
+      <Environment :background="false" :environment-intensity="0.3" :frames="1" :resolution="256">
+        <Lightformer :intensity="2" :position="[0, tunnelH/2 - 0.1, 0]" :scale="[tunnelW/2, tunnelD, 1]" :rotation="[-Math.PI/2, 0, 0]" />
+      </Environment>
+
       <!-- Back / Rim Lights from the demo (Soft but not pitch black) -->
-      <TresPointLight :position="[10, -10, -20]" :intensity="30" color="#ffffff" />
-      <TresPointLight :position="[-10, -10, -20]" :intensity="30" color="#ffffff" />
+      <TresPointLight :position="[10, -10, -20]" :intensity="30" color="#ffffff" :distance="40" />
+      <TresPointLight :position="[-10, -10, -20]" :intensity="30" color="#ffffff" :distance="40" />
 
       <!-- Phase 3 Fleet Fill Lights (Dynamically fade in to light up the sides) -->
-      <TresPointLight ref="fleetL" :position="[-12, 0, 10]" :intensity="0" color="#ffffff" :distance="40" />
-      <TresPointLight ref="fleetR" :position="[12, 0, 10]" :intensity="0" color="#ffffff" :distance="40" />
+      <TresPointLight ref="fleetL" :position="[-12, 0, 10]" :intensity="0" color="#ffffff" :distance="30" />
+      <TresPointLight ref="fleetR" :position="[12, 0, 10]" :intensity="0" color="#ffffff" :distance="30" />
 
       <!-- Interactive Mouse Spotlight -->
       <TresSpotLight 
@@ -52,11 +59,48 @@
         :penumbra="1" 
         :intensity="spotlightIntensity" 
         color="#ffffff"
-        cast-shadow 
-        :shadow-mapSize="[1024, 1024]" 
-        :shadow-bias="-0.001" 
       />
 
+      <!-- Tunnel Scene -->
+      <TresGroup>
+        <!-- Floor -->
+        <TresMesh :rotation="[-Math.PI/2, 0, 0]" :position="[0, -2.05, 0]">
+          <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
+          <MeshReflectionMaterial 
+            v-if="!isMobile && floorSeamMap"
+            color="#101112"
+            :map="floorSeamMap"
+            :metalness="0.6"
+            :roughness="0.08"
+            :resolution="isMobile ? 256 : 512"
+            :blur="[100, 30]"
+            :mixBlur="0"
+            :mixStrength="1.2"
+            :mirror="0.7"
+            :depthScale="0"
+            :fog="true"
+          />
+          <TresMeshStandardMaterial v-else-if="floorSeamMap" color="#101112" :map="floorSeamMap" :metalness="0.6" :roughness="0.08" :fog="true" />
+        </TresMesh>
+
+        <!-- Ceiling -->
+        <TresMesh :rotation="[Math.PI/2, 0, 0]" :position="[0, tunnelH - 2.05, 0]">
+          <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
+          <TresMeshStandardMaterial v-if="ceilingGridMap" color="#8a8a8a" :map="ceilingGridMap" :emissiveMap="ceilingGridMap" emissive="#8a8a8a" :emissiveIntensity="0.65" :fog="true" />
+        </TresMesh>
+
+        <!-- Left Wall -->
+        <TresMesh :rotation="[0, Math.PI/2, 0]" :position="[-tunnelW/2, (tunnelH/2) - 2.05, 0]" :visible="!isDebug">
+          <TresPlaneGeometry :args="[tunnelD, tunnelH]" />
+          <TresMeshStandardMaterial v-if="wallNoiseMap && wallEmissiveMap" color="#26282b" :map="wallNoiseMap" :emissiveMap="wallEmissiveMap" emissive="#9a9a9a" :emissiveIntensity="1" :roughness="0.85" :fog="true" />
+        </TresMesh>
+
+        <!-- Right Wall -->
+        <TresMesh :rotation="[0, -Math.PI/2, 0]" :position="[tunnelW/2, (tunnelH/2) - 2.05, 0]" :visible="!isDebug">
+          <TresPlaneGeometry :args="[tunnelD, tunnelH]" />
+          <TresMeshStandardMaterial v-if="wallNoiseMap && wallEmissiveMap" color="#26282b" :map="wallNoiseMap" :emissiveMap="wallEmissiveMap" emissive="#9a9a9a" :emissiveIntensity="1" :roughness="0.85" :fog="true" />
+        </TresMesh>
+      </TresGroup>
 
 
       <!-- Main chamber group -->
@@ -98,8 +142,9 @@ import Lenis from 'lenis'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-import { AnimationMixer, MathUtils, Box3, Vector3, MeshLambertMaterial, Color } from 'three'
+import { AnimationMixer, MathUtils, Box3, Vector3, MeshLambertMaterial, Color, CanvasTexture, RepeatWrapping } from 'three'
 import * as THREE from 'three'
+import { Environment, Lightformer, ContactShadows, MeshReflectionMaterial } from '@tresjs/cientos'
 
 // --- 1. Transition Chamber Configuration ---
 // Adjust these to control the duplicate chamber that arrives at the end
@@ -112,10 +157,94 @@ const isPanelOpen = ref(false)
 const isPointerInPanel = ref(false)
 const frostBgRef = ref<HTMLElement | null>(null)
 const textPanelRef = ref<HTMLElement | null>(null)
-const bgCanvasRef = ref<HTMLCanvasElement | null>(null)
 const panelTl = gsap.timeline({ paused: true })
 
+const isMobile = ref(false)
+const pixelRatio = ref(1)
+const isDebug = new URLSearchParams(window.location.search).get('debug') === 'lineup'
+
+// Tunnel refs
+const tunnelW = ref(20)
+const tunnelH = ref(10)
+const tunnelD = ref(100)
+const wallNoiseMap = ref<any>(null)
+const wallEmissiveMap = ref<any>(null)
+const floorSeamMap = ref<any>(null)
+const ceilingGridMap = ref<any>(null)
+
+function generateTextures() {
+  // 1. Wall Noise & Top Gradient (1:1 vertically)
+  const wallCanvas = document.createElement('canvas')
+  wallCanvas.width = 512; wallCanvas.height = 512
+  const wCtx = wallCanvas.getContext('2d')!
+  const wImg = wCtx.getImageData(0,0,512,512)
+  for (let i=0; i<wImg.data.length; i+=4) {
+    const v = 15 + Math.random() * 8
+    wImg.data[i] = wImg.data[i+1] = wImg.data[i+2] = v
+    wImg.data[i+3] = 255
+  }
+  wCtx.putImageData(wImg, 0, 0)
+  
+  // Add faint vertical panel seams every few units at ~4% brightness
+  wCtx.strokeStyle = 'rgba(255,255,255,0.04)'
+  wCtx.lineWidth = 2
+  for(let x=0; x<=512; x+=128) {
+    wCtx.beginPath(); wCtx.moveTo(x, 0); wCtx.lineTo(x, 512); wCtx.stroke()
+  }
+
+  const wallTex = new CanvasTexture(wallCanvas)
+  wallTex.wrapS = wallTex.wrapT = RepeatWrapping
+  wallTex.repeat.set(tunnelD.value/5, 1) // repeat horizontally, clamp vertically
+  wallNoiseMap.value = wallTex
+
+  // 1b. Wall Emissive Map (Gradient)
+  const emissiveCanvas = document.createElement('canvas')
+  emissiveCanvas.width = 512; emissiveCanvas.height = 512
+  const eCtx = emissiveCanvas.getContext('2d')!
+  eCtx.fillStyle = '#000000'
+  eCtx.fillRect(0,0,512,512)
+  
+  const grad = eCtx.createLinearGradient(0, 0, 0, 512 * 0.35)
+  grad.addColorStop(0, 'rgba(255,255,255,0.15)') // 15% brightness at top
+  grad.addColorStop(1, 'rgba(0,0,0,0)')          // fade to zero
+  eCtx.fillStyle = grad
+  eCtx.fillRect(0, 0, 512, 512)
+
+  const wallEmissiveTex = new CanvasTexture(emissiveCanvas)
+  wallEmissiveTex.wrapS = wallEmissiveTex.wrapT = RepeatWrapping
+  wallEmissiveTex.repeat.set(tunnelD.value/5, 1) // Match wall noise repeat
+  wallEmissiveMap.value = wallEmissiveTex
+
+  // 2. Floor Seams
+  const floorCanvas = document.createElement('canvas')
+  floorCanvas.width = 512; floorCanvas.height = 512
+  const fCtx = floorCanvas.getContext('2d')!
+  fCtx.fillStyle = '#101112'
+  fCtx.fillRect(0,0,512,512)
+  fCtx.strokeStyle = 'rgba(255,255,255,0.035)' // ~3.5% brighter seams
+  fCtx.lineWidth = 2
+  fCtx.strokeRect(0,0,512,512)
+  const floorTex = new CanvasTexture(floorCanvas)
+  floorTex.wrapS = floorTex.wrapT = RepeatWrapping
+  floorTex.repeat.set(tunnelW.value/4, tunnelD.value/4)
+  floorSeamMap.value = floorTex
+
+  // 3. Ceiling Panels
+  const ceilCanvas = document.createElement('canvas')
+  ceilCanvas.width = 512; ceilCanvas.height = 512
+  const cCtx = ceilCanvas.getContext('2d')!
+  cCtx.fillStyle = '#050506' // gaps
+  cCtx.fillRect(0,0,512,512)
+  cCtx.fillStyle = '#8a8a8a' // neutral grey
+  cCtx.fillRect(8, 8, 512-16, 512-16)
+  const ceilTex = new CanvasTexture(ceilCanvas)
+  ceilTex.wrapS = ceilTex.wrapT = RepeatWrapping
+  ceilTex.repeat.set(tunnelW.value/4, tunnelD.value/4) // 4x4m panels roughly
+  ceilingGridMap.value = ceilTex
+}
+
 onMounted(() => {
+  pixelRatio.value = Math.min(window.devicePixelRatio || 1, 1.5)
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (prefersReducedMotion) {
@@ -148,119 +277,7 @@ onMounted(() => {
     if (frostBgRef.value) frostBgRef.value.style.pointerEvents = 'none'
   })
 
-  // ── Dynamic Dot Grid Background ───────────────────────────────────────────
-  if (bgCanvasRef.value) {
-    const canvas = bgCanvasRef.value
-    const ctx = canvas.getContext('2d')
-    let width = 0
-    let height = 0
-    let isTabVisible = true
-    let animationFrameId = 0
-    let time = 0
 
-    let dots: { x: number, y: number, currentRadius: number }[] = []
-    
-    const initDots = () => {
-      dots = []
-      const isMobile = window.innerWidth <= 768
-      const spacing = isMobile ? 14 : 10
-      for (let y = spacing/2; y < height; y += spacing) {
-        for (let x = spacing/2; x < width; x += spacing) {
-          dots.push({ x, y, currentRadius: 0.4 })
-        }
-      }
-    }
-
-    const resize = () => {
-      width = window.innerWidth
-      height = window.innerHeight
-      canvas.width = width
-      canvas.height = height
-      initDots()
-    }
-    resize()
-    window.addEventListener('resize', resize)
-
-    document.addEventListener('visibilitychange', () => {
-      isTabVisible = document.visibilityState === 'visible'
-    })
-
-    let lastTime = performance.now()
-    const fpsInterval = 1000 / 30
-
-    const drawGrid = (currentTime: number) => {
-      animationFrameId = requestAnimationFrame(drawGrid)
-      
-      if (!isTabVisible) return
-      
-      const elapsed = currentTime - lastTime
-      if (elapsed < fpsInterval && !prefersReducedMotion) return
-      lastTime = currentTime - (elapsed % fpsInterval)
-
-      if (!prefersReducedMotion) {
-        // Slow soft noise field full cycle ~ 20s
-        time += (elapsed / 1000) * (Math.PI * 2 / 20) 
-      }
-
-      ctx!.clearRect(0, 0, width, height)
-      
-      const centerX = width / 2
-      const centerY = height / 2
-      const dimRadius = width * 0.22
-
-      for (let i = 0; i < dots.length; i++) {
-        const dot = dots[i]
-        
-        // Base noise scale (0 to 1) using simple sine interference
-        const noiseRaw = (Math.sin(dot.x * 0.003 + time) + Math.cos(dot.y * 0.004 + time * 0.8) + 2) / 4
-        
-        // Threshold curve: 60% stay at minimum size. Top 40% active.
-        let activeNoise = (noiseRaw - 0.6) / 0.4
-        if (activeNoise < 0) activeNoise = 0
-        
-        // Soft clusters: non-linear power curve for brightest zones
-        activeNoise = Math.pow(activeNoise, 1.5)
-        
-        // Base target radius (0.4px min, up to 1.6px from noise)
-        let targetRadius = 0.4 + (activeNoise * 1.2)
-        
-        // Cursor interaction (within 140px, grow by up to +1.2px)
-        const distToCursor = Math.hypot(dot.x - globalPointerX, dot.y - globalPointerY)
-        if (distToCursor < 140) {
-           const cursorEffect = Math.pow(1 - (distToCursor / 140), 2) // Smooth edge
-           targetRadius += cursorEffect * 1.2
-        }
-        
-        // Hard cap never more than 1.6px
-        if (targetRadius > 1.6) targetRadius = 1.6
-        
-        // Ease radius to prevent any shimmer or snapping
-        dot.currentRadius += (targetRadius - dot.currentRadius) * 0.08
-        
-        // Map current radius (0.4 to 1.6) to brightness (approx 5% to 28% max)
-        let alpha = 0.05 + ((dot.currentRadius - 0.4) / 1.2) * 0.23
-        if (alpha > 0.28) alpha = 0.28
-        
-        // Chamber dimming focus: 22% of screen width, drop to 20% brightness
-        const distToCenter = Math.hypot(dot.x - centerX, dot.y - centerY)
-        if (distToCenter < dimRadius) {
-          const dimFactor = Math.pow(distToCenter / dimRadius, 2)
-          alpha *= (0.2 + 0.8 * dimFactor)
-        }
-        
-        ctx!.beginPath()
-        ctx!.arc(dot.x, dot.y, dot.currentRadius, 0, Math.PI * 2)
-        ctx!.fillStyle = `rgba(255, 255, 255, ${alpha})`
-        ctx!.fill()
-      }
-      
-      if (prefersReducedMotion) {
-        cancelAnimationFrame(animationFrameId)
-      }
-    }
-    
-    requestAnimationFrame(drawGrid)
-  }
 
 })
 
@@ -393,9 +410,10 @@ const scrollProxy = {
   lookX: 0, lookY: 0, lookZ: 0,
   camRoll: 0,
   fogFar: 35, // Dynamic fog distance
-  cloneAx: 0, cloneAz: 0, 
-  cloneBx: 0, cloneBz: 0,
+  cloneAx: 0, cloneAy: 0, cloneAz: 0, 
+  cloneBx: 0, cloneBy: 0, cloneBz: 0,
   cloneScale: 0, // Used to keep clones completely invisible until Phase 3
+  cloneFade: 1,  // Multiplies color and envMapIntensity
   fleetLightIntensity: 0, // Dynamically lights up the sides in Phase 3
   transitionZ: transitionChamberStartZ,
   transitionScale: 0
@@ -508,46 +526,74 @@ onMounted(() => {
     if (blob2Ref.value) blob2Ref.value.style.transform = `translate(${parallaxX * 0.7}px, ${parallaxY * 0.7}px)`
     if (blob3Ref.value) blob3Ref.value.style.transform = `translate(${parallaxX * 1.3}px, ${parallaxY * 1.3}px)`
 
-    // Door animation
+    // Door animation (ONLY update if time actually changed to prevent constant heavy skeletal matrix calculations)
     if (doorAnim.mixer && doorAnim.action && doorAnim.duration) {
-      doorAnim.action.time = scrollProxy.door * doorAnim.duration
-      doorAnim.mixer.update(0)
+      const newTime = scrollProxy.door * doorAnim.duration
+      if (Math.abs(doorAnim.action.time - newTime) > 0.0001) {
+        doorAnim.action.time = newTime
+        doorAnim.mixer.update(0)
+      }
     }
 
     // Dynamic Fleet Spread
-    if (cloneARef.value) {
-      cloneARef.value.position.set(scrollProxy.cloneAx, 0, scrollProxy.cloneAz)
-      cloneARef.value.scale.setScalar(scrollProxy.cloneScale)
+    if (cloneARef.value && cloneBRef.value) {
+      const fade = scrollProxy.cloneFade
+      
+      const updateClone = (cloneRef: any, x: number, y: number, z: number, cacheKey: string) => {
+        cloneRef.position.set(isDebug ? 0 : x, isDebug ? y : y, isDebug ? 0 : z)
+        cloneRef.scale.setScalar(isDebug ? 1 : scrollProxy.cloneScale)
+        cloneRef.visible = fade > 0 && scrollProxy.cloneScale > 0
+        
+        // ONLY traverse and update materials if the fade value actually changed!
+        if (cloneRef.visible && (cloneRef.userData.lastFade !== fade)) {
+          cloneRef.userData.lastFade = fade
+          cloneRef.traverse((child: any) => {
+            if (child.isMesh && child.material && child.userData.origColor) {
+               child.material.color.copy(child.userData.origColor).multiplyScalar(fade)
+               if (child.material.envMapIntensity !== undefined) {
+                 child.material.envMapIntensity = child.userData.origEnvIntensity * fade
+               }
+            }
+          })
+        }
+      }
+      
+      updateClone(cloneARef.value, scrollProxy.cloneAx, scrollProxy.cloneAy, scrollProxy.cloneAz, 'A')
+      updateClone(cloneBRef.value, scrollProxy.cloneBx, scrollProxy.cloneBy, scrollProxy.cloneBz, 'B')
     }
-    if (cloneBRef.value) {
-      cloneBRef.value.position.set(scrollProxy.cloneBx, 0, scrollProxy.cloneBz)
-      cloneBRef.value.scale.setScalar(scrollProxy.cloneScale)
-    }
+    // Hide transition chamber completely when scale is 0 to save massive draw calls
     if (transitionChamberRef.value) {
       transitionChamberRef.value.position.set(0, 0, scrollProxy.transitionZ)
       transitionChamberRef.value.scale.setScalar(scrollProxy.transitionScale)
+      transitionChamberRef.value.visible = scrollProxy.transitionScale > 0
     }
 
     // Camera motion
     if (cameraRef.value && baseDistance > 0) {
-      mouseOffsetX += (targetMouseOffsetX - mouseOffsetX) * 0.05
-      mouseOffsetY += (targetMouseOffsetY - mouseOffsetY) * 0.05
-      const driftX = Math.sin(time*0.5)*0.03
-      const driftY = Math.cos(time*0.4)*0.03
-      
-      const targetYaw = targetMouseX * MathUtils.degToRad(4)
-      currentYaw += (targetYaw - currentYaw) * 0.05
-      
-      if (chamberGroupRef.value) chamberGroupRef.value.rotation.y = currentYaw + scrollProxy.chamberYaw
+      if (isDebug) {
+        cameraRef.value.position.set(0, 40, 0)
+        cameraRef.value.lookAt(0, 0, 0)
+        cameraRef.value.rotation.z = 0
+      } else {
+        mouseOffsetX += (targetMouseOffsetX - mouseOffsetX) * 0.05
+        mouseOffsetY += (targetMouseOffsetY - mouseOffsetY) * 0.05
+        const driftX = Math.sin(time*0.5)*0.03
+        const driftY = Math.cos(time*0.4)*0.03
+        
+        const targetYaw = targetMouseX * MathUtils.degToRad(4)
+        currentYaw += (targetYaw - currentYaw) * 0.05
+        
+        if (chamberGroupRef.value) chamberGroupRef.value.rotation.y = currentYaw + scrollProxy.chamberYaw
 
-      cameraRef.value.position.set(
-        scrollProxy.camX + mouseOffsetX + driftX,
-        scrollProxy.camY + mouseOffsetY + driftY,
-        scrollProxy.camZ
-      )
-      
-      cameraRef.value.lookAt(scrollProxy.lookX, scrollProxy.lookY, scrollProxy.lookZ)
-      cameraRef.value.rotation.z = scrollProxy.camRoll
+        cameraRef.value.position.set(
+          scrollProxy.camX + mouseOffsetX + driftX,
+          scrollProxy.camY + mouseOffsetY + driftY,
+          scrollProxy.camZ
+        )
+        
+        cameraRef.value.lookAt(scrollProxy.lookX, scrollProxy.lookY, scrollProxy.lookZ)
+        cameraRef.value.rotation.z = scrollProxy.camRoll
+      }
     }
   })
   gsap.ticker.lagSmoothing(0)
@@ -559,7 +605,7 @@ onMounted(() => {
   loader.setDRACOLoader(draco)
 
   // Exact Three Graces Material: Deep Matte Black
-  const gracesMaterial = new MeshLambertMaterial({ color: new Color('#050505') })
+  const gracesMaterial = new MeshLambertMaterial({ color: new Color('#050505'), fog: false })
 
   loader.load('/models/chamber_main.glb', (gltf) => {
     
@@ -572,6 +618,10 @@ onMounted(() => {
         }
         child.castShadow = true
         child.receiveShadow = true
+        if (child.material) {
+          child.material.fog = false
+          child.material.needsUpdate = true
+        }
       }
     })
     
@@ -580,6 +630,30 @@ onMounted(() => {
     // Compute exact bounding box post-scale
     const box  = new Box3().setFromObject(gltf.scene)
     const size = new Vector3(); box.getSize(size); size.multiplyScalar(2.5)
+    
+    // Set Tunnel Dimensions dynamically based on chamber's bounding box
+    // Widened to 8.5x to comfortably fit the fleet lineup!
+    tunnelW.value = size.x * 8.5
+    tunnelH.value = size.y * 2.6
+    tunnelD.value = size.z * 50 // Lengthened to hide the end wall
+    generateTextures()
+    
+    // DIAGNOSIS LOGGING
+    console.log("--- DIAGNOSE LINE-UP ---")
+    console.log(`[TUNNEL INTERIOR BOUNDS] X: ${-tunnelW.value/2} to ${tunnelW.value/2}, Y: -2.05 to ${tunnelH.value - 2.05}, Z: ${-tunnelD.value/2} to ${tunnelD.value/2}`)
+    
+    const worldBox = new Box3().setFromObject(gltf.scene)
+    const chamberWorldPos = new Vector3(0, -2.05, 0)
+    console.log(`[MAIN CHAMBER] WorldPos: ${chamberWorldPos.toArray()}, BBox Min: ${worldBox.min.toArray()}, BBox Max: ${worldBox.max.toArray()}`)
+    
+    const cloneAPos = new Vector3(-12, -2.05, 0)
+    const cloneBPos = new Vector3(12, -2.05, 0)
+    console.log(`[CLONE A] WorldPos: ${cloneAPos.toArray()}, outside tunnel X bounds (-6.445)`)
+    console.log(`[CLONE B] WorldPos: ${cloneBPos.toArray()}, outside tunnel X bounds (+6.445)`)
+    
+    console.log(`[BASE Y CHECK] Chamber Base Y: -2.05. Floor Plane Y: -2.05. Sits exactly on floor.`)
+    console.log("------------------------")
+
     baseSizeY = size.y
     const center = new Vector3(); box.getCenter(center)
     center.multiplyScalar(2.5); center.add(new Vector3(0,-2.05,0))
@@ -613,8 +687,20 @@ onMounted(() => {
       doorAnim.duration = gltf.animations[0].duration
     }
 
-    cloneA.value = gltf.scene.clone(true)
-    cloneB.value = gltf.scene.clone(true)
+    function cloneWithMaterials(sceneObj: any) {
+      const cloned = sceneObj.clone(true)
+      cloned.traverse((child: any) => {
+        if (child.isMesh && child.material) {
+          child.material = child.material.clone()
+          child.userData.origColor = child.material.color.clone()
+          child.userData.origEnvIntensity = child.material.envMapIntensity !== undefined ? child.material.envMapIntensity : 1
+        }
+      })
+      return cloned
+    }
+
+    cloneA.value = cloneWithMaterials(gltf.scene)
+    cloneB.value = cloneWithMaterials(gltf.scene)
     transitionChamber.value = gltf.scene.clone(true)
 
     buildScrollTimeline()
@@ -654,20 +740,23 @@ function buildScrollTimeline() {
 
     // ── Phase 3: The South-West Spread Reveal (40% to 65%) ──
     tl.to(scrollProxy, { 
-      camX: -15, 
-      camY: baseCameraPos.y + 10,  
-      camZ: baseCameraPos.z + 8,  
+      camX: -9, // Stay safely inside the new wider left wall
+      camY: baseCameraPos.y + 6,  
+      camZ: baseCameraPos.z + 4,  
       lookX: 0, 
       lookY: baseCameraTarget.y,
       lookZ: 0,
-      fogFar: 70, // Extend fog to see the fleet
       duration: 25, 
       ease: 'power2.inOut' 
     }, 40)
     
     tl.to(scrollProxy, {
-      cloneAx: -12, cloneAz: 0, // Perfectly aligned on the same invisible line
-      cloneBx: 12,  cloneBz: 0, 
+      cloneAx: -10, // Spread horizontally cleanly inside the wider tunnel
+      cloneBx: 10,  
+      cloneAy: 0, 
+      cloneBy: 0,
+      cloneAz: 0, 
+      cloneBz: 0, 
       cloneScale: 1, 
       fleetLightIntensity: 80, // Light up the side clones!
       duration: 25,
@@ -675,6 +764,9 @@ function buildScrollTimeline() {
     }, 40)
 
     // ── Phase 4: Cinematic J-Curve Breach (65% to 100%) ──
+    // Fade out clones over a short span as the section ends
+    tl.to(scrollProxy, { cloneFade: 0, duration: 3, ease: 'none' }, 65)
+    
     // 1. Center the camera's X/Y quickly (65% to 75%)
     tl.to(scrollProxy, { 
       camX: 0, 
@@ -802,14 +894,8 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: -1;
-  background-color: #070708;
+  background-color: #050505;
   overflow: hidden;
-  pointer-events: none;
-}
-.bg-grid-canvas {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
   pointer-events: none;
 }
 

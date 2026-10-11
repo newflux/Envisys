@@ -1,0 +1,10 @@
+{
+  "name": "icomat-frontend-replica",
+  "version": "1.0.0",
+  "description": "Pixel-perfect frontend replica of icomat.co.uk",
+  "scripts": {
+    "start": "node serve.cjs",
+    "dev": "node serve.cjs"
+  },
+  "dependencies": {}
+}

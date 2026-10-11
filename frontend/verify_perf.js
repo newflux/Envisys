@@ -6,7 +6,7 @@ import fs from 'fs';
   const page = await browser.newPage();
   await page.setViewport({ width: 1920, height: 1080 });
   
-  await page.goto('http://localhost:5173');
+  await page.goto('http://127.0.0.1:4173');
   await new Promise(r => setTimeout(r, 6000)); // wait for scene to load
   
   // Take screenshot for visual verification

@@ -29,7 +29,17 @@
       </div>
     </div>
 
-<!----><div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><div class="preloader" data-v-edead8a0 data-v-314f53c6><div class="preloader__inner" data-v-edead8a0><h4 class="preloader__text" data-v-edead8a0><span data-v-edead8a0></span> <span data-v-edead8a0> |</span></h4></div> <div class="preloader__progress" data-v-edead8a0></div></div> <main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
+<!---->
+<!-- NEW ENVISYS PRELOADER -->
+<div id="envisys-new-preloader" class="preloader-layer">
+  <div class="preloader-pale-bg"></div>
+  <canvas id="preloader-canvas" class="preloader-dark-rise"></canvas>
+  <div class="preloader-logo-wrap">
+    <img src="/img/logo.png" alt="Envisys" class="preloader-logo-real" style="height: 120px; width: auto; filter: brightness(0.1);" />
+  </div>
+</div>
+
+<div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
   <div class="canvas-fixed-wrap">
@@ -464,8 +474,8 @@ const scrollProxy = {
   transitionZ: transitionChamberStartZ,
   transitionScale: 0,
   textY: 5.5,
-  textScale: 0.45,
-  textOpacity: 1,
+  textScale: 0.35,
+  textOpacity: 0,
   logoOpacity: 0
 }
 
@@ -885,7 +895,230 @@ function buildScrollTimeline() {
 
   }, 600)
 }
+
+
+// --- NEW PRELOADER LOGIC ---
+onMounted(() => {
+    // For development, we skip hasVisited so it ALWAYS loads unless nopreload=1 is set!
+    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const skipPreload = window.location.search.includes('nopreload=1') || window.location.search.includes('force=1');
+    const hasVisited = sessionStorage.getItem('envisys_visited');
+    sessionStorage.setItem('envisys_visited', 'true');
+    
+    // VARIABLES
+    const T_START = 0.00;
+    const T_REVEAL_START = 0.05;
+    const T_REVEAL_END = 0.40;
+    const T_DARK_START = 0.40;
+    const T_DARK_END = 0.90;
+    const T_HOLD = 1.00;
+
+    // Lock scroll and body
+    document.body.style.overflow = 'hidden';
+    if ((window as any).lenisInstance) (window as any).lenisInstance.stop();
+
+    const dispatchDone = () => {
+      document.body.style.overflow = '';
+      if ((window as any).lenisInstance) (window as any).lenisInstance.start();
+      window.dispatchEvent(new Event('preloader:done'));
+      
+      const tlHero = gsap.timeline();
+      
+      // 1. Text emerges deeply from background
+      tlHero.to(scrollProxy, {
+        textOpacity: 1,
+        textScale: 0.45,
+        duration: 2.5,
+        ease: 'power3.out'
+      }, 0.2);
+
+      // 2. Navbar elongates from the right
+      tlHero.to('.start-header', {
+        clipPath: 'inset(0% 0% 0% 0% round 0px)',
+        duration: 1.4, 
+        ease: 'power4.inOut'
+      }, 0.4);
+
+      // 3. Navbar items stagger in
+      tlHero.to('.start-header__navigation-item, .start-header__logo--nightmode, .sound-switcher, .dots', {
+        opacity: 1,
+        x: 0,
+        duration: 0.8,
+        stagger: 0.05,
+        ease: 'power3.out'
+      }, 1.2);
+
+      // 4. Footer items rise
+      tlHero.to('.start-screen__footer-left, .start-screen__footer-center, .start-screen__footer-right', {
+        y: 0, 
+        opacity: 1, 
+        duration: 1.0, 
+        stagger: 0.1,
+        ease: 'power3.out'
+      }, 1.4);
+    };
+
+    const runFullPreloader = async () => {
+      // INITIALIZE HERO STATES BEFORE PRELOADER REVEALS ANYTHING
+      gsap.set('.start-header', { clipPath: 'inset(0% 0% 0% 100% round 40px)' });
+      gsap.set('.start-header__navigation-item, .start-header__logo--nightmode, .sound-switcher, .dots', { opacity: 0, x: 20 });
+      gsap.set('.start-screen__footer-left, .start-screen__footer-center, .start-screen__footer-right', { y: 20, opacity: 0 });
+
+      const tl = gsap.timeline();
+      
+      // --- WebGL Shader Setup ---
+      const pCanvas = document.getElementById('preloader-canvas') as HTMLCanvasElement;
+      pCanvas.width = window.innerWidth;
+      pCanvas.height = window.innerHeight;
+      const gl = pCanvas.getContext('webgl');
+      
+      if (gl) {
+        const vsSource = `
+          attribute vec2 position;
+          void main() { gl_Position = vec4(position, 0.0, 1.0); }
+        `;
+        const fsSource = `
+          precision mediump float;
+          uniform vec2 u_resolution;
+          uniform float u_progress;
+
+          void main() {
+            vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+            
+            // True circular arc anchored above the screen
+            vec2 center = vec2(0.5, 1.2);
+            vec2 pos = uv - center;
+            
+            // Correct aspect ratio so the sweep is perfectly round, not stretched
+            pos.x *= u_resolution.x / u_resolution.y;
+            
+            float dist = length(pos);
+            
+            // Max dist is at bottom corners (around 1.7 depending on screen width)
+            // Min dist is top center (around 0.2)
+            // u_progress goes 0 to 1
+            // threshold goes from massive (so dist is always < threshold) to tiny (so dist always > threshold)
+            float threshold = 4.0 - (u_progress * 4.5);
+            
+            float softness = 1.5; 
+            
+            float alpha = smoothstep(threshold - softness, threshold, dist);
+            
+            // Deep charcoal fading into absolute black
+            vec3 color = mix(vec3(0.08, 0.08, 0.09), vec3(0.0, 0.0, 0.0), smoothstep(threshold - softness, threshold - softness * 0.4, dist));
+            
+            gl_FragColor = vec4(color, alpha);
+          }
+        `;
+        
+        const compileShader = (type: number, source: string) => {
+          const shader = gl.createShader(type);
+          if (!shader) throw new Error('Could not create shader');
+          gl.shaderSource(shader, source);
+          gl.compileShader(shader);
+          return shader as WebGLShader;
+        };
+        
+        const program = gl.createProgram();
+        if (!program) throw new Error('Could not create program');
+        gl.attachShader(program, compileShader(gl.VERTEX_SHADER, vsSource));
+        gl.attachShader(program, compileShader(gl.FRAGMENT_SHADER, fsSource));
+        gl.linkProgram(program);
+        gl.useProgram(program);
+        
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+        
+        const posLoc = gl.getAttribLocation(program, 'position');
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+        
+        const resLoc = gl.getUniformLocation(program, 'u_resolution');
+        const progLoc = gl.getUniformLocation(program, 'u_progress');
+        gl.uniform2f(resLoc, pCanvas.width, pCanvas.height);
+        
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        
+        const shaderProxy = { progress: 0 };
+        const renderShader = () => {
+          if (shaderProxy.progress >= 1 && pCanvas.style.display === 'none') return;
+          gl.uniform1f(progLoc, shaderProxy.progress);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+          if (shaderProxy.progress < 1) requestAnimationFrame(renderShader);
+        };
+        renderShader();
+        
+        window.addEventListener('resize', () => {
+          if (pCanvas) {
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            gl.uniform2f(resLoc, pCanvas.width, pCanvas.height);
+            renderShader();
+          }
+        });
+
+        tl.to(shaderProxy, { 
+          progress: 1, 
+          duration: T_DARK_END - T_DARK_START, 
+          ease: "power3.inOut",
+          onUpdate: renderShader
+        }, T_DARK_START);
+      }
+      
+      tl.to('.preloader-logo-real', { 
+        maskPosition: "0 0", 
+        webkitMaskPosition: "0 0", 
+        duration: T_REVEAL_END - T_REVEAL_START, 
+        ease: "power3.out" 
+      }, T_REVEAL_START);
+      
+      tl.call(async () => {
+        if (document.fonts.status !== 'loaded' || !chamberScene.value) {
+          tl.pause();
+          const checkLoad = () => {
+            return new Promise(resolve => {
+              const interval = setInterval(() => {
+                if (document.fonts.status === 'loaded' && chamberScene.value) {
+                  clearInterval(interval);
+                  resolve(true);
+                }
+              }, 100);
+            });
+          };
+          const timeout = new Promise(resolve => setTimeout(() => resolve(false), 4000));
+          await Promise.race([checkLoad(), timeout]);
+          tl.resume();
+        }
+      }, undefined, T_DARK_START);
+      
+      tl.to('.preloader-logo-real', { 
+        opacity: 0, 
+        duration: 0.8 
+      }, T_DARK_START + 0.15);
+      
+      tl.call(() => {
+        dispatchDone();
+        gsap.to('#envisys-new-preloader', { opacity: 0, duration: 0.15, onComplete: () => {
+          const el = document.getElementById('envisys-new-preloader');
+          if (el) el.style.display = 'none';
+        }});
+      }, undefined, T_HOLD);
+    };
+
+    // TEMPORARILY DISABLED HASVISITED CHECK SO YOU CAN SEE IT EVERY TIME
+    if (skipPreload && !window.location.search.includes('force=1')) {
+      const el = document.getElementById('envisys-new-preloader');
+      if (el) el.style.display = 'none';
+      dispatchDone();
+    } else {
+      runFullPreloader();
+    }
+})
 </script>
+
 
 <style>
 @import "./assets/style.css";

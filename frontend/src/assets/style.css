@@ -1,8 +1,49 @@
+@font-face {
+  font-display: swap;
+  font-family: 'LayGrotesk-Semibold';
+  src: url('/fonts/LayGrotesk-Semibold.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'AkkuratMono';
+  src: url('/fonts/AkkuratMono.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --font-mono-regular: "PPSupplyMonoRegular";
-  --font-mono-ultralight: "PPSupplyMonoUltralight";
-  --font-sans-regular: "PPSupplySansRegular";
-  --font-sans-ultralight: "PPSupplySansUltralight";
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
+  --font-mono-regular: "Geist Mono", monospace;
+  --font-mono-ultralight: "Geist Mono", monospace;
+  --font-sans-regular: "Geist", sans-serif;
+  --font-sans-ultralight: "Geist", sans-serif;
   --color-light: #ffffff;
   --color-dark: #101011;
   --color-gray: #CBCBCB;
@@ -25,32 +66,156 @@
 }
 
 @media (max-width: 1919px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 8.3rem;
   }
 }
 
 @media (max-width: 1439px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 6.6rem;
   }
 }
 
 @media (max-width: 1023px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 4rem;
   }
 }
 
 @media (max-width: 767px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 4.2666666667vw;
   }
 }
 
 html {
   font-size: 62.5%;
-  font-family: var(--font-sans-regular);
+  font-family: "Geist", sans-serif;
   background-color: #070708;
   color: var(--color-light);
 }
@@ -63,7 +228,7 @@ html, body {
   bottom: 0;
   padding: 0;
   margin: 0;
-  overflow: hidden;
+  
   -ms-overflow-style: none;
   scrollbar-width: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
@@ -115,7 +280,7 @@ ul {
 }
 
 @font-face {
-  font-family: "PPSupplyMonoRegular";
+  font-family: "Geist Mono", monospace;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplyMono-Regular.otf);
   font-weight: 400;
   font-style: normal;
@@ -123,7 +288,7 @@ ul {
 }
 
 @font-face {
-  font-family: "PPSupplyMonoUltralight";
+  font-family: "Geist Mono", monospace;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplyMono-Ultralight.otf);
   font-weight: 300;
   font-style: normal;
@@ -131,7 +296,7 @@ ul {
 }
 
 @font-face {
-  font-family: "PPSupplySansRegular";
+  font-family: "Geist", sans-serif;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplySans-Regular.otf);
   font-weight: 400;
   font-style: normal;
@@ -139,7 +304,7 @@ ul {
 }
 
 @font-face {
-  font-family: "PPSupplySansUltralight";
+  font-family: "Geist", sans-serif;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplySans-Ultralight.otf);
   font-weight: 300;
   font-style: normal;
@@ -237,16 +402,16 @@ h3, .h3 {
 }
 
 .p1 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 2.2rem;
   font-weight: 400;
   line-height: 1;
 }
 
 .p2 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.3;
@@ -259,8 +424,8 @@ h3, .h3 {
 }
 
 .a1 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 1.7rem;
   font-weight: 400;
   line-height: 1;
@@ -274,8 +439,8 @@ h3, .h3 {
 
 html {
   font-size: 62.5%;
-  font-family: "PPSupplySansRegular";
-  font-family: var(--font-sans-regular);
+  font-family: "Geist", sans-serif;
+  font-family: "Geist", sans-serif;
   background-color: #070708;
   background-color: #070708;
   color: #ffffff;
@@ -372,7 +537,7 @@ input:-webkit-autofill:active {
   position: absolute;
   width: calc(100% - 0.8rem);
   height: 1px;
-  background-color: white;
+  background-color: black;
   bottom: 1rem;
   left: 0.4rem;
   transform: scaleX(0);
@@ -1159,7 +1324,7 @@ svg[data-v-71e9e103] {
 .faq__inner[data-v-55603bb3] {
   height: 100%;
   width: 67.3rem;
-  overflow: hidden;
+  
   overflow-y: auto;
   margin: 0 auto;
   -ms-scroll-chaining: none;
@@ -1362,7 +1527,7 @@ svg[data-v-71e9e103] {
   transition: var(--transition);
 }
 .faq__item-text-wrapper[data-v-a5afd848] {
-  overflow: hidden;
+  
   height: 0;
 }
 .faq__item-pb[data-v-a5afd848] {
@@ -1450,7 +1615,7 @@ svg[data-v-71e9e103] {
   --v-width: var(--size-2);
   --v-height: var(--size-1);
   display: block;
-  background-color: white;
+  background-color: black;
   transform-origin: left center;
   position: absolute;
 }
@@ -1481,11 +1646,42 @@ svg[data-v-71e9e103] {
   height: var(--v-height);
   transform: translateX(-50%);
 }
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --font-mono-regular: "PPSupplyMonoRegular";
-  --font-mono-ultralight: "PPSupplyMonoUltralight";
-  --font-sans-regular: "PPSupplySansRegular";
-  --font-sans-ultralight: "PPSupplySansUltralight";
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
+  --font-mono-regular: "Geist Mono", monospace;
+  --font-mono-ultralight: "Geist Mono", monospace;
+  --font-sans-regular: "Geist", sans-serif;
+  --font-sans-ultralight: "Geist", sans-serif;
   --color-light: #ffffff;
   --color-dark: #101011;
   --color-gray: #CBCBCB;
@@ -1508,31 +1704,155 @@ svg[data-v-71e9e103] {
 }
 
 @media (max-width: 1919px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 8.3rem;
   }
 }
 
 @media (max-width: 1439px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 6.6rem;
   }
 }
 
 @media (max-width: 1023px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 4rem;
   }
 }
 
 @media (max-width: 767px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 4.2666666667vw;
   }
 }
 
 @font-face {
-  font-family: "PPSupplyMonoRegular";
+  font-family: "Geist Mono", monospace;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplyMono-Regular.otf);
   font-weight: 400;
   font-style: normal;
@@ -1540,7 +1860,7 @@ svg[data-v-71e9e103] {
 }
 
 @font-face {
-  font-family: "PPSupplyMonoUltralight";
+  font-family: "Geist Mono", monospace;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplyMono-Ultralight.otf);
   font-weight: 300;
   font-style: normal;
@@ -1548,7 +1868,7 @@ svg[data-v-71e9e103] {
 }
 
 @font-face {
-  font-family: "PPSupplySansRegular";
+  font-family: "Geist", sans-serif;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplySans-Regular.otf);
   font-weight: 400;
   font-style: normal;
@@ -1556,7 +1876,7 @@ svg[data-v-71e9e103] {
 }
 
 @font-face {
-  font-family: "PPSupplySansUltralight";
+  font-family: "Geist", sans-serif;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplySans-Ultralight.otf);
   font-weight: 300;
   font-style: normal;
@@ -1654,16 +1974,16 @@ h3, .h3 {
 }
 
 .p1 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 2.2rem;
   font-weight: 400;
   line-height: 1;
 }
 
 .p2 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.3;
@@ -1676,8 +1996,8 @@ h3, .h3 {
 }
 
 .a1 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 1.7rem;
   font-weight: 400;
   line-height: 1;
@@ -1691,8 +2011,8 @@ h3, .h3 {
 
 html {
   font-size: 62.5%;
-  font-family: "PPSupplySansRegular";
-  font-family: var(--font-sans-regular);
+  font-family: "Geist", sans-serif;
+  font-family: "Geist", sans-serif;
   background-color: #101011;
   background-color: var(--color-dark);
   color: #ffffff;
@@ -1707,7 +2027,7 @@ html, body {
   bottom: 0;
   padding: 0;
   margin: 0;
-  overflow: hidden;
+  
   -ms-overflow-style: none;
   scrollbar-width: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
@@ -1803,7 +2123,7 @@ input:-webkit-autofill:active {
   position: absolute;
   width: calc(100% - 0.8rem);
   height: 1px;
-  background-color: white;
+  background-color: black;
   bottom: 1rem;
   left: 0.4rem;
   transform: scaleX(0);
@@ -2604,7 +2924,7 @@ svg[data-v-71e9e103] {
   height: 100vh;
   min-height: 50.5555555556vw;
   display: flex;
-  overflow: hidden;
+  
   position: absolute;
   left: 0;
   top: 0;
@@ -2652,7 +2972,7 @@ svg[data-v-71e9e103] {
     flex-shrink: 0;
     flex-grow: 1;
     flex-basis: 0;
-    overflow: hidden;
+    
 }
 }
 .scroll-block__slides[data-v-4b18c830] {
@@ -2903,7 +3223,7 @@ svg[data-v-71e9e103] {
   top: 0;
   height: 18.4rem;
   width: 100%;
-  overflow: hidden;
+  
 }
 @media (min-width: 1920px) {
 .idea-block__arrow[data-v-9e40fdf0] {
@@ -2938,7 +3258,7 @@ svg[data-v-71e9e103] {
   align-items: center;
   --border-radius: 5.4rem;
   border-radius: var(--border-radius);
-  overflow: hidden;
+  
   position: relative;
   transform: translateZ(0);
   padding: 0 2.2rem;
@@ -3229,7 +3549,7 @@ svg[data-v-71e9e103] {
 .faq__inner[data-v-55603bb3] {
   height: 100%;
   width: 67.3rem;
-  overflow: hidden;
+  
   overflow-y: auto;
   margin: 0 auto;
   -ms-scroll-chaining: none;
@@ -3432,7 +3752,7 @@ svg[data-v-71e9e103] {
   transition: var(--transition);
 }
 .faq__item-text-wrapper[data-v-a5afd848] {
-  overflow: hidden;
+  
   height: 0;
 }
 .faq__item-pb[data-v-a5afd848] {
@@ -3520,7 +3840,7 @@ svg[data-v-71e9e103] {
   --v-width: var(--size-2);
   --v-height: var(--size-1);
   display: block;
-  background-color: white;
+  background-color: black;
   transform-origin: left center;
   position: absolute;
 }
@@ -3551,11 +3871,42 @@ svg[data-v-71e9e103] {
   height: var(--v-height);
   transform: translateX(-50%);
 }
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --font-mono-regular: "PPSupplyMonoRegular";
-  --font-mono-ultralight: "PPSupplyMonoUltralight";
-  --font-sans-regular: "PPSupplySansRegular";
-  --font-sans-ultralight: "PPSupplySansUltralight";
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
+  --font-mono-regular: "Geist Mono", monospace;
+  --font-mono-ultralight: "Geist Mono", monospace;
+  --font-sans-regular: "Geist", sans-serif;
+  --font-sans-ultralight: "Geist", sans-serif;
   --color-light: #ffffff;
   --color-dark: #101011;
   --color-gray: #CBCBCB;
@@ -3578,31 +3929,155 @@ svg[data-v-71e9e103] {
 }
 
 @media (max-width: 1919px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 8.3rem;
   }
 }
 
 @media (max-width: 1439px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 6.6rem;
   }
 }
 
 @media (max-width: 1023px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 4rem;
   }
 }
 
 @media (max-width: 767px) {
-  :root {
+  
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fs-hero: clamp(3rem, 3.7vw, 6rem);
+  --lh-hero: 1.1;
+  --ls-hero: -0.02em;
+  --fs-lead: clamp(1rem, 1.1vw, 2rem);
+  --lh-lead: 1.05;
+  --fs-nav: 13px;
+  --nav-h: 44px;
+  --edge: 24px;
+  --logo-h: 28px;
+  --radius: 6px;
+  --color-ink: #f4f5f2;
+  --color-muted: #8a8d92;
+  --color-void: #050505;
+
     --container-padding: 4.2666666667vw;
   }
 }
 
 @font-face {
-  font-family: "PPSupplyMonoRegular";
+  font-family: "Geist Mono", monospace;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplyMono-Regular.otf);
   font-weight: 400;
   font-style: normal;
@@ -3610,7 +4085,7 @@ svg[data-v-71e9e103] {
 }
 
 @font-face {
-  font-family: "PPSupplyMonoUltralight";
+  font-family: "Geist Mono", monospace;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplyMono-Ultralight.otf);
   font-weight: 300;
   font-style: normal;
@@ -3618,7 +4093,7 @@ svg[data-v-71e9e103] {
 }
 
 @font-face {
-  font-family: "PPSupplySansRegular";
+  font-family: "Geist", sans-serif;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplySans-Regular.otf);
   font-weight: 400;
   font-style: normal;
@@ -3626,7 +4101,7 @@ svg[data-v-71e9e103] {
 }
 
 @font-face {
-  font-family: "PPSupplySansUltralight";
+  font-family: "Geist", sans-serif;
   src: url(/_nuxt/assets/fonts/SupplyFree/PPSupplySans-Ultralight.otf);
   font-weight: 300;
   font-style: normal;
@@ -3724,16 +4199,16 @@ h3, .h3 {
 }
 
 .p1 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 2.2rem;
   font-weight: 400;
   line-height: 1;
 }
 
 .p2 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.3;
@@ -3746,8 +4221,8 @@ h3, .h3 {
 }
 
 .a1 {
-  font-family: "PPSupplyMonoRegular";
-  font-family: var(--font-mono-regular);
+  font-family: "Geist Mono", monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 1.7rem;
   font-weight: 400;
   line-height: 1;
@@ -3761,8 +4236,8 @@ h3, .h3 {
 
 html {
   font-size: 62.5%;
-  font-family: "PPSupplySansRegular";
-  font-family: var(--font-sans-regular);
+  font-family: "Geist", sans-serif;
+  font-family: "Geist", sans-serif;
   background-color: #101011;
   background-color: var(--color-dark);
   color: #ffffff;
@@ -3777,7 +4252,7 @@ html, body {
   bottom: 0;
   padding: 0;
   margin: 0;
-  overflow: hidden;
+  
   -ms-overflow-style: none;
   scrollbar-width: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
@@ -3873,7 +4348,7 @@ input:-webkit-autofill:active {
   position: absolute;
   width: calc(100% - 0.8rem);
   height: 1px;
-  background-color: white;
+  background-color: black;
   bottom: 1rem;
   left: 0.4rem;
   transform: scaleX(0);
@@ -4906,7 +5381,7 @@ svg[data-v-71e9e103] {
   align-items: center;
   --border-radius: 5.4rem;
   border-radius: var(--border-radius);
-  overflow: hidden;
+  
   position: relative;
   transform: translateZ(0);
   padding: 0 2.2rem;
@@ -5252,7 +5727,7 @@ svg[data-v-71e9e103] {
 .faq__inner[data-v-55603bb3] {
   height: 100%;
   width: 67.3rem;
-  overflow: hidden;
+  
   overflow-y: auto;
   margin: 0 auto;
   -ms-scroll-chaining: none;
@@ -5455,7 +5930,7 @@ svg[data-v-71e9e103] {
   transition: var(--transition);
 }
 .faq__item-text-wrapper[data-v-a5afd848] {
-  overflow: hidden;
+  
   height: 0;
 }
 .faq__item-pb[data-v-a5afd848] {
@@ -5543,7 +6018,7 @@ svg[data-v-71e9e103] {
   --v-width: var(--size-2);
   --v-height: var(--size-1);
   display: block;
-  background-color: white;
+  background-color: black;
   transform-origin: left center;
   position: absolute;
 }
@@ -5573,4 +6048,264 @@ svg[data-v-71e9e103] {
   width: var(--v-width);
   height: var(--v-height);
   transform: translateX(-50%);
+}
+
+
+/* --- ICOMAT EXACT STYLING --- */
+
+/* Preloader */
+.envisys-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.envisys-loader__logo-container {
+  animation: pulse-loader 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+.envisys-loader__logo {
+  width: 80px;
+  filter: brightness(0) invert(1);
+}
+
+@keyframes pulse-loader {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.15); opacity: 1; }
+}
+
+/* Main Header */
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 30px 40px;
+  z-index: 1000;
+  pointer-events: none;
+  font-family: var(--font-sans-regular);
+}
+
+.main-header__logo-link {
+  pointer-events: auto;
+  display: block;
+}
+
+.main-header__logo {
+  height: 35px;
+  filter: brightness(0) invert(1);
+}
+
+.main-header__right {
+  display: flex;
+  align-items: center;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 5px 5px 5px 24px;
+  gap: 20px;
+  pointer-events: auto;
+}
+
+.main-header__nav-list {
+  display: flex;
+  list-style: none;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+}
+
+.main-header__nav-list a {
+  color: #fff;
+  text-decoration: none;
+  font-family: var(--font-mono-regular);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s ease;
+}
+
+.main-header__nav-list a:hover {
+  opacity: 0.6;
+}
+
+.main-header__build-btn {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-family: var(--font-mono-regular);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.main-header__build-btn:hover {
+  opacity: 0.8;
+}
+
+/* Big Hero Text (Bottom Left) */
+.hero-huge-text {
+  position: fixed;
+  bottom: 30px;
+  left: 40px;
+  z-index: 900;
+  pointer-events: none;
+  font-family: var(--font-sans-regular);
+  font-size: 110px;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: #fff;
+  margin: 0;
+  opacity: 1;
+}
+.hero-huge-text span, .hero-line-mask span {
+  
+  display: block;
+}
+
+/* Small Hero Text (Right Side vertically centered) */
+.hero-text-container {
+  position: fixed;
+  top: 50%;
+  right: 60px;
+  transform: translateY(-50%);
+  max-width: 420px;
+  z-index: 900;
+  pointer-events: none;
+  font-family: var(--font-sans-regular);
+  color: #fff;
+  opacity: 1;
+}
+
+.hero-text-light {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.3;
+  opacity: 1;
+  display: inline;
+}
+
+.hero-text-strong {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.3;
+  opacity: 0.5;
+  display: inline;
+}
+
+
+.envisys-svg-logo text {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: drawLogo 2s cubic-bezier(0.4, 0, 0.2, 1) forwards infinite alternate;
+  color: black;
+}
+@keyframes drawLogo {
+  0% { stroke-dashoffset: 600; fill: transparent; }
+  60% { stroke-dashoffset: 0; fill: transparent; }
+  100% { stroke-dashoffset: 0; fill: black; }
+}
+
+
+.hero-line-mask {
+  overflow: hidden;
+  padding-top: 40px;
+  margin-top: -40px;
+}
+
+
+/* NEW PRELOADER CSS */
+.preloader-layer {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.preloader-pale-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #f7f7f7;
+  z-index: 1;
+}
+.preloader-dark-rise {
+  position: absolute;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 2;
+  background: transparent;
+  pointer-events: none;
+}
+.preloader-logo-wrap {
+  position: relative;
+  z-index: 3;
+}
+.preloader-logo-real {
+  mask-image: linear-gradient(to bottom, black 40%, transparent 60%);
+  mask-size: 100% 300%;
+  mask-position: 0 100%; /* Hidden */
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 60%);
+  -webkit-mask-size: 100% 300%;
+  -webkit-mask-position: 0 100%;
+}
+
+/* NEW PRELOADER CSS */
+.preloader-layer {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.preloader-pale-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #f7f7f7;
+  z-index: 1;
+}
+.preloader-dark-rise {
+  position: absolute;
+  bottom: -150vh; left: 0; width: 100%; height: 150vh;
+  z-index: 2;
+  /* Vertical gradient + corner vignette */
+  background: radial-gradient(150% 100% at 50% 0%, transparent 20%, #000 80%),
+              linear-gradient(to bottom, transparent 0%, #000 30%, #000 100%);
+  transform: translateY(0);
+}
+.preloader-logo-wrap {
+  position: relative;
+  z-index: 3;
+}
+.preloader-logo-real {
+  mask-image: linear-gradient(to bottom, black 40%, transparent 60%);
+  mask-size: 100% 300%;
+  mask-position: 0 100%; /* Hidden */
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 60%);
+  -webkit-mask-size: 100% 300%;
+  -webkit-mask-position: 0 100%;
 }

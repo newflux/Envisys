@@ -29,17 +29,16 @@
       </div>
     </div>
 
-<!---->
-<!-- NEW ENVISYS PRELOADER -->
-<div id="envisys-new-preloader" class="preloader-layer">
-  <div class="preloader-pale-bg"></div>
-  <canvas id="preloader-canvas" class="preloader-dark-rise"></canvas>
-  <div class="preloader-logo-wrap">
-    <img src="/img/logo.png" alt="Envisys" class="preloader-logo-real" style="height: 120px; width: auto; filter: brightness(0.1);" />
-  </div>
-</div>
+    <!-- EXACT ICOMAT PRELOADER -->
+    <Preloader @complete="onPreloaderComplete" />
 
-<div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
+    <!-- EXACT ICOMAT NAVBAR & BRAND LOGO -->
+    <Navbar @build-click="handleBuildClick" />
+
+    <!-- EXACT ICOMAT HERO OVERLAY (TITLE, PARAGRAPH, SCROLL PILL) -->
+    <HeroOverlay ref="heroOverlayRef" @scroll-down="onScrollDown" />
+
+    <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
   <div class="canvas-fixed-wrap">
@@ -166,9 +165,16 @@
     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); mask-image: radial-gradient(circle at center, transparent 40%, black 100%); -webkit-mask-image: radial-gradient(circle at center, transparent 40%, black 100%); z-index: 10;"></div>
   </div><!-- /canvas-fixed-wrap -->
 
-</div> <header class="start-header" data-v-36cf41b8 data-v-34202237><nav class="start-header__navigation" data-v-36cf41b8><ul class="start-header__navigation-list" data-v-4a566750 data-v-36cf41b8><li class="start-header__navigation-item" data-v-4a566750><a href="/about" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>About us</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><a href="/contacts" class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>Contacts</span></a></li> <li class="start-header__navigation-item" data-v-4a566750><button class="link-switcher p2" data-v-760660a8 data-v-4a566750><span class="link-switcher__icon" data-v-760660a8><span class="switcher-icon" data-v-5376e1c5 data-v-760660a8><span class="switcher-icon__shadow" data-v-5376e1c5></span> <span class="switcher-icon__body" data-v-5376e1c5><span class="switcher-icon__marker" data-v-5376e1c5></span></span></span></span> <span class="link-switcher__text" data-v-760660a8>FAQ</span></button></li></ul></nav> <div class="start-header__logo" data-v-36cf41b8 style="display:none;"><div class="logo" data-v-cb243c6e data-v-36cf41b8></div></div> <div class="start-header__logo start-header__logo--nightmode" ref="navbarLogoRef" style="display:flex; align-items:center; opacity:0; transition:none; font-family: Inter, sans-serif; font-size: 1.5rem; font-weight: 500; letter-spacing: -0.025em; color: white;" data-v-36cf41b8>/envisys</div> <div class="start-header__sound" style="display:flex;gap:20px;align-items:center;" data-v-36cf41b8><button class="sound-switcher" @click="toggleNightMode" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Mode</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button><button class="sound-switcher" data-v-69263892 data-v-36cf41b8><span class="sound-switcher__text p2" data-v-69263892>Sound</span> <span class="switcher-2" data-v-87500f60 data-v-69263892><span class="switcher-2__body" data-v-87500f60><span class="switcher-2__marker" data-v-87500f60></span></span></span></button></div> <div class="dots start-header__dots" data-v-7d6eeb50 data-v-36cf41b8><div class="dot" data-v-7d6eeb50></div> <div class="dot" data-v-7d6eeb50></div></div></header> <footer class="start-screen__footer" data-v-7934099c data-v-34202237><div class="start-screen__footer-left p2" data-v-7934099c>
-    // Positioned at the axis of talent and content across film
-  </div> <div class="start-screen__footer-center" data-v-7934099c><p class="scroll-down p2" data-v-751b1c41 data-v-7934099c><span data-v-751b1c41>Scroll Down</span> <span class="scroll-down__icon" data-v-751b1c41></span></p></div> <div class="start-screen__footer-right" data-v-7934099c><p class="clock p2" data-v-43f4bbf8 data-v-7934099c>06 : 57 pm</p></div></footer></div></div> <!----></div></main> <div class="popup faq" style="display:none;" data-v-55603bb3 data-v-314f53c6><button aria-label="close modal" class="faq__close-button" data-v-372f1411 data-v-55603bb3><span data-v-372f1411></span> <span data-v-372f1411></span></button> <div class="faq__inner" data-v-55603bb3><div class="faq__content" data-v-55603bb3></div></div></div> <div class="loader" data-v-0dfb4719 data-v-314f53c6><div class="loader__inner" data-v-0dfb4719></div> <!----></div> <div class="cursor" data-v-37e7b582 data-v-314f53c6><div class="cursor__inner" data-v-37e7b582><span data-v-37e7b582></span> <span data-v-37e7b582></span> <span data-v-37e7b582></span> <span data-v-37e7b582></span></div></div></div></div>
+</div></div></div></div></main>
+<div class="cursor" data-v-37e7b582 data-v-314f53c6>
+  <div class="cursor__inner" data-v-37e7b582>
+    <span data-v-37e7b582></span>
+    <span data-v-37e7b582></span>
+    <span data-v-37e7b582></span>
+    <span data-v-37e7b582></span>
+  </div>
+</div>
+</div></div>
   </div>
 </template>
 
@@ -181,11 +187,16 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { AnimationMixer, MathUtils, Box3, Vector3, MeshLambertMaterial, Color, CanvasTexture, RepeatWrapping } from 'three'
 import * as THREE from 'three'
-import { Environment, Lightformer, ContactShadows, MeshReflectionMaterial, GLTFModel } from '@tresjs/cientos'
+import { Environment, Lightformer, ContactShadows, MeshReflectionMaterial } from '@tresjs/cientos'
 import { extend } from '@tresjs/core'
 import { Text } from 'troika-three-text'
+import Preloader from './components/Preloader.vue'
+import Navbar from './components/Navbar.vue'
+import HeroOverlay from './components/HeroOverlay.vue'
 
 extend({ Text })
+
+const heroOverlayRef = ref<any>(null)
 
 // --- 1. Transition Chamber Configuration ---
 // Adjust these to control the duplicate chamber that arrives at the end
@@ -897,225 +908,47 @@ function buildScrollTimeline() {
 }
 
 
-// --- NEW PRELOADER LOGIC ---
+// --- ICOMAT INTEGRATION HANDLERS ---
+function onPreloaderComplete() {
+  document.body.style.overflow = ''
+  if ((window as any).lenisInstance) (window as any).lenisInstance.start()
+  window.dispatchEvent(new Event('preloader:done'))
+
+  // 1. Trigger Hero Entrance Animation
+  heroOverlayRef.value?.playEntrance?.()
+
+  // 2. Animate Navbar & Topbar in smoothly
+  gsap.fromTo(
+    ['.Header_topBar__t3Nfy', '.Header_header__qBw1J'],
+    { opacity: 0, y: -20 },
+    { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out', delay: 0.1 }
+  )
+
+  // 3. Emerge 3D Background Text & Chamber Camera
+  const tlHero = gsap.timeline()
+  tlHero.to(scrollProxy, {
+    textOpacity: 1,
+    textScale: 0.45,
+    duration: 2.5,
+    ease: 'power3.out'
+  }, 0.2)
+}
+
+function onScrollDown() {
+  if ((window as any).lenisInstance) {
+    (window as any).lenisInstance.scrollTo(window.innerHeight, { duration: 1.5, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) })
+  } else {
+    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
+  }
+}
+
+function handleBuildClick() {
+  openPanel(window.innerWidth / 2, window.innerHeight / 2)
+}
+
 onMounted(() => {
-    // For development, we skip hasVisited so it ALWAYS loads unless nopreload=1 is set!
-    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const skipPreload = window.location.search.includes('nopreload=1') || window.location.search.includes('force=1');
-    const hasVisited = sessionStorage.getItem('envisys_visited');
-    sessionStorage.setItem('envisys_visited', 'true');
-    
-    // VARIABLES
-    const T_START = 0.00;
-    const T_REVEAL_START = 0.05;
-    const T_REVEAL_END = 0.40;
-    const T_DARK_START = 0.40;
-    const T_DARK_END = 0.90;
-    const T_HOLD = 1.00;
-
-    // Lock scroll and body
-    document.body.style.overflow = 'hidden';
-    if ((window as any).lenisInstance) (window as any).lenisInstance.stop();
-
-    const dispatchDone = () => {
-      document.body.style.overflow = '';
-      if ((window as any).lenisInstance) (window as any).lenisInstance.start();
-      window.dispatchEvent(new Event('preloader:done'));
-      
-      const tlHero = gsap.timeline();
-      
-      // 1. Text emerges deeply from background
-      tlHero.to(scrollProxy, {
-        textOpacity: 1,
-        textScale: 0.45,
-        duration: 2.5,
-        ease: 'power3.out'
-      }, 0.2);
-
-      // 2. Navbar elongates from the right
-      tlHero.to('.start-header', {
-        clipPath: 'inset(0% 0% 0% 0% round 0px)',
-        duration: 1.4, 
-        ease: 'power4.inOut'
-      }, 0.4);
-
-      // 3. Navbar items stagger in
-      tlHero.to('.start-header__navigation-item, .start-header__logo--nightmode, .sound-switcher, .dots', {
-        opacity: 1,
-        x: 0,
-        duration: 0.8,
-        stagger: 0.05,
-        ease: 'power3.out'
-      }, 1.2);
-
-      // 4. Footer items rise
-      tlHero.to('.start-screen__footer-left, .start-screen__footer-center, .start-screen__footer-right', {
-        y: 0, 
-        opacity: 1, 
-        duration: 1.0, 
-        stagger: 0.1,
-        ease: 'power3.out'
-      }, 1.4);
-    };
-
-    const runFullPreloader = async () => {
-      // INITIALIZE HERO STATES BEFORE PRELOADER REVEALS ANYTHING
-      gsap.set('.start-header', { clipPath: 'inset(0% 0% 0% 100% round 40px)' });
-      gsap.set('.start-header__navigation-item, .start-header__logo--nightmode, .sound-switcher, .dots', { opacity: 0, x: 20 });
-      gsap.set('.start-screen__footer-left, .start-screen__footer-center, .start-screen__footer-right', { y: 20, opacity: 0 });
-
-      const tl = gsap.timeline();
-      
-      // --- WebGL Shader Setup ---
-      const pCanvas = document.getElementById('preloader-canvas') as HTMLCanvasElement;
-      pCanvas.width = window.innerWidth;
-      pCanvas.height = window.innerHeight;
-      const gl = pCanvas.getContext('webgl');
-      
-      if (gl) {
-        const vsSource = `
-          attribute vec2 position;
-          void main() { gl_Position = vec4(position, 0.0, 1.0); }
-        `;
-        const fsSource = `
-          precision mediump float;
-          uniform vec2 u_resolution;
-          uniform float u_progress;
-
-          void main() {
-            vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-            
-            // True circular arc anchored above the screen
-            vec2 center = vec2(0.5, 1.2);
-            vec2 pos = uv - center;
-            
-            // Correct aspect ratio so the sweep is perfectly round, not stretched
-            pos.x *= u_resolution.x / u_resolution.y;
-            
-            float dist = length(pos);
-            
-            // Max dist is at bottom corners (around 1.7 depending on screen width)
-            // Min dist is top center (around 0.2)
-            // u_progress goes 0 to 1
-            // threshold goes from massive (so dist is always < threshold) to tiny (so dist always > threshold)
-            float threshold = 4.0 - (u_progress * 4.5);
-            
-            float softness = 1.5; 
-            
-            float alpha = smoothstep(threshold - softness, threshold, dist);
-            
-            // Deep charcoal fading into absolute black
-            vec3 color = mix(vec3(0.08, 0.08, 0.09), vec3(0.0, 0.0, 0.0), smoothstep(threshold - softness, threshold - softness * 0.4, dist));
-            
-            gl_FragColor = vec4(color, alpha);
-          }
-        `;
-        
-        const compileShader = (type: number, source: string) => {
-          const shader = gl.createShader(type);
-          if (!shader) throw new Error('Could not create shader');
-          gl.shaderSource(shader, source);
-          gl.compileShader(shader);
-          return shader as WebGLShader;
-        };
-        
-        const program = gl.createProgram();
-        if (!program) throw new Error('Could not create program');
-        gl.attachShader(program, compileShader(gl.VERTEX_SHADER, vsSource));
-        gl.attachShader(program, compileShader(gl.FRAGMENT_SHADER, fsSource));
-        gl.linkProgram(program);
-        gl.useProgram(program);
-        
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-        
-        const posLoc = gl.getAttribLocation(program, 'position');
-        gl.enableVertexAttribArray(posLoc);
-        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-        
-        const resLoc = gl.getUniformLocation(program, 'u_resolution');
-        const progLoc = gl.getUniformLocation(program, 'u_progress');
-        gl.uniform2f(resLoc, pCanvas.width, pCanvas.height);
-        
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        
-        const shaderProxy = { progress: 0 };
-        const renderShader = () => {
-          if (shaderProxy.progress >= 1 && pCanvas.style.display === 'none') return;
-          gl.uniform1f(progLoc, shaderProxy.progress);
-          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-          if (shaderProxy.progress < 1) requestAnimationFrame(renderShader);
-        };
-        renderShader();
-        
-        window.addEventListener('resize', () => {
-          if (pCanvas) {
-            pCanvas.width = window.innerWidth;
-            pCanvas.height = window.innerHeight;
-            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-            gl.uniform2f(resLoc, pCanvas.width, pCanvas.height);
-            renderShader();
-          }
-        });
-
-        tl.to(shaderProxy, { 
-          progress: 1, 
-          duration: T_DARK_END - T_DARK_START, 
-          ease: "power3.inOut",
-          onUpdate: renderShader
-        }, T_DARK_START);
-      }
-      
-      tl.to('.preloader-logo-real', { 
-        maskPosition: "0 0", 
-        webkitMaskPosition: "0 0", 
-        duration: T_REVEAL_END - T_REVEAL_START, 
-        ease: "power3.out" 
-      }, T_REVEAL_START);
-      
-      tl.call(async () => {
-        if (document.fonts.status !== 'loaded' || !chamberScene.value) {
-          tl.pause();
-          const checkLoad = () => {
-            return new Promise(resolve => {
-              const interval = setInterval(() => {
-                if (document.fonts.status === 'loaded' && chamberScene.value) {
-                  clearInterval(interval);
-                  resolve(true);
-                }
-              }, 100);
-            });
-          };
-          const timeout = new Promise(resolve => setTimeout(() => resolve(false), 4000));
-          await Promise.race([checkLoad(), timeout]);
-          tl.resume();
-        }
-      }, undefined, T_DARK_START);
-      
-      tl.to('.preloader-logo-real', { 
-        opacity: 0, 
-        duration: 0.8 
-      }, T_DARK_START + 0.15);
-      
-      tl.call(() => {
-        dispatchDone();
-        gsap.to('#envisys-new-preloader', { opacity: 0, duration: 0.15, onComplete: () => {
-          const el = document.getElementById('envisys-new-preloader');
-          if (el) el.style.display = 'none';
-        }});
-      }, undefined, T_HOLD);
-    };
-
-    // TEMPORARILY DISABLED HASVISITED CHECK SO YOU CAN SEE IT EVERY TIME
-    if (skipPreload && !window.location.search.includes('force=1')) {
-      const el = document.getElementById('envisys-new-preloader');
-      if (el) el.style.display = 'none';
-      dispatchDone();
-    } else {
-      runFullPreloader();
-    }
+  // Pre-set navbar opacity to 0 until preloader completes
+  gsap.set(['.Header_topBar__t3Nfy', '.Header_header__qBw1J'], { opacity: 0, y: -20 })
 })
 </script>
 

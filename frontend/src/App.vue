@@ -41,6 +41,9 @@
     <!-- EXACT ICOMAT HERO OVERLAY (TITLE, PARAGRAPH, SCROLL PILL) -->
     <HeroOverlay ref="heroOverlayRef" @scroll-down="onScrollDown" />
 
+    <!-- PHASE 2 TELEMETRY CALLOUTS (Shooting Lines & Targeted Components) -->
+    <TelemetryCallouts ref="telemetryCalloutsRef" />
+
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
@@ -197,10 +200,12 @@ import { Text } from 'troika-three-text'
 import Preloader from './components/Preloader.vue'
 import Navbar from './components/Navbar.vue'
 import HeroOverlay from './components/HeroOverlay.vue'
+import TelemetryCallouts from './components/TelemetryCallouts.vue'
 
 extend({ Text })
 
 const heroOverlayRef = ref<any>(null)
+const telemetryCalloutsRef = ref<any>(null)
 const navbarRef = ref<any>(null)
 
 // --- 1. Transition Chamber Configuration ---
@@ -550,6 +555,7 @@ onMounted(() => {
   if (scrollerEl) scrollerEl.scrollTop = 0 // Reset custom scroller
   
   const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, lerp: 0.08, smoothWheel: true })
+  ;(window as any).lenisInstance = lenis
   
   lenis.on('scroll', (e: any) => {
     // Close panel on scroll start if pointer isn't inside it
@@ -831,6 +837,28 @@ function buildScrollTimeline() {
       ease: 'power2.out'
     }, 0)
 
+    // Slide tagline, mid-right text, and scroll pill cleanly out through their line masks (same mask effect they entered with)
+    tl.to('.Hero_title__FZMTC .line', {
+      y: '-115%',
+      opacity: 0,
+      duration: 10,
+      stagger: 0.02,
+      ease: 'power2.in'
+    }, 0)
+    tl.to('.Hero_text__cn7Li .line', {
+      y: '-115%',
+      opacity: 0,
+      duration: 10,
+      stagger: 0.02,
+      ease: 'power2.in'
+    }, 0)
+    tl.to('.Hero_iconDownWrapper__FfrlA', {
+      opacity: 0,
+      scale: 0.7,
+      duration: 8,
+      ease: 'power2.in'
+    }, 0)
+
     // 2. Direct, fluid transition to the spec inspection angle (no push-pull)
     tl.to(scrollProxy, { 
       camX: -1.8, 
@@ -846,6 +874,29 @@ function buildScrollTimeline() {
       { chamberYaw: Math.PI * 2, duration: 30, ease: 'power2.inOut' }, 
       0
     )
+
+    // ── Phase 2: Telemetry Callouts Shooting Lines & Targeting Dots (22 to 50) ──
+    tl.to('.telemetry-callouts-layer', { opacity: 1, duration: 6, ease: 'power2.out' }, 22)
+    tl.fromTo('.vanishing-line', 
+      { scaleX: 0, transformOrigin: 'right center' }, 
+      { scaleX: 1, duration: 8, stagger: 0.2, ease: 'expo.out' }, 
+      22
+    )
+    tl.fromTo('.callout-dot', 
+      { scale: 0 }, 
+      { scale: 1, duration: 5, stagger: 0.2, ease: 'back.out(2)' }, 
+      22.5
+    )
+    tl.fromTo(['.callout-heading', '.callout-text'], 
+      { opacity: 0, x: -14 }, 
+      { opacity: 1, x: 0, duration: 6, stagger: 0.1, ease: 'power2.out' }, 
+      24
+    )
+
+    // Retract lines and fade callouts before Phase 3 fleet spread begins
+    tl.to('.vanishing-line', { scaleX: 0, transformOrigin: 'right center', duration: 5, stagger: 0.1, ease: 'power2.in' }, 48)
+    tl.to(['.callout-heading', '.callout-text'], { opacity: 0, x: -8, duration: 4, ease: 'power2.in' }, 49)
+    tl.to('.telemetry-callouts-layer', { opacity: 0, duration: 4, ease: 'power2.in' }, 50)
 
     // ── Phase 3: The South-West Spread Reveal (55 to 80) ──
     tl.to(scrollProxy, { 
@@ -945,7 +996,7 @@ function onPreloaderComplete() {
         bgTextRef.value.clipRect = null
         if (bgTextRef.value.sync) bgTextRef.value.sync()
       }
-      // 3. Trigger bottom-left & mid-right typography AFTER ENVISYS laser reveal completes
+      // 3. Trigger bottom-left & mid-right typography STRICTLY AFTER ENVISYS has arrived!
       heroOverlayRef.value?.playEntrance?.()
     }
   })
@@ -964,6 +1015,7 @@ function handleBuildClick() {
 }
 
 onMounted(() => {
+  ;(window as any).telemetryCalloutsRef = telemetryCalloutsRef
   // Pre-set navbar opacity to 0 until preloader completes
   gsap.set(['.Header_topBar__t3Nfy', '.Header_header__qBw1J'], { opacity: 0, y: -20 })
 })

@@ -72,35 +72,66 @@ function playEntrance() {
     scale: 0.8
   })
 
-  // Animate title lines upward
+  // Animate title lines upward with crisp timing
   tl.to('.Hero_title__FZMTC .line', {
     y: '0%',
-    duration: 1.15,
-    stagger: 0.12,
+    duration: 0.85,
+    stagger: 0.08,
     ease: 'power3.out'
-  }, 0.1)
+  }, 0.05)
 
   // Animate description lines upward
   tl.to('.Hero_text__cn7Li .line', {
     y: '0%',
-    duration: 1.0,
-    stagger: 0.08,
+    duration: 0.8,
+    stagger: 0.06,
     ease: 'power3.out'
-  }, 0.25)
+  }, 0.15)
 
   // Animate down button pill in
   tl.to(downBtnRef.value, {
     opacity: 1,
     scale: 1,
-    duration: 0.8,
+    duration: 0.6,
     ease: 'power2.out'
-  }, 0.5)
+  }, 0.3)
+
+  return tl
+}
+
+function playExit(duration = 0.45) {
+  const tl = gsap.timeline()
+
+  // Slide lines out through their line masks in the same style they entered
+  tl.to('.Hero_title__FZMTC .line', {
+    y: '-115%',
+    opacity: 0,
+    duration,
+    stagger: 0.04,
+    ease: 'power2.in'
+  }, 0)
+
+  tl.to('.Hero_text__cn7Li .line', {
+    y: '-115%',
+    opacity: 0,
+    duration: duration * 0.9,
+    stagger: 0.03,
+    ease: 'power2.in'
+  }, 0)
+
+  tl.to(downBtnRef.value, {
+    opacity: 0,
+    scale: 0.7,
+    duration: duration * 0.7,
+    ease: 'power2.in'
+  }, 0)
 
   return tl
 }
 
 defineExpose({
-  playEntrance
+  playEntrance,
+  playExit
 })
 </script>
 

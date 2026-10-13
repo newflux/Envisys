@@ -10,6 +10,20 @@
 }
 
 @font-face {
+  font-display: swap;
+  font-family: 'Monument Extended';
+  font-weight: 800 900;
+  src: url('/fonts/MonumentExtended-Ultrabold.woff') format('woff');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Monument Extended';
+  font-weight: 400;
+  src: url('/fonts/MonumentExtended-Regular.woff') format('woff');
+}
+
+@font-face {
   font-family: 'Geist';
   src: url('/fonts/Geist-Regular.woff2') format('woff2');
   font-weight: 400;

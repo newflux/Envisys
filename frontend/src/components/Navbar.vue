@@ -10,7 +10,6 @@
       >
         <!-- 7-Arc Sphere Brandmark with Animated Alternating ClipPaths -->
         <svg 
-          ref="logoSvgRef" 
           class="BrandLogo_logo__q8D51" 
           width="36" 
           height="31.5" 
@@ -37,7 +36,7 @@
         </svg>
 
         <!-- Brand Text Wordmark (ENVISYS) - Big, Bold, Clean Architectural Reveal -->
-        <div ref="logoTextRef" class="BrandLogo_lottie__SZi57">
+        <div class="BrandLogo_lottie__SZi57">
           <svg 
             class="BrandLogo_envisysLettersSvg" 
             viewBox="0 0 160 32" 
@@ -299,8 +298,6 @@ let closeTimer: any = null
 // DOM refs
 const topBarRef = ref<HTMLElement | null>(null)
 const headerRef = ref<HTMLElement | null>(null)
-const logoSvgRef = ref<SVGElement | null>(null)
-const logoTextRef = ref<HTMLElement | null>(null)
 const navBgRef = ref<HTMLElement | null>(null)
 const submenuRef = ref<HTMLElement | null>(null)
 

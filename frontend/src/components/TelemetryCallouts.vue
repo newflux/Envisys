@@ -1,5 +1,5 @@
 <template>
-  <div class="telemetry-callouts-layer" ref="rootRef" :class="{ 'is-active': isActive }">
+  <div class="telemetry-callouts-layer" :class="{ 'is-active': isActive }">
     <div
       v-for="(item, idx) in callouts"
       :key="item.id"
@@ -16,7 +16,21 @@
         :style="{ width: item.lineWidth }"
       >
         <div class="vanishing-line"></div>
-        <div class="callout-dot"></div>
+        <!-- Target Reticle [ + ] exactly at the point on the chamber -->
+        <div class="callout-target callout-dot">
+          <svg class="target-reticle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Top-Left Corner -->
+            <path d="M2 7V2H7" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <!-- Top-Right Corner -->
+            <path d="M17 2H22V7" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <!-- Bottom-Left Corner -->
+            <path d="M2 17V22H7" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <!-- Bottom-Right Corner -->
+            <path d="M17 22H22V17" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <!-- Center Crosshair + -->
+            <path d="M12 9V15M9 12H15" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+          </svg>
+        </div>
       </div>
 
       <!-- Text (Muted gray #888888, smaller text) -->
@@ -66,7 +80,6 @@ const callouts: CalloutData[] = [
   }
 ]
 
-const rootRef = ref<HTMLElement | null>(null)
 const isActive = ref(false)
 const itemElements = ref<HTMLElement[]>([])
 
@@ -111,7 +124,7 @@ function show(duration = 0.85) {
   return tl
 }
 
-function hide(duration = 0.4) {
+function hide(duration = 0.45) {
   if (activeTween) activeTween.kill()
 
   const tl = gsap.timeline({
@@ -121,18 +134,35 @@ function hide(duration = 0.4) {
   })
   activeTween = tl
 
-  // Retract lines back to right and fade out text
+  tl.to(['.callout-heading', '.callout-text'], {
+    opacity: 0,
+    x: -10,
+    duration: duration * 0.5,
+    ease: 'power2.in'
+  }, 0)
+
   tl.to(
     '.vanishing-line',
-    { scaleX: 0, transformOrigin: 'right center', duration: duration * 0.7, stagger: 0.05, ease: 'power2.in' },
-    0
+    {
+      scaleX: 0,
+      transformOrigin: 'right center',
+      duration: duration * 0.7,
+      ease: 'power3.in'
+    },
+    0.1
   )
+
   tl.to(
-    ['.callout-heading', '.callout-text'],
-    { opacity: 0, x: -8, duration: duration * 0.6, stagger: 0.05, ease: 'power2.in' },
-    0
+    '.callout-dot',
+    {
+      scale: 0,
+      duration: duration * 0.4,
+      ease: 'power2.in'
+    },
+    0.15
   )
-  tl.to('.telemetry-callouts-layer', { opacity: 0, duration: duration * 0.4 }, duration * 0.4)
+
+  tl.set('.telemetry-callouts-layer', { pointerEvents: 'none' })
 
   return tl
 }
@@ -145,21 +175,20 @@ defineExpose({
 
 <style scoped>
 .telemetry-callouts-layer {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  z-index: 25;
+  z-index: 100;
   opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-/* Organic curved callout block */
 .callout-block {
   position: absolute;
-  transform: translateY(-50%);
-  pointer-events: auto;
+  width: fit-content;
   display: flex;
   flex-direction: column;
 }
@@ -167,17 +196,17 @@ defineExpose({
 /* Heading: White, Semi-bold, large */
 .callout-heading {
   font-family: LayGrotesk-Semibold, sans-serif;
-  font-size: 22px;
-  font-weight: 500;
+  font-size: 21px;
+  font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: #ffffff;
-  margin: 0 0 10px 0;
-  text-rendering: geometricPrecision;
+  color: #FFFFFF;
+  margin: 0 0 8px 0;
   white-space: nowrap;
+  text-rendering: geometricPrecision;
 }
 
-/* The 'Vanishing Line' Divider (CSS) */
+/* The 'Vanishing Line' Divider (Clean White Gradient, Solid at machine, Fading out to left) */
 .vanishing-line-wrap {
   position: relative;
   height: 1px;
@@ -191,25 +220,30 @@ defineExpose({
   left: 0;
   width: 100%;
   height: 1px;
-  /* Solid white on the right edge, completely fading to transparent on the far left edge */
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.35) 30%, rgba(255, 255, 255, 1) 100%);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.45) 30%, rgba(255, 255, 255, 0.95) 100%);
   transform-origin: right center;
   will-change: transform;
 }
 
-/* Machine targeting dot */
-.callout-dot {
+/* Orange Target Reticle [ + ] pointing right at the chamber */
+.callout-target {
   position: absolute;
-  right: -2px;
-  top: -1.5px;
-  width: 4px;
-  height: 4px;
-  background: #ffffff;
-  border-radius: 0; /* 4px by 4px white square (border-radius: 0) */
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+  right: -10px;
+  top: -9.5px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transform-origin: center center;
   will-change: transform;
+}
+
+.target-reticle {
+  width: 20px;
+  height: 20px;
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(236, 87, 72, 0.7));
 }
 
 /* Text: Muted gray #888888, smaller text */

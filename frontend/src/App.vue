@@ -1,12 +1,15 @@
 <template>
   <div id="app">
 
-  <!-- Dynamic Environment Background (Moved to external component) -->
-  <div class="page-background" style="background: #050505;">
+  <!-- Dynamic Environment Background (Deep blue-graphite void) -->
+  <div class="page-background">
     <div class="vignette"></div>
   </div>
 
-  <!-- Film Grain Overlay (Awwwards cinematic texture) -->
+  <!-- Volumetric Atmospheric Haze (Kills pure digital black) -->
+  <div class="volumetric-haze"></div>
+
+  <!-- Film Grain Overlay (Awwwards cinematic 35mm texture) -->
   <div class="film-grain"></div>
 
     <!-- Smoky frosted blob (Pure CSS mask + backdrop-filter) -->
@@ -47,21 +50,26 @@
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
-  <div class="canvas-fixed-wrap">
-    <TresCanvas window-size :clear-color="'#050505'" :clear-alpha="1" :tone-mapping-exposure="1" :pixel-ratio="pixelRatio" :antialias="false" power-preference="high-performance">
-      <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.01" :far="1500" />
+  <div class="canvas-fixed-wrap">    <TresCanvas window-size :clear-color="'#0a1113'" :clear-alpha="1" :tone-mapping-exposure="1" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
+      <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.5" :far="250" />
       
-      <!-- Fog (Infinite void studio effect) -->
-      <TresFog :args="['#050505', 40, 150]" />
+      <!-- Fog (Tinty cold bluish-ash atmospheric gallery void) -->
+      <TresFog :args="['#0a1113', 30, 140]" />
 
-      <!-- Environment Lighting -->
-      <Environment :background="false" :environment-intensity="0.3" :frames="1" :resolution="256">
-        <Lightformer :intensity="2" :position="[0, tunnelH/2 - 0.1, 0]" :scale="[tunnelW/2, tunnelD, 1]" :rotation="[-Math.PI/2, 0, 0]" />
+      <!-- Environment Lighting (Tinty cold bluish-ash studio illumination from reference image) -->
+      <Environment :background="false" :environment-intensity="0.32" :frames="1" :resolution="256">
+        <!-- Overhead luminous ceiling flood centered directly over chamber (cold bluish-ash tint +0.2) -->
+        <Lightformer :intensity="3.0" :position="[0, tunnelH - 2.5, 0]" :scale="[8, 12, 1]" :rotation="[-Math.PI/2, 0, 0]" color="#d4e4e2" />
+        <!-- Rear Top Rim Lightformer: cuts metallic outlines along top bevels -->
+        <Lightformer :intensity="5.0" :position="[0, 3.8, -3.5]" :scale="[6, 0.5, 1]" color="#c2d6d3" />
+        <!-- Left & Right Kickers -->
+        <Lightformer :intensity="3.5" :position="[-3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, Math.PI/3, 0]" color="#b0c8c5" />
+        <Lightformer :intensity="3.5" :position="[3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, -Math.PI/3, 0]" color="#b0c8c5" />
       </Environment>
 
-      <!-- Background 3D Text Effect (ENVISYS in Monument Extended) -->
+      <!-- Background 3D Text Effect (ENVISYS in Monument Extended with Seamless Looping Video Inside) -->
       <TresGroup ref="bgTextGroupRef" :position="[0, 5.1, -15]" :scale="scrollProxy.textScale">
-        <!-- The actual 3D Text (troika-three-text) -->
+        <!-- Solid white base text for guaranteed legibility -->
         <TresText
           ref="bgTextRef"
           text="ENVISYS"
@@ -69,21 +77,60 @@
           :fontSize="9.5"
           :letterSpacing="0.02"
           color="white"
-          :fillOpacity="0.85"
+          :fillOpacity="0.75"
           :clipRect="textClipRect"
           anchorX="center"
           anchorY="middle"
           cast-shadow
         />
+        <!-- Seamless dual-buffer video overlays (A and B smoothly crossfade at the seam) -->
+        <TresText
+          v-if="textVideoMatA"
+          ref="bgTextVideoRefA"
+          text="ENVISYS"
+          font="/fonts/MonumentExtended-Ultrabold.woff"
+          :fontSize="9.5"
+          :letterSpacing="0.02"
+          :material="textVideoMatA"
+          :clipRect="textClipRect"
+          anchorX="center"
+          anchorY="middle"
+          :position="[0, 0, 0.04]"
+        />
+        <TresText
+          v-if="textVideoMatB"
+          ref="bgTextVideoRefB"
+          text="ENVISYS"
+          font="/fonts/MonumentExtended-Ultrabold.woff"
+          :fontSize="9.5"
+          :letterSpacing="0.02"
+          :material="textVideoMatB"
+          :clipRect="textClipRect"
+          anchorX="center"
+          anchorY="middle"
+          :position="[0, 0, 0.041]"
+        />
       </TresGroup>
 
-      <!-- Back / Rim Lights from the demo (Soft but not pitch black) -->
-      <TresPointLight :position="[10, -10, -20]" :intensity="30" color="#ffffff" :distance="40" />
-      <TresPointLight :position="[-10, -10, -20]" :intensity="30" color="#ffffff" :distance="40" />
+      <!-- Clean Studio Rim & Key Lights (Tinty cold bluish ash, +0.2 boost) -->
+      <!-- High rear grazing directional light for clean metallic silhouette -->
+      <TresDirectionalLight :position="[0, 5.5, -4]" :intensity="4.2" color="#d2e4e1" />
+      <!-- Left & Right grazing rim directional kickers -->
+      <TresDirectionalLight :position="[-4.5, 3.5, -3]" :intensity="2.8" color="#b8cecb" />
+      <TresDirectionalLight :position="[4.5, 3.5, -3]" :intensity="2.8" color="#b8cecb" />
+      <!-- High-angle side fill lights (soft cold architectural bounce) -->
+      <TresPointLight :position="[-4.5, 2.5, -2]" :intensity="3.0" color="#9ab8b5" :distance="15" />
+      <TresPointLight :position="[4.5, 2.5, -2]" :intensity="3.0" color="#9ab8b5" :distance="15" />
 
-      <!-- Phase 3 Fleet Fill Lights (Dynamically fade in to light up the sides) -->
-      <TresPointLight ref="fleetL" :position="[-12, 0, 10]" :intensity="0" color="#ffffff" :distance="30" />
-      <TresPointLight ref="fleetR" :position="[12, 0, 10]" :intensity="0" color="#ffffff" :distance="30" />
+      <!-- Side Wall Subtle Cold Bluish-Ash Ambient Fill -->
+      <TresPointLight :position="[-tunnelW/2 + 2, 3, -4]" :intensity="2.5" color="#182a2c" :distance="30" />
+      <TresPointLight :position="[tunnelW/2 - 2, 3, -4]" :intensity="2.5" color="#182a2c" :distance="30" />
+      <TresPointLight :position="[-tunnelW/2 + 2, 3, 12]" :intensity="2" color="#152426" :distance="25" />
+      <TresPointLight :position="[tunnelW/2 - 2, 3, 12]" :intensity="2" color="#152426" :distance="25" />
+
+      <!-- Phase 3 Fleet Fill Lights (Cold bluish ash tint) -->
+      <TresPointLight ref="fleetL" :position="[-12, 0, 10]" :intensity="0" color="#bdd4d1" :distance="30" />
+      <TresPointLight ref="fleetR" :position="[12, 0, 10]" :intensity="0" color="#bdd4d1" :distance="30" />
 
       <!-- Interactive Mouse Spotlight -->
       <TresSpotLight 
@@ -91,56 +138,80 @@
         :angle="0.4" 
         :penumbra="1" 
         :intensity="spotlightIntensity" 
-        color="#ffffff"
+        color="#d8e8e6"
       />
 
       <!-- Tunnel Scene -->
       <TresGroup>
-        <!-- Floor -->
+        <!-- Floor (Dark polished industrial obsidian floor with clamped subtle highlights) -->
         <TresMesh :rotation="[-Math.PI/2, 0, 0]" :position="[0, -2.05, 0]">
           <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
           <MeshReflectionMaterial 
             v-if="!isMobile && floorSeamMap && scrollProxy.transitionScale < 0.1"
-            color="#101112"
+            color="#080e10"
             :map="floorSeamMap"
-            :metalness="0.6"
-            :roughness="0.15"
+            :metalness="0.12"
+            :roughness="0.32"
             :resolution="256"
-            :blur="[20, 20]"
-            :mixBlur="0.3"
-            :mixStrength="1.2"
-            :mirror="0.7"
+            :blur="[0, 0]"
+            :mixBlur="0.95"
+            :mixStrength="0.28"
+            :mirror="0.14"
             :depthScale="0"
             :fog="true"
           />
-          <TresMeshStandardMaterial v-else-if="floorSeamMap" color="#101112" :map="floorSeamMap" :metalness="0.6" :roughness="0.08" :fog="true" />
+          <TresMeshStandardMaterial v-else-if="floorSeamMap" color="#080e10" :map="floorSeamMap" :metalness="0.15" :roughness="0.3" :fog="true" />
         </TresMesh>
 
-        <!-- Ceiling -->
+        <!-- Ceiling (Industrial Aperture: heavy radial vignette light pool directly over the chamber) -->
         <TresMesh :rotation="[Math.PI/2, 0, 0]" :position="[0, tunnelH - 2.05, 0]">
           <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
-          <TresMeshStandardMaterial v-if="ceilingGridMap" color="#8a8a8a" :map="ceilingGridMap" :emissiveMap="ceilingGridMap" emissive="#8a8a8a" :emissiveIntensity="0.65" :fog="true" />
+          <TresMeshStandardMaterial 
+            v-if="ceilingGridMap && ceilingVignetteMap" 
+            color="#07080a" 
+            :map="ceilingGridMap" 
+            :emissiveMap="ceilingVignetteMap" 
+            emissive="#ffffff" 
+            :emissiveIntensity="1.0" 
+            :fog="true" 
+          />
         </TresMesh>
 
-        <!-- Left Wall -->
+        <!-- Left Wall (Architectural Concrete / Tadao Ando Monolithic Slabs) -->
         <TresMesh :rotation="[0, Math.PI/2, 0]" :position="[-tunnelW/2, (tunnelH/2) - 2.05, 0]" :visible="!isDebug">
           <TresPlaneGeometry :args="[tunnelD, tunnelH]" />
-          <TresMeshStandardMaterial v-if="wallNoiseMap && wallEmissiveMap" color="#26282b" :map="wallNoiseMap" :emissiveMap="wallEmissiveMap" emissive="#9a9a9a" :emissiveIntensity="1" :roughness="0.85" :fog="true" />
+          <TresMeshStandardMaterial 
+            v-if="wallNoiseMap && wallEmissiveMap" 
+            color="#222327" 
+            :map="wallNoiseMap" 
+            :emissiveMap="wallEmissiveMap" 
+            emissive="#ffffff" 
+            :emissiveIntensity="0.2" 
+            :roughness="0.88" 
+            :metalness="0.08" 
+            :fog="true" 
+          />
         </TresMesh>
 
-        <!-- Right Wall -->
+        <!-- Right Wall (Architectural Concrete / Tadao Ando Monolithic Slabs) -->
         <TresMesh :rotation="[0, -Math.PI/2, 0]" :position="[tunnelW/2, (tunnelH/2) - 2.05, 0]" :visible="!isDebug">
           <TresPlaneGeometry :args="[tunnelD, tunnelH]" />
-          <TresMeshStandardMaterial v-if="wallNoiseMap && wallEmissiveMap" color="#26282b" :map="wallNoiseMap" :emissiveMap="wallEmissiveMap" emissive="#9a9a9a" :emissiveIntensity="1" :roughness="0.85" :fog="true" />
+          <TresMeshStandardMaterial 
+            v-if="wallNoiseMap && wallEmissiveMap" 
+            color="#222327" 
+            :map="wallNoiseMap" 
+            :emissiveMap="wallEmissiveMap" 
+            emissive="#ffffff" 
+            :emissiveIntensity="0.2" 
+            :roughness="0.88" 
+            :metalness="0.08" 
+            :fog="true" 
+          />
         </TresMesh>
       </TresGroup>
 
       <!-- Main Chamber Shadow (Render Once) -->
       <ContactShadows :position="[0, -2.04, 0]" :opacity="0.5" :blur="2.5" :resolution="256" :scale="10" :frames="1" />
-      
-      <!-- Clones Shadows (No v-if, bind scale to proxy) -->
-      <ContactShadows :position="[-12, -2.04, 0]" :opacity="0.5" :blur="2.5" :resolution="256" :scale="scrollProxy.cloneScale * 10" :frames="1" />
-      <ContactShadows :position="[12, -2.04, 0]" :opacity="0.5" :blur="2.5" :resolution="256" :scale="scrollProxy.cloneScale * 10" :frames="1" />
 
       <!-- Main chamber group -->
       <TresGroup 
@@ -165,11 +236,11 @@
       <TresGroup ref="transitionChamberRef">
         <primitive v-if="transitionChamber" :object="transitionChamber" :scale="2.5" :position="[0, -2.05, 0]" />
       </TresGroup>
+
+      <!-- 3D Floating Dust Particles System -->
+      <primitive v-if="dustPoints" :object="dustPoints" />
     </TresCanvas>
 
-    <!-- Subtle CSS Radial 'Disc' Blur -->
-    <!-- pointer-events: none ensures it doesn't block chamber clicks -->
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); mask-image: radial-gradient(circle at center, transparent 40%, black 100%); -webkit-mask-image: radial-gradient(circle at center, transparent 40%, black 100%); z-index: 10;"></div>
   </div><!-- /canvas-fixed-wrap -->
 
 </div></div></div></div></main>
@@ -192,7 +263,7 @@ import Lenis from 'lenis'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-import { AnimationMixer, MathUtils, Box3, Vector3, MeshLambertMaterial, Color, CanvasTexture, RepeatWrapping } from 'three'
+import { MathUtils, Box3, Vector3, CanvasTexture, RepeatWrapping } from 'three'
 import * as THREE from 'three'
 import { Environment, Lightformer, ContactShadows, MeshReflectionMaterial } from '@tresjs/cientos'
 import { extend } from '@tresjs/core'
@@ -233,76 +304,176 @@ const wallNoiseMap = ref<any>(null)
 const wallEmissiveMap = ref<any>(null)
 const floorSeamMap = ref<any>(null)
 const ceilingGridMap = ref<any>(null)
+const ceilingVignetteMap = ref<any>(null)
 
 function generateTextures() {
-  // 1. Wall Noise & Top Gradient (1:1 vertically)
+  // 1. Tadao Ando Architectural Cast Concrete Wall Texture (1024 x 1024)
   const wallCanvas = document.createElement('canvas')
-  wallCanvas.width = 512; wallCanvas.height = 512
+  wallCanvas.width = 1024; wallCanvas.height = 1024
   const wCtx = wallCanvas.getContext('2d')!
-  const wImg = wCtx.getImageData(0,0,512,512)
-  for (let i=0; i<wImg.data.length; i+=4) {
-    const v = 15 + Math.random() * 8
-    wImg.data[i] = wImg.data[i+1] = wImg.data[i+2] = v
+  
+  // Base architectural concrete tone (tinty cold bluish ash slate)
+  wCtx.fillStyle = '#1c2426'
+  wCtx.fillRect(0, 0, 1024, 1024)
+  
+  // Natural fine aggregate concrete stippling with cold bluish-ash tone
+  const wImg = wCtx.getImageData(0, 0, 1024, 1024)
+  for (let i = 0; i < wImg.data.length; i += 4) {
+    const v = 28 + Math.floor(Math.random() * 8)
+    wImg.data[i] = v
+    wImg.data[i+1] = v + 3
+    wImg.data[i+2] = v + 4 // cold bluish-ash tint
     wImg.data[i+3] = 255
   }
   wCtx.putImageData(wImg, 0, 0)
   
-  // Add faint vertical panel seams every few units at ~4% brightness
-  wCtx.strokeStyle = 'rgba(255,255,255,0.04)'
-  wCtx.lineWidth = 2
-  for(let x=0; x<=512; x+=128) {
-    wCtx.beginPath(); wCtx.moveTo(x, 0); wCtx.lineTo(x, 512); wCtx.stroke()
-  }
+  // Horizontal formwork joints (3 major monolithic slab seams)
+  const horizontalSeams = [256, 512, 768]
+  horizontalSeams.forEach(y => {
+    // Reveal groove shadow
+    wCtx.strokeStyle = 'rgba(10, 16, 17, 0.65)'
+    wCtx.lineWidth = 3
+    wCtx.beginPath(); wCtx.moveTo(0, y); wCtx.lineTo(1024, y); wCtx.stroke()
+    // Concrete edge chamfer catchlight (cold ash highlight)
+    wCtx.strokeStyle = 'rgba(210, 230, 228, 0.09)'
+    wCtx.lineWidth = 1.5
+    wCtx.beginPath(); wCtx.moveTo(0, y + 2); wCtx.lineTo(1024, y + 2); wCtx.stroke()
+  })
+
+  // Major vertical slab expansion joints (wide spacing = 12m wide bays)
+  const verticalSeams = [512]
+  verticalSeams.forEach(x => {
+    wCtx.strokeStyle = 'rgba(10, 16, 17, 0.65)'
+    wCtx.lineWidth = 3
+    wCtx.beginPath(); wCtx.moveTo(x, 0); wCtx.lineTo(x, 1024); wCtx.stroke()
+    wCtx.strokeStyle = 'rgba(210, 230, 228, 0.09)'
+    wCtx.lineWidth = 1.5
+    wCtx.beginPath(); wCtx.moveTo(x + 2, 0); wCtx.lineTo(x + 2, 1024); wCtx.stroke()
+  })
+
+  // Tadao Ando Signature Formwork Tie-Holes (P-con indentations)
+  const tieX = [128, 384, 640, 896]
+  const tieY = [64, 192, 320, 448, 576, 704, 832, 960]
+  tieX.forEach(x => {
+    tieY.forEach(y => {
+      // Outer subtle shadow bevel
+      wCtx.fillStyle = 'rgba(8, 14, 15, 0.45)'
+      wCtx.beginPath(); wCtx.arc(x, y + 0.5, 4, 0, Math.PI * 2); wCtx.fill()
+      // Recessed hole interior
+      wCtx.fillStyle = '#0f1718'
+      wCtx.beginPath(); wCtx.arc(x, y, 3, 0, Math.PI * 2); wCtx.fill()
+      // Tiny bottom rim catchlight
+      wCtx.strokeStyle = 'rgba(210, 230, 228, 0.1)'
+      wCtx.lineWidth = 1
+      wCtx.beginPath(); wCtx.arc(x, y, 3, 0.2 * Math.PI, 0.8 * Math.PI); wCtx.stroke()
+    })
+  })
+
+  // Smooth ambient occlusion at bottom (seamless junction with floor)
+  const floorShadow = wCtx.createLinearGradient(0, 860, 0, 1024)
+  floorShadow.addColorStop(0, 'rgba(0, 0, 0, 0)')
+  floorShadow.addColorStop(1, 'rgba(8, 14, 15, 0.75)')
+  wCtx.fillStyle = floorShadow
+  wCtx.fillRect(0, 860, 1024, 164)
 
   const wallTex = new CanvasTexture(wallCanvas)
   wallTex.wrapS = wallTex.wrapT = RepeatWrapping
-  wallTex.repeat.set(tunnelD.value/5, 1) // repeat horizontally, clamp vertically
+  wallTex.repeat.set(tunnelD.value / 12, 1) // 12-meter monolithic concrete slabs
   wallNoiseMap.value = wallTex
 
-  // 1b. Wall Emissive Map (Gradient)
+  // 1b. Wall Emissive Map (Ceiling Lightbox Grazing Wash with cold ash tone)
   const emissiveCanvas = document.createElement('canvas')
-  emissiveCanvas.width = 512; emissiveCanvas.height = 512
+  emissiveCanvas.width = 1024; emissiveCanvas.height = 1024
   const eCtx = emissiveCanvas.getContext('2d')!
   eCtx.fillStyle = '#000000'
-  eCtx.fillRect(0,0,512,512)
-  
-  const grad = eCtx.createLinearGradient(0, 0, 0, 512 * 0.35)
-  grad.addColorStop(0, 'rgba(255,255,255,0.15)') // 15% brightness at top
-  grad.addColorStop(1, 'rgba(0,0,0,0)')          // fade to zero
-  eCtx.fillStyle = grad
-  eCtx.fillRect(0, 0, 512, 512)
+  eCtx.fillRect(0, 0, 1024, 1024)
+
+  // Overhead lightbox grazing glow running down the top of the wall
+  const eWash = eCtx.createLinearGradient(0, 0, 0, 320)
+  eWash.addColorStop(0, 'rgba(210, 232, 230, 0.22)')
+  eWash.addColorStop(0.5, 'rgba(180, 208, 205, 0.07)')
+  eWash.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  eCtx.fillStyle = eWash
+  eCtx.fillRect(0, 0, 1024, 320)
 
   const wallEmissiveTex = new CanvasTexture(emissiveCanvas)
   wallEmissiveTex.wrapS = wallEmissiveTex.wrapT = RepeatWrapping
-  wallEmissiveTex.repeat.set(tunnelD.value/5, 1) // Match wall noise repeat
+  wallEmissiveTex.repeat.set(tunnelD.value / 12, 1)
   wallEmissiveMap.value = wallEmissiveTex
 
-  // 2. Floor Seams
+  // 2. Polished Architectural Concrete Floor Texture (512 x 512)
   const floorCanvas = document.createElement('canvas')
   floorCanvas.width = 512; floorCanvas.height = 512
   const fCtx = floorCanvas.getContext('2d')!
-  fCtx.fillStyle = '#101112'
-  fCtx.fillRect(0,0,512,512)
-  fCtx.strokeStyle = 'rgba(255,255,255,0.035)' // ~3.5% brighter seams
-  fCtx.lineWidth = 2
-  fCtx.strokeRect(0,0,512,512)
+  fCtx.fillStyle = '#091012'
+  fCtx.fillRect(0, 0, 512, 512)
+
+  // Silky aggregate micro-texture
+  const fImg = fCtx.getImageData(0, 0, 512, 512)
+  for (let i = 0; i < fImg.data.length; i += 4) {
+    const v = 14 + Math.floor(Math.random() * 5)
+    fImg.data[i] = v
+    fImg.data[i+1] = v + 1
+    fImg.data[i+2] = v + 2
+    fImg.data[i+3] = 255
+  }
+  fCtx.putImageData(fImg, 0, 0)
+
+  // Architectural expansion joint border
+  fCtx.strokeStyle = 'rgba(200, 225, 222, 0.035)'
+  fCtx.lineWidth = 1
+  fCtx.strokeRect(0, 0, 512, 512)
+
   const floorTex = new CanvasTexture(floorCanvas)
   floorTex.wrapS = floorTex.wrapT = RepeatWrapping
-  floorTex.repeat.set(tunnelW.value/4, tunnelD.value/4)
+  floorTex.repeat.set(tunnelW.value / 8, tunnelD.value / 8) // 8-meter architectural bays
   floorSeamMap.value = floorTex
 
-  // 3. Ceiling Panels
+  // 3. Suspended Industrial Ceiling Grid (512 x 512)
   const ceilCanvas = document.createElement('canvas')
   ceilCanvas.width = 512; ceilCanvas.height = 512
   const cCtx = ceilCanvas.getContext('2d')!
-  cCtx.fillStyle = '#050506' // gaps
-  cCtx.fillRect(0,0,512,512)
-  cCtx.fillStyle = '#8a8a8a' // neutral grey
-  cCtx.fillRect(8, 8, 512-16, 512-16)
+  
+  // Dark industrial structural steel T-bar frame
+  cCtx.fillStyle = '#050a0b'
+  cCtx.fillRect(0, 0, 512, 512)
+  
+  // Industrial diffuser panel with cold bluish ash gradient
+  const cPanelGrad = cCtx.createRadialGradient(256, 256, 30, 256, 256, 240)
+  cPanelGrad.addColorStop(0, '#d8e7e4')
+  cPanelGrad.addColorStop(0.75, '#a8bcb8')
+  cPanelGrad.addColorStop(1, '#566b68')
+  cCtx.fillStyle = cPanelGrad
+  // 12px dark structural flange border
+  cCtx.fillRect(12, 12, 512 - 24, 512 - 24)
+
   const ceilTex = new CanvasTexture(ceilCanvas)
   ceilTex.wrapS = ceilTex.wrapT = RepeatWrapping
-  ceilTex.repeat.set(tunnelW.value/4, tunnelD.value/4) // 4x4m panels roughly
+  ceilTex.repeat.set(tunnelW.value / 4, tunnelD.value / 4) // Clean 4m lightbox modules
   ceilingGridMap.value = ceilTex
+
+  // 3b. Ceiling Heavy Radial Light Pool / Vignette Map (1024 x 1024, covers entire ceiling plane)
+  // Pools intense focused light directly over the chamber, edges fade into total pitch-black void
+  const ceilVignetteCanvas = document.createElement('canvas')
+  ceilVignetteCanvas.width = 1024; ceilVignetteCanvas.height = 1024
+  const cvCtx = ceilVignetteCanvas.getContext('2d')!
+  cvCtx.fillStyle = '#000000'
+  cvCtx.fillRect(0, 0, 1024, 1024)
+
+  // Elliptical radial spotlight centered at 512, 512 (directly above X=0, Z=0)
+  const ceilRadial = cvCtx.createRadialGradient(512, 512, 20, 512, 512, 420)
+  ceilRadial.addColorStop(0, 'rgba(215, 235, 232, 1.0)')
+  ceilRadial.addColorStop(0.18, 'rgba(190, 215, 212, 0.85)')
+  ceilRadial.addColorStop(0.42, 'rgba(110, 135, 132, 0.35)')
+  ceilRadial.addColorStop(0.65, 'rgba(30, 42, 44, 0.08)')
+  ceilRadial.addColorStop(0.85, 'rgba(0, 0, 0, 0.0)')
+  ceilRadial.addColorStop(1, 'rgba(0, 0, 0, 0.0)')
+  cvCtx.fillStyle = ceilRadial
+  cvCtx.fillRect(0, 0, 1024, 1024)
+
+  const ceilVignetteTex = new CanvasTexture(ceilVignetteCanvas)
+  ceilVignetteTex.wrapS = ceilVignetteTex.wrapT = THREE.ClampToEdgeWrapping
+  ceilingVignetteMap.value = ceilVignetteTex
 }
 
 onMounted(() => {
@@ -397,11 +568,11 @@ window.addEventListener('pointermove', (e) => {
   globalPointerY = e.clientY
 })
 
-function onChamberPointerDown(e: any) {
+function onChamberPointerDown() {
   // Tracked globally
 }
 
-function onChamberPointerUp(e: any) {
+function onChamberPointerUp() {
   const dx = globalPointerX - globalPointerDownX
   const dy = globalPointerY - globalPointerDownY
   const dist = Math.sqrt(dx * dx + dy * dy)
@@ -437,7 +608,6 @@ window.addEventListener('pointerup', (e) => {
 
 // ── Refs ────────────────────────────────────────────────────────────────────
 const cameraRef       = ref<any>(null)
-const fogRef          = ref<any>(null)
 const mouseSpotLightRef = ref<any>(null)
 const fleetL          = ref<any>(null)
 const fleetR          = ref<any>(null)
@@ -448,11 +618,14 @@ const blob3Ref        = ref<HTMLElement | null>(null)
 const cloneARef       = ref<any>(null)
 const cloneBRef       = ref<any>(null)
 
-const bgTextGroupRef  = ref<any>(null)
-const bgTextRef       = ref<any>(null)
-const textClipRect    = ref<any>([-70, -30, -70, 30])
-const htmlOverlayRef  = ref<HTMLElement | null>(null)
-const navbarLogoRef   = ref<HTMLElement | null>(null)
+const bgTextGroupRef   = ref<any>(null)
+const bgTextRef        = ref<any>(null)
+const bgTextVideoRefA  = ref<any>(null)
+const bgTextVideoRefB  = ref<any>(null)
+const textVideoMatA    = shallowRef<any>(null)
+const textVideoMatB    = shallowRef<any>(null)
+const textClipRect     = ref<any>([-70, -30, -70, 30])
+const navbarLogoRef    = ref<HTMLElement | null>(null)
 
 import { watchEffect } from 'vue'
 watchEffect(() => {
@@ -462,13 +635,23 @@ watchEffect(() => {
   if (bgTextRef.value) {
     bgTextRef.value.layers.set(1)
   }
+  if (bgTextVideoRefA.value) {
+    bgTextVideoRefA.value.layers.set(1)
+  }
+  if (bgTextVideoRefB.value) {
+    bgTextVideoRefB.value.layers.set(1)
+  }
 })
 const transitionChamberRef = ref<any>(null)
 const startScreenRef  = ref<any>(null)
 
+let activeVideo = 'A'
+let videoElA: HTMLVideoElement | null = null
+let videoElB: HTMLVideoElement | null = null
+
 // Reactive scene state
 const exposure       = ref(1)
-const spotlightIntensity = ref(100) // Default for touch devices
+const spotlightIntensity = ref(120) // Default for touch devices (+0.2 boost)
 let mouseHasMoved = false
 
 // GLB scenes
@@ -477,8 +660,57 @@ const cloneA       = shallowRef<any>(null)
 const cloneB       = shallowRef<any>(null)
 const transitionChamber = shallowRef<any>(null)
 
+// 3D Floating Dust Particles System (Killing pure black void with physical atmospheric motes)
+const dustPoints = shallowRef<any>(null)
+const DUST_COUNT = 320
+let dustGeo: any = null
+const dustSpeeds = new Float32Array(DUST_COUNT * 3)
+
+function createDustTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 64; canvas.height = 64
+  const ctx = canvas.getContext('2d')!
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+  grad.addColorStop(0, 'rgba(255, 255, 255, 1)')
+  grad.addColorStop(0.25, 'rgba(245, 243, 240, 0.75)')
+  grad.addColorStop(0.55, 'rgba(220, 218, 215, 0.22)')
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, 64, 64)
+  return new CanvasTexture(canvas)
+}
+
+function initDustParticles() {
+  const positions = new Float32Array(DUST_COUNT * 3)
+  for (let i = 0; i < DUST_COUNT; i++) {
+    const i3 = i * 3
+    positions[i3] = (Math.random() - 0.5) * 22     // X: -11 to +11
+    positions[i3 + 1] = -1.8 + Math.random() * 8.5 // Y: -1.8 to +6.7
+    positions[i3 + 2] = -18 + Math.random() * 26   // Z: -18 to +8 (depth parallax!)
+    
+    dustSpeeds[i3] = (Math.random() - 0.5) * 0.0025
+    dustSpeeds[i3 + 1] = 0.0008 + Math.random() * 0.002
+    dustSpeeds[i3 + 2] = (Math.random() - 0.5) * 0.0025
+  }
+
+  dustGeo = new THREE.BufferGeometry()
+  dustGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+  const dustMat = new THREE.PointsMaterial({
+    size: 0.12,
+    map: createDustTexture(),
+    transparent: true,
+    opacity: 0.38,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    color: new THREE.Color('#f0eee8')
+  })
+
+  dustPoints.value = new THREE.Points(dustGeo, dustMat)
+}
+
 // Animation
-let doorAnim = { mixer: null as AnimationMixer | null, action: null as any, duration: 0 }
+let doorAnim = { mixer: null as any, action: null as any, duration: 0 }
 
 // ── GSAP Scroll Proxy ────────────────────────────────────────────────────────
 const scrollProxy = { 
@@ -539,6 +771,7 @@ const toggleNightMode = () => {
     tl.to('.link-switcher,.clock,.scroll-down,.sound-switcher__text,.start-screen__footer-left',{ color:'#101011', fill:'#101011', duration:0.5 }, 0)
   }
 }
+if (typeof window !== 'undefined') (window as any).toggleNightMode = toggleNightMode
 
 // ── onMounted ───────────────────────────────────────────────────────────────
 onMounted(() => {
@@ -547,6 +780,83 @@ onMounted(() => {
     history.scrollRestoration = 'manual'
   }
   window.scrollTo(0, 0)
+  initDustParticles()
+  
+  // ── 3D Text Video Textures (Dual Buffers for Seamless Continuous Crossfade Loop) ──
+  const setupVideoEl = () => {
+    const v = document.createElement('video')
+    v.src = '/videos/smoke.mp4'
+    v.crossOrigin = 'anonymous'
+    v.muted = true
+    v.playsInline = true
+    v.setAttribute('playsinline', '')
+    v.setAttribute('webkit-playsinline', '')
+    v.style.display = 'none'
+    document.body.appendChild(v)
+    return v
+  }
+
+  videoElA = setupVideoEl()
+  videoElB = setupVideoEl()
+  videoElA.play().catch(e => console.warn('Video A play:', e))
+
+  const videoTexA = new THREE.VideoTexture(videoElA)
+  videoTexA.minFilter = THREE.LinearFilter
+  videoTexA.magFilter = THREE.LinearFilter
+  videoTexA.generateMipmaps = false
+  videoTexA.wrapS = THREE.MirroredRepeatWrapping
+  videoTexA.wrapT = THREE.ClampToEdgeWrapping
+
+  const videoTexB = new THREE.VideoTexture(videoElB)
+  videoTexB.minFilter = THREE.LinearFilter
+  videoTexB.magFilter = THREE.LinearFilter
+  videoTexB.generateMipmaps = false
+  videoTexB.wrapS = THREE.MirroredRepeatWrapping
+  videoTexB.wrapT = THREE.ClampToEdgeWrapping
+
+  const updateVideoAspect = () => {
+    const vW = videoElA?.videoWidth || 1024
+    const vH = videoElA?.videoHeight || 576
+    const videoAspect = vW / vH // 1.7778 (16:9)
+
+    let textW = 72
+    let textH = 9.5
+    const tri = bgTextVideoRefA.value?.textRenderInfo || bgTextRef.value?.textRenderInfo
+    if (tri && tri.blockBounds) {
+      textW = tri.blockBounds[2] - tri.blockBounds[0]
+      textH = tri.blockBounds[3] - tri.blockBounds[1]
+    }
+    const textAspect = textW / textH
+    const repeatX = textAspect / videoAspect
+
+    videoTexA.repeat.set(repeatX, 1)
+    videoTexA.offset.set(0, 0)
+    videoTexA.needsUpdate = true
+
+    videoTexB.repeat.set(repeatX, 1)
+    videoTexB.offset.set(0, 0)
+    videoTexB.needsUpdate = true
+  }
+
+  videoElA.addEventListener('loadedmetadata', updateVideoAspect)
+  setTimeout(updateVideoAspect, 600)
+  setTimeout(updateVideoAspect, 2000)
+
+  textVideoMatA.value = new THREE.MeshBasicMaterial({
+    map: videoTexA,
+    transparent: true,
+    opacity: 0.85,
+    depthWrite: false,
+    blending: THREE.NormalBlending
+  })
+
+  textVideoMatB.value = new THREE.MeshBasicMaterial({
+    map: videoTexB,
+    transparent: true,
+    opacity: 0.0,
+    depthWrite: false,
+    blending: THREE.NormalBlending
+  })
   
   gsap.registerPlugin(ScrollTrigger)
   gsap.set('.link-switcher,.clock,.scroll-down,.sound-switcher__text,.start-screen__footer-left',{ color:'#ffffff', fill:'#ffffff' })
@@ -562,13 +872,13 @@ onMounted(() => {
     if (Math.abs(e.velocity) > 0 && isPanelOpen.value && !isPointerInPanel.value) {
       closePanelImmediate()
     }
-    ScrollTrigger.update(e)
+    ScrollTrigger.update()
   })
 
   window.addEventListener('mousemove', (e) => {
     if (!mouseHasMoved) {
       mouseHasMoved = true
-      gsap.to(spotlightIntensity, { value: 150, duration: 0.5, overwrite: true })
+      gsap.to(spotlightIntensity, { value: 180, duration: 0.5, overwrite: true }) // +0.2 boost
     }
     const nx = (e.clientX/window.innerWidth)*2-1
     const ny = -(e.clientY/window.innerHeight)*2+1
@@ -629,6 +939,25 @@ onMounted(() => {
     if (blob2Ref.value) blob2Ref.value.style.transform = `translate(${parallaxX * 0.7}px, ${parallaxY * 0.7}px)`
     if (blob3Ref.value) blob3Ref.value.style.transform = `translate(${parallaxX * 1.3}px, ${parallaxY * 1.3}px)`
 
+    // 3D Floating Dust Drift (Screen feels alive before scrolling)
+    if (dustPoints.value && dustGeo) {
+      const pos = dustGeo.attributes.position.array as Float32Array
+      for (let i = 0; i < DUST_COUNT; i++) {
+        const i3 = i * 3
+        pos[i3] += dustSpeeds[i3] + Math.sin(time * 0.35 + i) * 0.001
+        pos[i3 + 1] += dustSpeeds[i3 + 1] + Math.cos(time * 0.25 + i * 0.7) * 0.0006
+        pos[i3 + 2] += dustSpeeds[i3 + 2] + Math.sin(time * 0.3 + i * 1.3) * 0.001
+        
+        // Dynamic volume wrapping
+        if (pos[i3 + 1] > 7.0) pos[i3 + 1] = -1.8
+        if (pos[i3] > 11) pos[i3] = -11
+        if (pos[i3] < -11) pos[i3] = 11
+        if (pos[i3 + 2] > 8) pos[i3 + 2] = -18
+        if (pos[i3 + 2] < -18) pos[i3 + 2] = 8
+      }
+      dustGeo.attributes.position.needsUpdate = true
+    }
+
     // Door animation (ONLY update if time actually changed to prevent constant heavy skeletal matrix calculations)
     if (doorAnim.mixer && doorAnim.action && doorAnim.duration) {
       const newTime = scrollProxy.door * doorAnim.duration
@@ -642,7 +971,7 @@ onMounted(() => {
     if (cloneARef.value && cloneBRef.value) {
       const fade = scrollProxy.cloneFade
       
-      const updateClone = (cloneRef: any, x: number, y: number, z: number, cacheKey: string) => {
+      const updateClone = (cloneRef: any, x: number, y: number, z: number) => {
         cloneRef.position.set(isDebug ? 0 : x, isDebug ? y : y, isDebug ? 0 : z)
         cloneRef.scale.setScalar(isDebug ? 1 : scrollProxy.cloneScale)
         
@@ -653,8 +982,8 @@ onMounted(() => {
         }
       }
       
-      updateClone(cloneARef.value, scrollProxy.cloneAx, scrollProxy.cloneAy, scrollProxy.cloneAz, 'A')
-      updateClone(cloneBRef.value, scrollProxy.cloneBx, scrollProxy.cloneBy, scrollProxy.cloneBz, 'B')
+      updateClone(cloneARef.value, scrollProxy.cloneAx, scrollProxy.cloneAy, scrollProxy.cloneAz)
+      updateClone(cloneBRef.value, scrollProxy.cloneBx, scrollProxy.cloneBy, scrollProxy.cloneBz)
     }
     // Hide transition chamber completely when scale is 0 to save massive draw calls
     if (transitionChamberRef.value) {
@@ -681,8 +1010,53 @@ onMounted(() => {
       bgTextGroupRef.value.visible = scrollProxy.textOpacity > 0
     }
     if (bgTextRef.value) {
-      // Direct property assignment for Troika Text
-      bgTextRef.value.fillOpacity = scrollProxy.textOpacity * 0.85
+      bgTextRef.value.fillOpacity = scrollProxy.textOpacity * 0.75
+    }
+
+    // Seamless continuous crossfade loop (zero frame drops, zero sync calls)
+    if (textVideoMatA.value && textVideoMatB.value && videoElA && videoElB) {
+      const dur = videoElA.duration || 5.466
+      const fadeSec = 0.95
+
+      if (activeVideo === 'A') {
+        const cur = videoElA.currentTime
+        if (cur >= dur - fadeSec) {
+          if (videoElB.paused) {
+            videoElB.currentTime = 0
+            videoElB.play().catch(() => {})
+          }
+          const t = Math.min(1, Math.max(0, (cur - (dur - fadeSec)) / fadeSec))
+          const blend = Math.sin(t * Math.PI * 0.5)
+          textVideoMatA.value.opacity = scrollProxy.textOpacity * 0.85 * (1 - blend)
+          textVideoMatB.value.opacity = scrollProxy.textOpacity * 0.85 * blend
+          if (cur >= dur - 0.06 || videoElA.ended) {
+            activeVideo = 'B'
+            videoElA.pause()
+          }
+        } else {
+          textVideoMatA.value.opacity = scrollProxy.textOpacity * 0.85
+          textVideoMatB.value.opacity = 0
+        }
+      } else {
+        const cur = videoElB.currentTime
+        if (cur >= dur - fadeSec) {
+          if (videoElA.paused) {
+            videoElA.currentTime = 0
+            videoElA.play().catch(() => {})
+          }
+          const t = Math.min(1, Math.max(0, (cur - (dur - fadeSec)) / fadeSec))
+          const blend = Math.sin(t * Math.PI * 0.5)
+          textVideoMatB.value.opacity = scrollProxy.textOpacity * 0.85 * (1 - blend)
+          textVideoMatA.value.opacity = scrollProxy.textOpacity * 0.85 * blend
+          if (cur >= dur - 0.06 || videoElB.ended) {
+            activeVideo = 'A'
+            videoElB.pause()
+          }
+        } else {
+          textVideoMatB.value.opacity = scrollProxy.textOpacity * 0.85
+          textVideoMatA.value.opacity = 0
+        }
+      }
     }
     if (navbarLogoRef.value) {
       navbarLogoRef.value.style.opacity = scrollProxy.logoOpacity.toString()
@@ -723,24 +1097,19 @@ onMounted(() => {
   draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
   const loader = new GLTFLoader()
   loader.setDRACOLoader(draco)
-
-  // Exact Three Graces Material: Deep Matte Black
-  const gracesMaterial = new MeshLambertMaterial({ color: new Color('#050505'), fog: false })
-
-  loader.load('/models/chamber_main.glb', (gltf) => {
-    
-    // Retain original materials, just enable shadows
+  loader.load('/models/chamber_main.glb', (gltf: any) => {
+    // Retain original Blender materials, textures, and finishes untouched
     gltf.scene.traverse((child: any) => {
       if (child.isMesh) {
-        // Target specific mesh based on GLB dump
-        if (child.name === 'Body5.003') {
-          child.material = gracesMaterial
-        }
         child.castShadow = true
-        child.receiveShadow = true
+        child.receiveShadow = false // Prevents CAD self-shadow fighting
         if (child.material) {
-          child.material.fog = false
-          child.material.needsUpdate = true
+          const mats = Array.isArray(child.material) ? child.material : [child.material]
+          mats.forEach((mat: any) => {
+            if (!mat) return
+            mat.fog = false
+            mat.depthWrite = true
+          })
         }
       }
     })
@@ -799,7 +1168,7 @@ onMounted(() => {
 
     // Animations
     if (gltf.animations?.length > 0) {
-      doorAnim.mixer  = new AnimationMixer(gltf.scene)
+      doorAnim.mixer  = new THREE.AnimationMixer(gltf.scene)
       const action    = doorAnim.mixer.clipAction(gltf.animations[0])
       action.setLoop(THREE.LoopOnce, 1); action.clampWhenFinished = true
       action.paused = true; action.timeScale = 0; action.play()
@@ -913,8 +1282,8 @@ function buildScrollTimeline() {
     tl.to(scrollProxy, {
       cloneAx: -10, // Spread horizontally cleanly inside the wider tunnel
       cloneBx: 10,  
-      cloneAy: 0, 
-      cloneBy: 0,
+      cloneAy: -0.06,
+      cloneBy: -0.06,
       cloneAz: 0, 
       cloneBz: 0, 
       cloneScale: 1, 
@@ -973,9 +1342,17 @@ function onPreloaderComplete() {
 
   const laserProgress = { x: -80 }
   if (bgTextRef.value) {
-    bgTextRef.value.fillOpacity = 0.85
+    bgTextRef.value.fillOpacity = 0.75
     bgTextRef.value.clipRect = [-80, -30, -80, 30]
     if (bgTextRef.value.sync) bgTextRef.value.sync()
+  }
+  if (bgTextVideoRefA.value) {
+    bgTextVideoRefA.value.clipRect = [-80, -30, -80, 30]
+    if (bgTextVideoRefA.value.sync) bgTextVideoRefA.value.sync()
+  }
+  if (bgTextVideoRefB.value) {
+    bgTextVideoRefB.value.clipRect = [-80, -30, -80, 30]
+    if (bgTextVideoRefB.value.sync) bgTextVideoRefB.value.sync()
   }
 
   gsap.to(laserProgress, {
@@ -989,12 +1366,28 @@ function onPreloaderComplete() {
         bgTextRef.value.clipRect = [-80, -30, laserProgress.x, 30]
         if (bgTextRef.value.sync) bgTextRef.value.sync()
       }
+      if (bgTextVideoRefA.value) {
+        bgTextVideoRefA.value.clipRect = [-80, -30, laserProgress.x, 30]
+        if (bgTextVideoRefA.value.sync) bgTextVideoRefA.value.sync()
+      }
+      if (bgTextVideoRefB.value) {
+        bgTextVideoRefB.value.clipRect = [-80, -30, laserProgress.x, 30]
+        if (bgTextVideoRefB.value.sync) bgTextVideoRefB.value.sync()
+      }
     },
     onComplete: () => {
       textClipRect.value = null
       if (bgTextRef.value) {
         bgTextRef.value.clipRect = null
         if (bgTextRef.value.sync) bgTextRef.value.sync()
+      }
+      if (bgTextVideoRefA.value) {
+        bgTextVideoRefA.value.clipRect = null
+        if (bgTextVideoRefA.value.sync) bgTextVideoRefA.value.sync()
+      }
+      if (bgTextVideoRefB.value) {
+        bgTextVideoRefB.value.clipRect = null
+        if (bgTextVideoRefB.value.sync) bgTextVideoRefB.value.sync()
       }
       // 3. Trigger bottom-left & mid-right typography STRICTLY AFTER ENVISYS has arrived!
       heroOverlayRef.value?.playEntrance?.()
@@ -1058,7 +1451,7 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   pointer-events: auto; /* MUST be auto for raycaster chamber clicks! */
 }
 
-/* Film grain */
+/* Film grain - High performance cinematic texture */
 .film-grain {
   position: fixed;
   top: 0;
@@ -1069,7 +1462,19 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   z-index: 995;
   mix-blend-mode: overlay;
   opacity: 0.04;
-  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
+}
+
+/* ── Volumetric Atmospheric Haze (Kills pure digital black) ── */
+.volumetric-haze {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 4;
+  background: 
+    radial-gradient(ellipse 65% 55% at 50% 48%, rgba(255, 255, 255, 0.035) 0%, rgba(20, 20, 24, 0.04) 55%, transparent 85%),
+    linear-gradient(180deg, rgba(16, 17, 20, 0.25) 0%, transparent 40%, rgba(8, 9, 11, 0.45) 100%);
+  mix-blend-mode: screen;
 }
 
 /* ── Smoky Frosted Blob & Info Block ── */
@@ -1123,17 +1528,16 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: -1;
-  background-color: #050505;
+  background: radial-gradient(ellipse 85% 75% at 50% 45%, #142224 0%, #0a1315 50%, #050a0b 100%);
   overflow: hidden;
   pointer-events: none;
 }
-
 
 .vignette {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(5,5,6,0.45) 100%);
+  background: radial-gradient(circle at 50% 50%, transparent 50%, rgba(5, 10, 11, 0.65) 100%);
 }
 
 .bg-grain {

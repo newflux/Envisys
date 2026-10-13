@@ -2,7 +2,7 @@
   <div class="Hero_overlayWrapper">
     <div class="Hero_content__nG8Ry">
       <!-- Bottom-Left Title -->
-      <h1 class="Hero_title__FZMTC Hero_medium__iqLWV" ref="titleRef">
+      <h1 class="Hero_title__FZMTC Hero_medium__iqLWV">
         <div class="line-mask">
           <div class="line"><span>Reimagining</span></div>
         </div>
@@ -14,7 +14,7 @@
       </h1>
 
       <!-- Middle-Right Text Block -->
-      <div class="Hero_text__cn7Li" ref="descRef">
+      <div class="Hero_text__cn7Li">
         <span class="Hero_primaryText">
           <div class="line-mask">
             <div class="line">Pioneering environmental test chambers and simulation </div>
@@ -47,8 +47,6 @@
 import { ref } from 'vue'
 import gsap from 'gsap'
 
-const titleRef = ref<HTMLElement | null>(null)
-const descRef = ref<HTMLElement | null>(null)
 const downBtnRef = ref<HTMLElement | null>(null)
 
 const emit = defineEmits<{

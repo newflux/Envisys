@@ -4,11 +4,11 @@
       <!-- Bottom-Left Title -->
       <h1 class="Hero_title__FZMTC Hero_medium__iqLWV" ref="titleRef">
         <div class="line-mask">
-          <div class="line"><span>Engineer <br /></span></div>
+          <div class="line"><span>Reimagining</span></div>
         </div>
         <div class="line-mask">
           <div class="line">
-            <span>Without <span class="Hero_noWrap__jJtUA">Limits<span class="Hero_trademark__LT07p">™</span></span></span>
+            <span>the environment.</span>
           </div>
         </div>
       </h1>
@@ -17,18 +17,18 @@
       <div class="Hero_text__cn7Li" ref="descRef">
         <span class="Hero_primaryText">
           <div class="line-mask">
-            <div class="line">The only composite manufacturer in the world delivering </div>
+            <div class="line">Pioneering environmental test chambers and simulation </div>
           </div>
           <div class="line-mask">
-            <div class="line">steered fiber composites at scale.</div>
+            <div class="line">systems engineered for extreme reliability.</div>
           </div>
         </span>
         <span class="Hero_strong__AKPn_">
           <div class="line-mask">
-            <div class="line">Unlocking design and performance never thought </div>
+            <div class="line">Empowering aerospace, automotive, and defense </div>
           </div>
           <div class="line-mask">
-            <div class="line">possible.</div>
+            <div class="line">to test without limits.</div>
           </div>
         </span>
       </div>
@@ -125,17 +125,17 @@ defineExpose({
   pointer-events: none;
 }
 
-/* Bottom-Left Title */
+/* Bottom-Left Title (The Tagline) */
 .Hero_title__FZMTC {
   position: absolute;
-  bottom: calc(24 * var(--vr, 1px));
-  left: calc(20 * var(--vr, 1px));
+  bottom: calc(28 * var(--vr, 1px));
+  left: calc(24 * var(--vr, 1px));
   font-family: LayGrotesk-Semibold, sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   font-style: normal;
-  font-size: calc(68 * var(--vr, 1px));
-  line-height: calc(98 / 100 * 68 * var(--vr, 1px));
-  letter-spacing: calc(-1.02 * var(--vr, 1px));
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   text-rendering: geometricPrecision;
   color: #fff;
   margin: 0;
@@ -172,8 +172,8 @@ defineExpose({
 /* Middle-Right Text Block */
 .Hero_text__cn7Li {
   position: absolute;
-  top: 50%;
-  right: calc(20 * var(--vr, 1px));
+  top: 57%;
+  right: calc(24 * var(--vr, 1px));
   transform: translateY(-50%);
   width: calc(453 * var(--vr, 1px));
   font-family: LayGrotesk-Semibold, sans-serif;

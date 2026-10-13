@@ -33,7 +33,7 @@
     <Preloader @complete="onPreloaderComplete" />
 
     <!-- EXACT ICOMAT NAVBAR & BRAND LOGO -->
-    <Navbar @build-click="handleBuildClick" />
+    <Navbar ref="navbarRef" @build-click="handleBuildClick" />
 
     <!-- EXACT ICOMAT HERO OVERLAY (TITLE, PARAGRAPH, SCROLL PILL) -->
     <HeroOverlay ref="heroOverlayRef" @scroll-down="onScrollDown" />
@@ -53,17 +53,18 @@
         <Lightformer :intensity="2" :position="[0, tunnelH/2 - 0.1, 0]" :scale="[tunnelW/2, tunnelD, 1]" :rotation="[-Math.PI/2, 0, 0]" />
       </Environment>
 
-      <!-- Background 3D Text Effect (/envisys) -->
-      <TresGroup ref="bgTextGroupRef" :position="[0, 4, -15]" :scale="0.45">
+      <!-- Background 3D Text Effect (ENVISYS in Monument Extended) -->
+      <TresGroup ref="bgTextGroupRef" :position="[0, 5.1, -15]" :scale="scrollProxy.textScale">
         <!-- The actual 3D Text (troika-three-text) -->
         <TresText
           ref="bgTextRef"
-          text="/envisys"
-          font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjQ.ttf"
-          :fontSize="14"
-          :letterSpacing="-0.025"
+          text="ENVISYS"
+          font="/fonts/MonumentExtended-Ultrabold.woff"
+          :fontSize="9.5"
+          :letterSpacing="0.02"
           color="white"
           :fillOpacity="0.85"
+          :clipRect="textClipRect"
           anchorX="center"
           anchorY="middle"
           cast-shadow
@@ -197,6 +198,7 @@ import HeroOverlay from './components/HeroOverlay.vue'
 extend({ Text })
 
 const heroOverlayRef = ref<any>(null)
+const navbarRef = ref<any>(null)
 
 // --- 1. Transition Chamber Configuration ---
 // Adjust these to control the duplicate chamber that arrives at the end
@@ -440,6 +442,7 @@ const cloneBRef       = ref<any>(null)
 
 const bgTextGroupRef  = ref<any>(null)
 const bgTextRef       = ref<any>(null)
+const textClipRect    = ref<any>([-70, -30, -70, 30])
 const htmlOverlayRef  = ref<HTMLElement | null>(null)
 const navbarLogoRef   = ref<HTMLElement | null>(null)
 
@@ -484,11 +487,12 @@ const scrollProxy = {
   fleetLightIntensity: 0, // Dynamically lights up the sides in Phase 3
   transitionZ: transitionChamberStartZ,
   transitionScale: 0,
-  textY: 5.5,
-  textScale: 0.35,
-  textOpacity: 0,
+  textY: 5.1,
+  textScale: 0.44,
+  textOpacity: 1,
   logoOpacity: 0
 }
+if (typeof window !== 'undefined') (window as any).scrollProxy = scrollProxy
 
 // Camera state
 let baseDistance = 0
@@ -918,20 +922,39 @@ function onPreloaderComplete() {
   heroOverlayRef.value?.playEntrance?.()
 
   // 2. Animate Navbar & Topbar in smoothly
-  gsap.fromTo(
-    ['.Header_topBar__t3Nfy', '.Header_header__qBw1J'],
-    { opacity: 0, y: -20 },
-    { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out', delay: 0.1 }
-  )
+  navbarRef.value?.animIn?.()
 
-  // 3. Emerge 3D Background Text & Chamber Camera
-  const tlHero = gsap.timeline()
-  tlHero.to(scrollProxy, {
-    textOpacity: 1,
-    textScale: 0.45,
-    duration: 2.5,
-    ease: 'power3.out'
-  }, 0.2)
+  // 3. Laser-Cutting Reveal for ENVISYS Text (Slides violently into existence from left to right like laser cutting steel)
+  scrollProxy.textOpacity = 1
+  scrollProxy.textScale = 0.44
+
+  const laserProgress = { x: -80 }
+  if (bgTextRef.value) {
+    bgTextRef.value.fillOpacity = 0.85
+    bgTextRef.value.clipRect = [-80, -30, -80, 30]
+    if (bgTextRef.value.sync) bgTextRef.value.sync()
+  }
+
+  gsap.to(laserProgress, {
+    x: 80,
+    duration: 1.15,
+    ease: 'power3.inOut',
+    delay: 0.15,
+    onUpdate: () => {
+      textClipRect.value = [-80, -30, laserProgress.x, 30]
+      if (bgTextRef.value) {
+        bgTextRef.value.clipRect = [-80, -30, laserProgress.x, 30]
+        if (bgTextRef.value.sync) bgTextRef.value.sync()
+      }
+    },
+    onComplete: () => {
+      textClipRect.value = null
+      if (bgTextRef.value) {
+        bgTextRef.value.clipRect = null
+        if (bgTextRef.value.sync) bgTextRef.value.sync()
+      }
+    }
+  })
 }
 
 function onScrollDown() {

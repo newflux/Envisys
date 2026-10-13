@@ -6,6 +6,9 @@
     <div class="vignette"></div>
   </div>
 
+  <!-- Film Grain Overlay (Awwwards cinematic texture) -->
+  <div class="film-grain"></div>
+
     <!-- Smoky frosted blob (Pure CSS mask + backdrop-filter) -->
     <div class="smoke-blob" ref="frostBgRef"></div>
 
@@ -815,42 +818,34 @@ function buildScrollTimeline() {
         scroller: "#scroller",
         start: "top top",
         end: "bottom bottom",
-        scrub: 1.2, 
+        scrub: 1.5, // 1.5s physical smoothing delay (Awwwards heavy physics)
       }
     })
 
-    // ── Phase 0: Intro Dissolve (0 to 15) ──
-    // 1. Dolly-in camera and dissolve 3D text in place
+    // ── Phase 0 & 2: Intro Dissolve & Seamless Spec Pan (0 to 30) ──
+    // 1. Immediately dissolve 3D background text on scroll start
     tl.to(scrollProxy, {
       textOpacity: 0,
       logoOpacity: 1,
-      camZ: baseCameraPos.z - 3,
-      duration: 15,
-      ease: 'power2.inOut'
+      duration: 10,
+      ease: 'power2.out'
     }, 0)
 
-    // ── Phase 1: Hold & Revert Dolly (15 to 35) ──
-    // Revert the camera back to starting angle before panning, as requested
-    tl.to(scrollProxy, {
-      camZ: baseCameraPos.z,
-      duration: 20,
-      ease: 'power2.inOut'
-    }, 15)
-
-    // ── Phase 2: The Spec Pan + 360 Spin (35 to 50) ──
+    // 2. Direct, fluid transition to the spec inspection angle (no push-pull)
     tl.to(scrollProxy, { 
       camX: -1.8, 
       camY: baseCameraPos.y + 0.5, 
       camZ: baseCameraPos.z - (baseDistance * 0.6), 
       lookX: -3.0, 
-      lookY: baseCameraTarget.y + 1.2,                                  
-      duration: 15, 
-      ease: 'power3.inOut' 
-    }, 35)
+      lookY: baseCameraTarget.y + 1.2, 
+      duration: 30, 
+      ease: 'power2.inOut' 
+    }, 0)
     tl.fromTo(scrollProxy, 
       { chamberYaw: 0 }, 
-      { chamberYaw: Math.PI * 2, duration: 15, ease: 'power2.inOut' }, 
-    35)
+      { chamberYaw: Math.PI * 2, duration: 30, ease: 'power2.inOut' }, 
+      0
+    )
 
     // ── Phase 3: The South-West Spread Reveal (55 to 80) ──
     tl.to(scrollProxy, { 
@@ -918,13 +913,10 @@ function onPreloaderComplete() {
   if ((window as any).lenisInstance) (window as any).lenisInstance.start()
   window.dispatchEvent(new Event('preloader:done'))
 
-  // 1. Trigger Hero Entrance Animation
-  heroOverlayRef.value?.playEntrance?.()
-
-  // 2. Animate Navbar & Topbar in smoothly
+  // 1. Animate Navbar & Topbar in
   navbarRef.value?.animIn?.()
 
-  // 3. Laser-Cutting Reveal for ENVISYS Text (Slides violently into existence from left to right like laser cutting steel)
+  // 2. Laser-Cutting Reveal for ENVISYS Text (First the background ENVISYS arrives)
   scrollProxy.textOpacity = 1
   scrollProxy.textScale = 0.44
 
@@ -953,6 +945,8 @@ function onPreloaderComplete() {
         bgTextRef.value.clipRect = null
         if (bgTextRef.value.sync) bgTextRef.value.sync()
       }
+      // 3. Trigger bottom-left & mid-right typography AFTER ENVISYS laser reveal completes
+      heroOverlayRef.value?.playEntrance?.()
     }
   })
 }
@@ -1014,8 +1008,15 @@ body, #app { background: transparent !important; overflow-x: hidden; }
 
 /* Film grain */
 .film-grain {
-  position: absolute; top:0; left:0; width:100%; height:100%;
-  pointer-events: none; z-index: 10; mix-blend-mode: overlay; opacity: 0.07;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 995;
+  mix-blend-mode: overlay;
+  opacity: 0.04;
   background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
 }
 

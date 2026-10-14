@@ -40,6 +40,11 @@
 }
 
 :root {
+  /* Global Brand Typography Hierarchy */
+  --font-display: 'Monument Extended', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-primary: 'LayGrotesk-Semibold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'AkkuratMono', 'SF Mono', Menlo, monospace;
+
   --fs-hero: clamp(3rem, 3.7vw, 6rem);
   --lh-hero: 1.1;
   --ls-hero: -0.02em;

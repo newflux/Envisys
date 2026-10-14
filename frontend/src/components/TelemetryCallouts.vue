@@ -7,8 +7,10 @@
       :style="{ top: item.top, left: item.left }"
       :ref="el => setItemRef(el, idx)"
     >
-      <!-- Heading (White, Semi-bold, large) -->
-      <h3 class="callout-heading">{{ item.heading }}</h3>
+      <!-- Heading (White, Semi-bold, large) with Line Mask Entrance -->
+      <div class="callout-line-mask">
+        <h3 class="callout-heading callout-line">{{ item.heading }}</h3>
+      </div>
 
       <!-- The 'Vanishing Line' Divider -->
       <div
@@ -33,8 +35,10 @@
         </div>
       </div>
 
-      <!-- Text (Muted gray #888888, smaller text) -->
-      <p class="callout-text">{{ item.text }}</p>
+      <!-- Text (Muted gray #888888, smaller text) with Line Mask Entrance -->
+      <div class="callout-line-mask">
+        <p class="callout-text callout-line">{{ item.text }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -98,6 +102,12 @@ function show(duration = 0.85) {
 
   tl.set('.telemetry-callouts-layer', { opacity: 1, pointerEvents: 'auto' })
 
+  // Reset lines below masks
+  gsap.set('.callout-line', {
+    y: '115%',
+    opacity: 1
+  })
+
   // Lines shoot out from right (the machine) to left slicing under the headings
   tl.fromTo(
     '.vanishing-line',
@@ -113,12 +123,17 @@ function show(duration = 0.85) {
     0.1
   )
 
-  // Fade in headers and paragraph text slightly after lines execute
-  tl.fromTo(
-    ['.callout-heading', '.callout-text'],
-    { opacity: 0, x: -14 },
-    { opacity: 1, x: 0, duration: duration * 0.75, stagger: 0.1, ease: 'power2.out' },
-    0.25
+  // Kinetic typography reveal from behind mask (matching Phase 1)
+  tl.to(
+    '.callout-heading.callout-line',
+    { y: '0%', duration: duration * 0.85, stagger: 0.15, ease: 'power3.out' },
+    0.15
+  )
+
+  tl.to(
+    '.callout-text.callout-line',
+    { y: '0%', duration: duration * 0.8, stagger: 0.15, ease: 'power3.out' },
+    0.28
   )
 
   return tl
@@ -134,10 +149,12 @@ function hide(duration = 0.45) {
   })
   activeTween = tl
 
-  tl.to(['.callout-heading', '.callout-text'], {
+  // Slide lines out through their line masks in the same style they entered
+  tl.to('.callout-line', {
+    y: '-115%',
     opacity: 0,
-    x: -10,
-    duration: duration * 0.5,
+    duration: duration * 0.6,
+    stagger: 0.04,
     ease: 'power2.in'
   }, 0)
 
@@ -191,6 +208,19 @@ defineExpose({
   width: fit-content;
   display: flex;
   flex-direction: column;
+}
+
+/* Phase 1 Typography Line-Mask Reveal System */
+.callout-line-mask {
+  overflow: hidden;
+  display: block;
+  padding-bottom: 2px; /* Prevent font descender clipping */
+}
+
+.callout-line {
+  display: block;
+  transform: translateY(0%);
+  will-change: transform;
 }
 
 /* Heading: White, Semi-bold, large */

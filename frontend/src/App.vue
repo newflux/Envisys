@@ -15,23 +15,23 @@
     <!-- Smoky frosted blob (Pure CSS mask + backdrop-filter) -->
     <div class="smoke-blob" ref="frostBgRef"></div>
 
-    <!-- Info Text Block (Left of Chamber) -->
+    <!-- Info Text Block (Center of Chamber, Image 1 Exact Layout) -->
     <div class="info-block" ref="textPanelRef" @pointerenter="isPointerInPanel = true" @pointerleave="isPointerInPanel = false">
       <div class="info-close-btn" @click="closePanel">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5"/></svg>
       </div>
-      <div class="info-index">01</div>
+      <div class="info-index">{{ activeChamberData.index }}</div>
       <h2 class="info-title">
         <div>ENVISYS</div>
-        <div>ET-400</div>
+        <div>{{ activeChamberData.model }}</div>
         <div class="outline-text">SERIES</div>
       </h2>
-      <div class="info-subtitle">ENVIRONMENTAL TEST CHAMBER</div>
-      <div class="info-pill">-70°C to +180°C</div>
-      <p class="info-desc">Simulates extreme environmental conditions flawlessly for the next generation of testing. Designed for precision and reliability.</p>
+      <div class="info-subtitle">{{ activeChamberData.subtitle }}</div>
+      <div class="info-pill">{{ activeChamberData.tempRange }}</div>
+      <p class="info-desc">{{ activeChamberData.desc }}</p>
       <div class="info-specs">
-        <div>HUMIDITY: 10% to 98% RH</div>
-        <div>CONTROLLER: ET-Touch 5.7" HMI</div>
+        <div>{{ activeChamberData.spec1 }}</div>
+        <div>{{ activeChamberData.spec2 }}</div>
       </div>
     </div>
 
@@ -46,6 +46,9 @@
 
     <!-- PHASE 2 TELEMETRY CALLOUTS (Shooting Lines & Targeted Components) -->
     <TelemetryCallouts ref="telemetryCalloutsRef" />
+
+    <!-- PHASE 3 FLEET OVERVIEW (Dotted Lines, Tactical Badges & Specification Matrix) -->
+    <FleetOverview ref="fleetOverviewRef" @select-unit="openChamberModal" />
 
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
@@ -213,22 +216,32 @@
       <!-- Main Chamber Shadow (Render Once) -->
       <ContactShadows :position="[0, -2.04, 0]" :opacity="0.5" :blur="2.5" :resolution="256" :scale="10" :frames="1" />
 
-      <!-- Main chamber group -->
+      <!-- Main chamber group (Unit 02 in Phase 3) -->
       <TresGroup 
         ref="chamberGroupRef"
         @pointerdown="onChamberPointerDown"
         @pointerup="onChamberPointerUp"
-        @pointerenter="onChamberEnter"
+        @pointerenter="() => onChamberHover(1)"
         @pointerleave="onChamberLeave"
       >
         <primitive v-if="chamberScene" :object="chamberScene" :scale="2.5" :position="[0, -2.05, 0]" />
       </TresGroup>
 
-      <!-- Fleet clones (Phase 3 line-up) -->
-      <TresGroup ref="cloneARef">
+      <!-- Fleet clones (Unit 01 Left, Unit 03 Right) -->
+      <TresGroup 
+        ref="cloneARef"
+        @pointerdown="() => onCloneClick(0)"
+        @pointerenter="() => onChamberHover(0)"
+        @pointerleave="onChamberLeave"
+      >
         <primitive v-if="cloneA" :object="cloneA" :scale="2.5" :position="[0, -2.05, 0]" />
       </TresGroup>
-      <TresGroup ref="cloneBRef">
+      <TresGroup 
+        ref="cloneBRef"
+        @pointerdown="() => onCloneClick(2)"
+        @pointerenter="() => onChamberHover(2)"
+        @pointerleave="onChamberLeave"
+      >
         <primitive v-if="cloneB" :object="cloneB" :scale="2.5" :position="[0, -2.05, 0]" />
       </TresGroup>
 
@@ -272,11 +285,13 @@ import Preloader from './components/Preloader.vue'
 import Navbar from './components/Navbar.vue'
 import HeroOverlay from './components/HeroOverlay.vue'
 import TelemetryCallouts from './components/TelemetryCallouts.vue'
+import FleetOverview from './components/FleetOverview.vue'
 
 extend({ Text })
 
 const heroOverlayRef = ref<any>(null)
 const telemetryCalloutsRef = ref<any>(null)
+const fleetOverviewRef = ref<any>(null)
 const navbarRef = ref<any>(null)
 
 // --- 1. Transition Chamber Configuration ---
@@ -291,6 +306,55 @@ const isPointerInPanel = ref(false)
 const frostBgRef = ref<HTMLElement | null>(null)
 const textPanelRef = ref<HTMLElement | null>(null)
 const panelTl = gsap.timeline({ paused: true })
+
+interface ChamberModalData {
+  index: string
+  model: string
+  subtitle: string
+  tempRange: string
+  desc: string
+  spec1: string
+  spec2: string
+}
+
+const chamberModalList: Record<number, ChamberModalData> = {
+  0: {
+    index: '01',
+    model: 'ET-350',
+    subtitle: 'ENVIRONMENTAL TEST CHAMBER',
+    tempRange: '-70°C to +180°C',
+    desc: 'Compact precision simulation chamber engineered for high-frequency thermal cycling and sensor qualification in tight laboratory footprints.',
+    spec1: 'HUMIDITY: 10% to 98% RH',
+    spec2: 'CONTROLLER: ET-Touch 5.7" HMI'
+  },
+  1: {
+    index: '02',
+    model: 'ET-950',
+    subtitle: 'ENVIRONMENTAL TEST CHAMBER',
+    tempRange: '-70°C to +180°C',
+    desc: 'Simulates extreme environmental conditions flawlessly for the next generation of testing. Designed for precision and reliability.',
+    spec1: 'HUMIDITY: 10% to 98% RH',
+    spec2: 'CONTROLLER: ET-Touch 5.7" HMI'
+  },
+  2: {
+    index: '03',
+    model: 'EO-1000',
+    subtitle: 'HIGH-CAPACITY WALK-IN CHAMBER',
+    tempRange: '-60°C to +150°C',
+    desc: 'Heavy-capacity walk-in environmental suite designed for large automotive battery assemblies, aerospace structures, and long-duration endurance validation.',
+    spec1: 'HUMIDITY: 10% to 98% RH',
+    spec2: 'CONTROLLER: ET-Touch 10.4" Multi-Zone HMI'
+  }
+}
+
+const activeChamberData = ref<ChamberModalData>(chamberModalList[1])
+
+function openChamberModal(idx: number) {
+  if (chamberModalList[idx]) {
+    activeChamberData.value = chamberModalList[idx]
+  }
+  openPanel(window.innerWidth / 2, window.innerHeight / 2)
+}
 
 const isMobile = ref(false)
 const pixelRatio = ref(1)
@@ -579,19 +643,46 @@ function onChamberPointerUp() {
   
   if (dist < 10) { // Slightly more forgiving for touch
     lastChamberClickTime = performance.now()
-    if (!isPanelOpen.value) {
+    if (scrollProxy.cloneScale > 0.5) {
+      // In Phase 3: clicking center chamber (Unit 02) opens Image 1 modal!
+      openChamberModal(1)
+    } else if (!isPanelOpen.value) {
+      // In Phase 1/2: open the hero telemetry panel
       openPanel(globalPointerX, globalPointerY)
     }
   }
 }
 
-function onChamberEnter() {
+function onCloneClick(unitIdx: number) {
+  const dx = globalPointerX - globalPointerDownX
+  const dy = globalPointerY - globalPointerDownY
+  const dist = Math.sqrt(dx * dx + dy * dy)
+  
+  if (dist < 10) {
+    lastChamberClickTime = performance.now()
+    openChamberModal(unitIdx)
+  }
+}
+
+const hoveredFleetUnit = ref<number | null>(null)
+
+function onChamberHover(unitIdx: number) {
   document.body.classList.add('is-hovering-chamber')
+  if (scrollProxy.cloneScale > 0.3) {
+    hoveredFleetUnit.value = unitIdx
+    fleetOverviewRef.value?.onUnitMouseEnter?.(unitIdx)
+  }
 }
 
 function onChamberLeave() {
   document.body.classList.remove('is-hovering-chamber')
+  hoveredFleetUnit.value = null
+  fleetOverviewRef.value?.onUnitMouseLeave?.()
 }
+
+
+
+
 
 // Global click to close empty space
 window.addEventListener('pointerup', (e) => {
@@ -739,6 +830,9 @@ let baseDistance = 0
 let baseSizeY    = 0
 const baseCameraPos    = new Vector3()
 const baseCameraTarget = new Vector3()
+const projVecA         = new Vector3()
+const projVecC         = new Vector3()
+const projVecB         = new Vector3()
 let targetMouseOffsetX = 0
 let targetMouseOffsetY = 0
 let mouseOffsetX = 0
@@ -982,6 +1076,7 @@ onMounted(() => {
         }
       }
       
+      // Uniform chamber sizing matching reference
       updateClone(cloneARef.value, scrollProxy.cloneAx, scrollProxy.cloneAy, scrollProxy.cloneAz)
       updateClone(cloneBRef.value, scrollProxy.cloneBx, scrollProxy.cloneBy, scrollProxy.cloneBz)
     }
@@ -1087,6 +1182,24 @@ onMounted(() => {
         
         cameraRef.value.lookAt(scrollProxy.lookX, scrollProxy.lookY, scrollProxy.lookZ)
         cameraRef.value.rotation.z = scrollProxy.camRoll
+
+        // Real-time 3D camera projection for FleetOverview badges and dotted lines
+        if (fleetOverviewRef.value && scrollProxy.cloneScale > 0) {
+          const cam = cameraRef.value
+          const w = window.innerWidth
+          const h = window.innerHeight
+          
+          // Project at center of each chamber matching Image 3 DSA badges:
+          projVecA.set(scrollProxy.cloneAx, -0.4, scrollProxy.cloneAz).project(cam)
+          projVecC.set(0, -0.4, 0).project(cam)
+          projVecB.set(scrollProxy.cloneBx, -0.4, scrollProxy.cloneBz).project(cam)
+
+          fleetOverviewRef.value.setProjectedAnchors([
+            { x: (projVecA.x * 0.5 + 0.5) * w, y: (-projVecA.y * 0.5 + 0.5) * h },
+            { x: (projVecC.x * 0.5 + 0.5) * w, y: (-projVecC.y * 0.5 + 0.5) * h },
+            { x: (projVecB.x * 0.5 + 0.5) * w, y: (-projVecB.y * 0.5 + 0.5) * h }
+          ])
+        }
       }
     }
   })
@@ -1227,6 +1340,12 @@ function buildScrollTimeline() {
       duration: 8,
       ease: 'power2.in'
     }, 0)
+    tl.to('.Hero_overlayWrapper', {
+      opacity: 0,
+      pointerEvents: 'none',
+      duration: 10,
+      ease: 'power2.in'
+    }, 0)
 
     // 2. Direct, fluid transition to the spec inspection angle (no push-pull)
     tl.to(scrollProxy, { 
@@ -1256,18 +1375,25 @@ function buildScrollTimeline() {
       { scale: 1, duration: 5, stagger: 0.2, ease: 'back.out(2)' }, 
       22.5
     )
-    tl.fromTo(['.callout-heading', '.callout-text'], 
-      { opacity: 0, x: -14 }, 
-      { opacity: 1, x: 0, duration: 6, stagger: 0.1, ease: 'power2.out' }, 
-      24
+    // Kinetic typography reveal from behind masks (matching Phase 1)
+    tl.fromTo('.callout-heading.callout-line', 
+      { y: '115%', opacity: 1 }, 
+      { y: '0%', opacity: 1, duration: 6, stagger: 0.15, ease: 'power3.out' }, 
+      23.5
+    )
+    tl.fromTo('.callout-text.callout-line', 
+      { y: '115%', opacity: 1 }, 
+      { y: '0%', opacity: 1, duration: 6, stagger: 0.15, ease: 'power3.out' }, 
+      25
     )
 
-    // Retract lines and fade callouts before Phase 3 fleet spread begins
-    tl.to('.vanishing-line', { scaleX: 0, transformOrigin: 'right center', duration: 5, stagger: 0.1, ease: 'power2.in' }, 48)
-    tl.to(['.callout-heading', '.callout-text'], { opacity: 0, x: -8, duration: 4, ease: 'power2.in' }, 49)
-    tl.to('.telemetry-callouts-layer', { opacity: 0, duration: 4, ease: 'power2.in' }, 50)
+    // Retract lines and slide typography out through line masks before Phase 3
+    tl.to('.vanishing-line', { scaleX: 0, transformOrigin: 'right center', duration: 5, stagger: 0.1, ease: 'power2.in' }, 47.5)
+    tl.to('.callout-line', { y: '-115%', opacity: 0, duration: 4.5, stagger: 0.05, ease: 'power2.in' }, 48)
+    tl.to('.callout-dot', { scale: 0, duration: 3, ease: 'power2.in' }, 48.5)
+    tl.to('.telemetry-callouts-layer', { opacity: 0, duration: 3, ease: 'power2.in' }, 50)
 
-    // ── Phase 3: The South-West Spread Reveal (55 to 80) ──
+    // ── Phase 3: The South-West Spread Motion & Angled Lineup (55 to 80) ──
     tl.to(scrollProxy, { 
       camX: -9, // Stay safely inside the new wider left wall
       camY: baseCameraPos.y + 6,  
@@ -1291,6 +1417,39 @@ function buildScrollTimeline() {
       duration: 25,
       ease: 'power3.out' 
     }, 55)
+
+    // ── Fleet Overview UI (58 to 78) - Matches Image 3 Reference Aesthetic ──
+    tl.to('.fleet-overview-container', { opacity: 1, duration: 2.5, ease: 'power2.out' }, 58)
+    tl.fromTo('.fleet-title-line', 
+      { y: '115%', opacity: 1 }, 
+      { y: '0%', opacity: 1, duration: 4.5, stagger: 0.1, ease: 'power3.out' }, 
+      58.5
+    )
+    tl.fromTo('.fleet-vector-line', 
+      { opacity: 0 }, 
+      { opacity: 1, duration: 3.5, ease: 'power2.out' }, 
+      59
+    )
+    tl.fromTo('.chamber-badge-box', 
+      { opacity: 0, scale: 0.8 }, 
+      { opacity: 1, scale: 1, duration: 3.5, stagger: 0.1, ease: 'back.out(1.5)' }, 
+      59.5
+    )
+    tl.fromTo('.fleet-lead-text', 
+      { opacity: 0, y: 15 }, 
+      { opacity: 1, y: 0, duration: 4, ease: 'power2.out' }, 
+      59
+    )
+    tl.fromTo('.fleet-spec-row', 
+      { opacity: 0, x: 15 }, 
+      { opacity: 1, x: 0, duration: 3.5, stagger: 0.08, ease: 'power2.out' }, 
+      59.5
+    )
+
+    // Fleet Overview UI Exit (smoothly slide out through line masks before Phase 4 door dive)
+    tl.to('.fleet-title-line', { y: '-115%', opacity: 0, duration: 3, stagger: 0.04, ease: 'power2.in' }, 75)
+    tl.to(['.fleet-vector-line', '.chamber-badge-box', '.fleet-lead-text', '.fleet-spec-row'], { opacity: 0, duration: 2.5, ease: 'power2.in' }, 75.5)
+    tl.to('.fleet-overview-container', { opacity: 0, duration: 2, ease: 'power2.in' }, 78)
 
     // ── Phase 4: Cinematic J-Curve Breach (80 to 115) ──
     // Fade out clones over a short span as the section ends

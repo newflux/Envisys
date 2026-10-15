@@ -1,24 +1,24 @@
 /**
  * Swarm / Chamber Matrix Configuration for Phase 3
- * Exact match to user reference aesthetic:
- * - Pure monochrome tactical white/grey aesthetic
- * - Clean white box badges: DSA012, DSA011, DSA013
- * - Transparent right-side specification layout with thin horizontal rules
- * - Detail modal content for Image 1
+ * Specifications & Content Model
+ * - Kept strictly uniform, clean monochrome styling
+ * - Product naming: ET-350, ET-950, EO-1000 with 01, 02, 03 indexing
+ * - Spec strip attributes: index, model, volume, tempRange
+ * - Benefits array preserved in content data (unused for now)
  */
 
-export interface FleetSpecRow {
+export interface FleetBenefit {
   label: string
   value: string
 }
 
 export interface ChamberUnitConfig {
   order: string           // 01, 02, 03
-  badgeId: string         // DSA012, DSA011, DSA013
   model: string           // ET-350, ET-950, EO-1000
+  volume: string          // 350L, 950L, [placeholder]
+  tempRange: string       // -70°C to +180°C
   title: string
   subtitle: string
-  tempRange: string
   desc: string
   spec1: string
   spec2: string
@@ -32,7 +32,7 @@ export interface FleetOverviewConfig {
   titleLine1: string
   titleLine2: string
   leadParagraph: string
-  specs: FleetSpecRow[]
+  benefits: FleetBenefit[]
   chambers: ChamberUnitConfig[]
 }
 
@@ -40,7 +40,7 @@ export const defaultFleetConfig: FleetOverviewConfig = {
   titleLine1: 'Understanding the',
   titleLine2: 'Chamber Matrix',
   leadParagraph: 'Fully autonomous environmental simulation matrix that operates and coordinates without human oversight, scaling across fleets to validate mission-critical aerospace, automotive, and defense payloads.',
-  specs: [
+  benefits: [
     {
       label: 'Autonomy',
       value: 'Truly autonomous end-to-end multi-chamber operation'
@@ -61,39 +61,39 @@ export const defaultFleetConfig: FleetOverviewConfig = {
   chambers: [
     {
       order: '01',
-      badgeId: 'DSA012',
       model: 'ET-350',
+      volume: '350L',
+      tempRange: '-70°C to +180°C',
       title: 'Compact Environmental Chamber',
       subtitle: 'ENVIRONMENTAL TEST CHAMBER',
-      tempRange: '-70°C to +180°C',
       desc: 'Compact precision simulation chamber engineered for high-frequency thermal cycling and sensor qualification in tight laboratory footprints.',
       spec1: 'HUMIDITY: 10% to 98% RH',
       spec2: 'CONTROLLER: ET-Touch 5.7" HMI',
-      defaultAnchor: { x: 17.5, y: 55.0 }
+      defaultAnchor: { x: 20.0, y: 44.0 }
     },
     {
       order: '02',
-      badgeId: 'DSA011',
       model: 'ET-950',
+      volume: '950L',
+      tempRange: '-70°C to +180°C',
       title: 'Flagship Modular Simulator',
       subtitle: 'ENVIRONMENTAL TEST CHAMBER',
-      tempRange: '-70°C to +180°C',
       desc: 'Simulates extreme environmental conditions flawlessly for the next generation of testing. Designed for precision and reliability.',
       spec1: 'HUMIDITY: 10% to 98% RH',
       spec2: 'CONTROLLER: ET-Touch 5.7" HMI',
-      defaultAnchor: { x: 49.5, y: 47.0 }
+      defaultAnchor: { x: 50.0, y: 44.0 }
     },
     {
       order: '03',
-      badgeId: 'DSA013',
       model: 'EO-1000',
+      volume: '[placeholder]',
+      tempRange: '-60°C to +150°C',
       title: 'High-Capacity Walk-In Chamber',
       subtitle: 'HIGH-CAPACITY WALK-IN CHAMBER',
-      tempRange: '-60°C to +150°C',
       desc: 'Heavy-capacity walk-in environmental suite designed for large automotive battery assemblies, aerospace structures, and long-duration endurance validation.',
       spec1: 'HUMIDITY: 10% to 98% RH',
       spec2: 'CONTROLLER: ET-Touch 10.4" Multi-Zone HMI',
-      defaultAnchor: { x: 79.5, y: 40.0 }
+      defaultAnchor: { x: 80.0, y: 44.0 }
     }
   ]
 }

@@ -48,26 +48,33 @@
     <TelemetryCallouts ref="telemetryCalloutsRef" />
 
     <!-- PHASE 3 FLEET OVERVIEW (Dotted Lines, Tactical Badges & Specification Matrix) -->
-    <FleetOverview ref="fleetOverviewRef" @select-unit="openChamberModal" />
+    <FleetOverview 
+      ref="fleetOverviewRef" 
+      @select-unit="openChamberModal" 
+      @unit-hover="onFleetUnitHover"
+    />
 
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
-  <div class="canvas-fixed-wrap">    <TresCanvas window-size :clear-color="'#0a1113'" :clear-alpha="1" :tone-mapping-exposure="1" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
+  <div class="canvas-fixed-wrap">    <TresCanvas window-size :clear-color="'#111c1e'" :clear-alpha="1" :tone-mapping-exposure="1.22" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
       <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.5" :far="250" />
       
-      <!-- Fog (Tinty cold bluish-ash atmospheric gallery void) -->
-      <TresFog :args="['#0a1113', 30, 140]" />
+      <!-- Fog (Soft cold bluish-ash atmospheric gallery void, slightly brightened) -->
+      <TresFog :args="['#111c1e', 38, 160]" />
 
-      <!-- Environment Lighting (Tinty cold bluish-ash studio illumination from reference image) -->
-      <Environment :background="false" :environment-intensity="0.32" :frames="1" :resolution="256">
-        <!-- Overhead luminous ceiling flood centered directly over chamber (cold bluish-ash tint +0.2) -->
-        <Lightformer :intensity="3.0" :position="[0, tunnelH - 2.5, 0]" :scale="[8, 12, 1]" :rotation="[-Math.PI/2, 0, 0]" color="#d4e4e2" />
+      <!-- Gentle Global Ambient Base Light (Brightened to lift deep shadow values) -->
+      <TresAmbientLight :intensity="0.80" color="#d4e6e3" />
+
+      <!-- Environment Lighting (Brightened studio illumination with crisp metallic reflections) -->
+      <Environment :background="false" :environment-intensity="0.72" :frames="1" :resolution="256">
+        <!-- Overhead luminous ceiling flood centered directly over chamber (cold bluish-ash tint) -->
+        <Lightformer :intensity="5.8" :position="[0, tunnelH - 2.5, 0]" :scale="[8, 12, 1]" :rotation="[-Math.PI/2, 0, 0]" color="#e0eeec" />
         <!-- Rear Top Rim Lightformer: cuts metallic outlines along top bevels -->
-        <Lightformer :intensity="5.0" :position="[0, 3.8, -3.5]" :scale="[6, 0.5, 1]" color="#c2d6d3" />
+        <Lightformer :intensity="6.8" :position="[0, 3.8, -3.5]" :scale="[6, 0.5, 1]" color="#d2e4e1" />
         <!-- Left & Right Kickers -->
-        <Lightformer :intensity="3.5" :position="[-3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, Math.PI/3, 0]" color="#b0c8c5" />
-        <Lightformer :intensity="3.5" :position="[3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, -Math.PI/3, 0]" color="#b0c8c5" />
+        <Lightformer :intensity="5.0" :position="[-3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, Math.PI/3, 0]" color="#bcd2cf" />
+        <Lightformer :intensity="5.0" :position="[3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, -Math.PI/3, 0]" color="#bcd2cf" />
       </Environment>
 
       <!-- Background 3D Text Effect (ENVISYS in Monument Extended with Seamless Looping Video Inside) -->
@@ -115,25 +122,26 @@
         />
       </TresGroup>
 
-      <!-- Clean Studio Rim & Key Lights (Tinty cold bluish ash, +0.2 boost) -->
+      <!-- Clean Studio Rim & Key Lights (Brightened cold bluish ash) -->
       <!-- High rear grazing directional light for clean metallic silhouette -->
-      <TresDirectionalLight :position="[0, 5.5, -4]" :intensity="4.2" color="#d2e4e1" />
+      <TresDirectionalLight :position="[0, 5.5, -4]" :intensity="5.2" color="#d8ebe8" />
       <!-- Left & Right grazing rim directional kickers -->
-      <TresDirectionalLight :position="[-4.5, 3.5, -3]" :intensity="2.8" color="#b8cecb" />
-      <TresDirectionalLight :position="[4.5, 3.5, -3]" :intensity="2.8" color="#b8cecb" />
+      <TresDirectionalLight :position="[-4.5, 3.5, -3]" :intensity="3.5" color="#c4dbd8" />
+      <TresDirectionalLight :position="[4.5, 3.5, -3]" :intensity="3.5" color="#c4dbd8" />
       <!-- High-angle side fill lights (soft cold architectural bounce) -->
-      <TresPointLight :position="[-4.5, 2.5, -2]" :intensity="3.0" color="#9ab8b5" :distance="15" />
-      <TresPointLight :position="[4.5, 2.5, -2]" :intensity="3.0" color="#9ab8b5" :distance="15" />
+      <TresPointLight :position="[-4.5, 2.5, -2]" :intensity="3.8" color="#a6c4c1" :distance="16" />
+      <TresPointLight :position="[4.5, 2.5, -2]" :intensity="3.8" color="#a6c4c1" :distance="16" />
 
       <!-- Side Wall Subtle Cold Bluish-Ash Ambient Fill -->
-      <TresPointLight :position="[-tunnelW/2 + 2, 3, -4]" :intensity="2.5" color="#182a2c" :distance="30" />
-      <TresPointLight :position="[tunnelW/2 - 2, 3, -4]" :intensity="2.5" color="#182a2c" :distance="30" />
-      <TresPointLight :position="[-tunnelW/2 + 2, 3, 12]" :intensity="2" color="#152426" :distance="25" />
-      <TresPointLight :position="[tunnelW/2 - 2, 3, 12]" :intensity="2" color="#152426" :distance="25" />
+      <TresPointLight :position="[-tunnelW/2 + 2, 3, -4]" :intensity="4.6" color="#345054" :distance="38" />
+      <TresPointLight :position="[tunnelW/2 - 2, 3, -4]" :intensity="4.6" color="#345054" :distance="38" />
+      <TresPointLight :position="[-tunnelW/2 + 2, 3, 12]" :intensity="3.8" color="#2b4246" :distance="32" />
+      <TresPointLight :position="[tunnelW/2 - 2, 3, 12]" :intensity="3.8" color="#2b4246" :distance="32" />
 
-      <!-- Phase 3 Fleet Fill Lights (Cold bluish ash tint) -->
-      <TresPointLight ref="fleetL" :position="[-12, 0, 10]" :intensity="0" color="#bdd4d1" :distance="30" />
-      <TresPointLight ref="fleetR" :position="[12, 0, 10]" :intensity="0" color="#bdd4d1" :distance="30" />
+      <!-- Phase 3 Fleet Fill Lights (Evenly lit, no pure black faces) -->
+      <TresPointLight ref="fleetL" :position="[-14, 2, 14]" :intensity="0" color="#bdd4d1" :distance="45" />
+      <TresPointLight ref="fleetCenter" :position="[0, 2, 16]" :intensity="0" color="#bdd4d1" :distance="45" />
+      <TresPointLight ref="fleetR" :position="[14, 2, 14]" :intensity="0" color="#bdd4d1" :distance="45" />
 
       <!-- Interactive Mouse Spotlight -->
       <TresSpotLight 
@@ -151,19 +159,19 @@
           <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
           <MeshReflectionMaterial 
             v-if="!isMobile && floorSeamMap && scrollProxy.transitionScale < 0.1"
-            color="#080e10"
+            color="#0c1517"
             :map="floorSeamMap"
             :metalness="0.12"
-            :roughness="0.32"
+            :roughness="0.30"
             :resolution="256"
             :blur="[0, 0]"
             :mixBlur="0.95"
-            :mixStrength="0.28"
-            :mirror="0.14"
+            :mixStrength="0.32"
+            :mirror="0.16"
             :depthScale="0"
             :fog="true"
           />
-          <TresMeshStandardMaterial v-else-if="floorSeamMap" color="#080e10" :map="floorSeamMap" :metalness="0.15" :roughness="0.3" :fog="true" />
+          <TresMeshStandardMaterial v-else-if="floorSeamMap" color="#0c1517" :map="floorSeamMap" :metalness="0.15" :roughness="0.3" :fog="true" />
         </TresMesh>
 
         <!-- Ceiling (Industrial Aperture: heavy radial vignette light pool directly over the chamber) -->
@@ -219,8 +227,8 @@
       <!-- Main chamber group (Unit 02 in Phase 3) -->
       <TresGroup 
         ref="chamberGroupRef"
-        @pointerdown="onChamberPointerDown"
-        @pointerup="onChamberPointerUp"
+        @pointerdown="() => onChamberPointerDown(1)"
+        @pointerup="() => onChamberPointerUp(1)"
         @pointerenter="() => onChamberHover(1)"
         @pointerleave="onChamberLeave"
       >
@@ -230,7 +238,8 @@
       <!-- Fleet clones (Unit 01 Left, Unit 03 Right) -->
       <TresGroup 
         ref="cloneARef"
-        @pointerdown="() => onCloneClick(0)"
+        @pointerdown="() => onChamberPointerDown(0)"
+        @pointerup="() => onChamberPointerUp(0)"
         @pointerenter="() => onChamberHover(0)"
         @pointerleave="onChamberLeave"
       >
@@ -238,7 +247,8 @@
       </TresGroup>
       <TresGroup 
         ref="cloneBRef"
-        @pointerdown="() => onCloneClick(2)"
+        @pointerdown="() => onChamberPointerDown(2)"
+        @pointerup="() => onChamberPointerUp(2)"
         @pointerenter="() => onChamberHover(2)"
         @pointerleave="onChamberLeave"
       >
@@ -632,35 +642,24 @@ window.addEventListener('pointermove', (e) => {
   globalPointerY = e.clientY
 })
 
-function onChamberPointerDown() {
+function onChamberPointerDown(_unitIdx: number) {
   // Tracked globally
 }
 
-function onChamberPointerUp() {
+function onChamberPointerUp(unitIdx: number) {
   const dx = globalPointerX - globalPointerDownX
   const dy = globalPointerY - globalPointerDownY
   const dist = Math.sqrt(dx * dx + dy * dy)
   
-  if (dist < 10) { // Slightly more forgiving for touch
+  if (dist < 15) { // Responsive threshold for click & touch
     lastChamberClickTime = performance.now()
-    if (scrollProxy.cloneScale > 0.5) {
-      // In Phase 3: clicking center chamber (Unit 02) opens Image 1 modal!
-      openChamberModal(1)
-    } else if (!isPanelOpen.value) {
+    if (scrollProxy.cloneScale > 0.4) {
+      // In Phase 3: clicking any chamber opens its Image 1 modal instantly!
+      openChamberModal(unitIdx)
+    } else if (unitIdx === 1 && !isPanelOpen.value) {
       // In Phase 1/2: open the hero telemetry panel
       openPanel(globalPointerX, globalPointerY)
     }
-  }
-}
-
-function onCloneClick(unitIdx: number) {
-  const dx = globalPointerX - globalPointerDownX
-  const dy = globalPointerY - globalPointerDownY
-  const dist = Math.sqrt(dx * dx + dy * dy)
-  
-  if (dist < 10) {
-    lastChamberClickTime = performance.now()
-    openChamberModal(unitIdx)
   }
 }
 
@@ -670,14 +669,18 @@ function onChamberHover(unitIdx: number) {
   document.body.classList.add('is-hovering-chamber')
   if (scrollProxy.cloneScale > 0.3) {
     hoveredFleetUnit.value = unitIdx
-    fleetOverviewRef.value?.onUnitMouseEnter?.(unitIdx)
+    fleetOverviewRef.value?.onHoverStart(unitIdx)
   }
 }
 
 function onChamberLeave() {
   document.body.classList.remove('is-hovering-chamber')
   hoveredFleetUnit.value = null
-  fleetOverviewRef.value?.onUnitMouseLeave?.()
+  fleetOverviewRef.value?.onHoverEnd()
+}
+
+function onFleetUnitHover(unitIdx: number | null) {
+  hoveredFleetUnit.value = unitIdx
 }
 
 
@@ -701,6 +704,7 @@ window.addEventListener('pointerup', (e) => {
 const cameraRef       = ref<any>(null)
 const mouseSpotLightRef = ref<any>(null)
 const fleetL          = ref<any>(null)
+const fleetCenter     = ref<any>(null)
 const fleetR          = ref<any>(null)
 const chamberGroupRef = ref<any>(null)
 const blob1Ref        = ref<HTMLElement | null>(null)
@@ -879,7 +883,7 @@ onMounted(() => {
   // ── 3D Text Video Textures (Dual Buffers for Seamless Continuous Crossfade Loop) ──
   const setupVideoEl = () => {
     const v = document.createElement('video')
-    v.src = '/videos/smoke.mp4'
+    v.src = '/videos/smoke.webm'
     v.crossOrigin = 'anonymous'
     v.muted = true
     v.playsInline = true
@@ -1020,11 +1024,17 @@ onMounted(() => {
       mouseSpotLightRef.value.position.x += (targetLightX - mouseSpotLightRef.value.position.x) * 0.1
       mouseSpotLightRef.value.position.y += (targetLightY - mouseSpotLightRef.value.position.y) * 0.1
       mouseSpotLightRef.value.position.z += (targetLightZ - mouseSpotLightRef.value.position.z) * 0.1
+
+      // Soften cursor light in Phase 3 so it only adds a highlight near the cursor
+      // Leaving the other phases' behaviour unchanged
+      const isPhase3 = scrollProxy.cloneScale > 0.4
+      mouseSpotLightRef.value.intensity = isPhase3 ? 35 : spotlightIntensity.value
     }
 
-    // Phase 3 Fleet side lighting
+    // Phase 3 Fleet side & center lighting (Evenly lit, no pure black faces)
     if (fleetL.value) fleetL.value.intensity = scrollProxy.fleetLightIntensity
     if (fleetR.value) fleetR.value.intensity = scrollProxy.fleetLightIntensity
+    if (fleetCenter.value) fleetCenter.value.intensity = scrollProxy.fleetLightIntensity * 0.75
 
     // Background Parallax Drift
     parallaxX += (targetMouseX * -30 - parallaxX) * 0.05
@@ -1183,16 +1193,16 @@ onMounted(() => {
         cameraRef.value.lookAt(scrollProxy.lookX, scrollProxy.lookY, scrollProxy.lookZ)
         cameraRef.value.rotation.z = scrollProxy.camRoll
 
-        // Real-time 3D camera projection for FleetOverview badges and dotted lines
+        // Real-time 3D camera projection for FleetOverview tags and spec strips
         if (fleetOverviewRef.value && scrollProxy.cloneScale > 0) {
           const cam = cameraRef.value
           const w = window.innerWidth
           const h = window.innerHeight
           
-          // Project at center of each chamber matching Image 3 DSA badges:
-          projVecA.set(scrollProxy.cloneAx, -0.4, scrollProxy.cloneAz).project(cam)
-          projVecC.set(0, -0.4, 0).project(cam)
-          projVecB.set(scrollProxy.cloneBx, -0.4, scrollProxy.cloneBz).project(cam)
+          // Project at top of each chamber (Y = 3.25) so tag and 24px hairline sit directly above roof:
+          projVecA.set(scrollProxy.cloneAx, 3.25, scrollProxy.cloneAz).project(cam)
+          projVecC.set(0, 3.25, 0).project(cam)
+          projVecB.set(scrollProxy.cloneBx, 3.25, scrollProxy.cloneBz).project(cam)
 
           fleetOverviewRef.value.setProjectedAnchors([
             { x: (projVecA.x * 0.5 + 0.5) * w, y: (-projVecA.y * 0.5 + 0.5) * h },
@@ -1393,7 +1403,7 @@ function buildScrollTimeline() {
     tl.to('.callout-dot', { scale: 0, duration: 3, ease: 'power2.in' }, 48.5)
     tl.to('.telemetry-callouts-layer', { opacity: 0, duration: 3, ease: 'power2.in' }, 50)
 
-    // ── Phase 3: The South-West Spread Motion & Angled Lineup (55 to 80) ──
+    // ── Phase 3: The South-West Spread Motion & Angled Lineup (54 to 74) ──
     tl.to(scrollProxy, { 
       camX: -9, // Stay safely inside the new wider left wall
       camY: baseCameraPos.y + 6,  
@@ -1401,9 +1411,9 @@ function buildScrollTimeline() {
       lookX: 0, 
       lookY: baseCameraTarget.y,
       lookZ: 0,
-      duration: 25, 
+      duration: 20, 
       ease: 'power2.inOut' 
-    }, 55)
+    }, 54)
     
     tl.to(scrollProxy, {
       cloneAx: -10, // Spread horizontally cleanly inside the wider tunnel
@@ -1413,49 +1423,52 @@ function buildScrollTimeline() {
       cloneAz: 0, 
       cloneBz: 0, 
       cloneScale: 1, 
-      fleetLightIntensity: 80, // Light up the side clones!
-      duration: 25,
+      fleetLightIntensity: 130, // Bright, crisp studio illumination on chamber faces
+      duration: 20,
       ease: 'power3.out' 
-    }, 55)
+    }, 54)
 
-    // ── Fleet Overview UI (58 to 78) - Matches Image 3 Reference Aesthetic ──
-    tl.to('.fleet-overview-container', { opacity: 1, duration: 2.5, ease: 'power2.out' }, 58)
+    // ── Fleet Overview UI Entrance (56 to 62) ──
+    tl.to('.fleet-overview-container', { opacity: 1, duration: 2.5, ease: 'power2.out' }, 56)
     tl.fromTo('.fleet-title-line', 
       { y: '115%', opacity: 1 }, 
       { y: '0%', opacity: 1, duration: 4.5, stagger: 0.1, ease: 'power3.out' }, 
-      58.5
+      56.5
     )
     tl.fromTo('.fleet-vector-line', 
       { opacity: 0 }, 
       { opacity: 1, duration: 3.5, ease: 'power2.out' }, 
-      59
+      57
     )
-    tl.fromTo('.chamber-badge-box', 
+    tl.fromTo('.chamber-tag-wrapper', 
       { opacity: 0, scale: 0.8 }, 
       { opacity: 1, scale: 1, duration: 3.5, stagger: 0.1, ease: 'back.out(1.5)' }, 
-      59.5
+      57.5
     )
     tl.fromTo('.fleet-lead-text', 
       { opacity: 0, y: 15 }, 
       { opacity: 1, y: 0, duration: 4, ease: 'power2.out' }, 
-      59
+      57
     )
-    tl.fromTo('.fleet-spec-row', 
-      { opacity: 0, x: 15 }, 
-      { opacity: 1, x: 0, duration: 3.5, stagger: 0.08, ease: 'power2.out' }, 
-      59.5
+    tl.fromTo('.product-spec-strip', 
+      { opacity: 0, y: 15 }, 
+      { opacity: 1, y: 0, duration: 3.5, stagger: 0.08, ease: 'power2.out' }, 
+      57.5
     )
 
-    // Fleet Overview UI Exit (smoothly slide out through line masks before Phase 4 door dive)
-    tl.to('.fleet-title-line', { y: '-115%', opacity: 0, duration: 3, stagger: 0.04, ease: 'power2.in' }, 75)
-    tl.to(['.fleet-vector-line', '.chamber-badge-box', '.fleet-lead-text', '.fleet-spec-row'], { opacity: 0, duration: 2.5, ease: 'power2.in' }, 75.5)
-    tl.to('.fleet-overview-container', { opacity: 0, duration: 2, ease: 'power2.in' }, 78)
+    // ── Phase 3 Extended Plateau (74 to 104): 30 full units of peaceful resting state! ──
+    // All 3 chambers rest solidly in place, tags and specs are fully visible and clickable.
 
-    // ── Phase 4: Cinematic J-Curve Breach (80 to 115) ──
-    // Fade out clones over a short span as the section ends
-    tl.to(scrollProxy, { cloneFade: 0, duration: 3, ease: 'none' }, 80)
+    // ── Fleet Overview UI Exit (104 to 108): smoothly slide out before Phase 4 door dive ──
+    tl.to('.fleet-title-line', { y: '-115%', opacity: 0, duration: 3, stagger: 0.04, ease: 'power2.in' }, 104)
+    tl.to(['.fleet-vector-line', '.chamber-tag-wrapper', '.fleet-lead-text', '.product-spec-strip'], { opacity: 0, duration: 2.5, ease: 'power2.in' }, 104.5)
+    tl.to('.fleet-overview-container', { opacity: 0, duration: 2, ease: 'power2.in' }, 107)
+
+    // ── Phase 4: Cinematic Transition into Chamber Breach (108 to 142) ──
+    // Fade out clones smoothly as the camera aligns
+    tl.to(scrollProxy, { cloneFade: 0, duration: 5, ease: 'power2.out' }, 108)
     
-    // 1. Center the camera's X/Y quickly (80 to 90)
+    // 1. Center the camera's X/Y smoothly (108 to 122)
     tl.to(scrollProxy, { 
       camX: 0, 
       camY: baseCameraTarget.y + 0.8, 
@@ -1464,23 +1477,23 @@ function buildScrollTimeline() {
       lookZ: 0,
       fogFar: 35, // Return fog to normal
       fleetLightIntensity: 0, // Fade out side lights as we center
-      duration: 10, 
+      duration: 14, 
       ease: "power2.inOut" 
-    }, 80)
+    }, 108)
 
-    // 2. Start opening the door seamlessly on approach (85 to 100)
-    tl.to(scrollProxy, { door: 1, duration: 15, ease: "power2.inOut" }, 85)
+    // 2. Start opening the door seamlessly on approach (114 to 130)
+    tl.to(scrollProxy, { door: 1, duration: 16, ease: "power2.inOut" }, 114)
 
-    // 3. One fluid, non-stop Z-dive all the way in (80 to 115)
-    tl.to(scrollProxy, { camZ: 1.2, duration: 35, ease: "power2.inOut" }, 80)
+    // 3. Fluid Z-dive towards the chamber (110 to 142)
+    tl.to(scrollProxy, { camZ: 2.0, duration: 32, ease: "power2.inOut" }, 110)
 
-    // ── Phase 5: Next-Scene Transition Chamber (108 to 115) ──
+    // ── Phase 5: Next-Scene Transition Chamber (134 to 142) ──
     tl.to(scrollProxy, {
       transitionZ: -5,
       transitionScale: 1,
       duration: transitionChamberArrivalDuration,
       ease: "power3.out"
-    }, 100 - transitionChamberArrivalDuration)
+    }, 134)
 
   }, 600)
 }
@@ -1577,8 +1590,8 @@ onMounted(() => {
 <style>
 @import "./assets/style.css";
 
-/* ── 5×100vh scroll space for deeper cinematic timing ── */
-.layout__page { min-height: 500vh; }
+/* ── 6.5×100vh scroll space for deeper cinematic timing and resting plateau ── */
+.layout__page { min-height: 650vh; }
 
 body, #app { background: transparent !important; overflow-x: hidden; }
 .preloader, .loader, .popup.faq { display: none !important; }
@@ -1610,7 +1623,7 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   pointer-events: auto; /* MUST be auto for raycaster chamber clicks! */
 }
 
-/* Film grain - High performance cinematic texture */
+/* Film grain - High-performance texture (zero SVG filter stalls, 120+ FPS) */
 .film-grain {
   position: fixed;
   top: 0;
@@ -1619,21 +1632,19 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   height: 100vh;
   pointer-events: none;
   z-index: 995;
-  mix-blend-mode: overlay;
-  opacity: 0.04;
-  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
+  opacity: 0.035;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 80%);
 }
 
-/* ── Volumetric Atmospheric Haze (Kills pure digital black) ── */
+/* ── Volumetric Atmospheric Haze (Kills pure digital black without compositor blend stalls) ── */
 .volumetric-haze {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   pointer-events: none;
   z-index: 4;
   background: 
-    radial-gradient(ellipse 65% 55% at 50% 48%, rgba(255, 255, 255, 0.035) 0%, rgba(20, 20, 24, 0.04) 55%, transparent 85%),
-    linear-gradient(180deg, rgba(16, 17, 20, 0.25) 0%, transparent 40%, rgba(8, 9, 11, 0.45) 100%);
-  mix-blend-mode: screen;
+    radial-gradient(ellipse 65% 55% at 50% 48%, rgba(200, 225, 222, 0.03) 0%, rgba(10, 18, 20, 0.04) 55%, transparent 85%),
+    linear-gradient(180deg, rgba(10, 16, 17, 0.3) 0%, transparent 40%, rgba(5, 10, 11, 0.5) 100%);
 }
 
 /* ── Smoky Frosted Blob & Info Block ── */
@@ -1687,7 +1698,7 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: -1;
-  background: radial-gradient(ellipse 85% 75% at 50% 45%, #142224 0%, #0a1315 50%, #050a0b 100%);
+  background: radial-gradient(ellipse 85% 75% at 50% 45%, #223a3d 0%, #122124 50%, #0a1315 100%);
   overflow: hidden;
   pointer-events: none;
 }
@@ -1696,7 +1707,7 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, transparent 50%, rgba(5, 10, 11, 0.65) 100%);
+  background: radial-gradient(circle at 50% 50%, transparent 50%, rgba(5, 10, 11, 0.48) 100%);
 }
 
 .bg-grain {
@@ -1745,7 +1756,7 @@ body, #app { background: transparent !important; overflow-x: hidden; }
 }
 .info-subtitle { font-weight: 600; font-size: 10px; letter-spacing: 2px; margin-bottom: 20px; }
 .info-pill { display: inline-block; font-family: monospace; background: #e8ece6; color: black; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-bottom: 20px; font-weight: 600; }
-.info-desc { font-weight: 300; font-size: 14px; line-height: 1.5; margin-bottom: 20px; opacity: 0.8; }
+.info-desc { font-weight: 300; font-size: 14px; line-height: 1.5; margin-bottom: 20px; opacity: 0.8; letter-spacing: 0.02em; }
 .info-specs { font-weight: 400; font-size: 11px; letter-spacing: 1px; opacity: 0.6; display: flex; flex-direction: column; gap: 4px; align-items: center; }
 
 body.is-hovering-chamber .cursor__inner {

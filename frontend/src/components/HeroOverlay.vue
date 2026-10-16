@@ -1,6 +1,9 @@
 <template>
   <div class="Hero_overlayWrapper">
     <div class="Hero_content__nG8Ry">
+      <!-- 01 eyebrow: same system as phases 2, 3, 4, 5 -->
+      <div class="hero-eyebrow"><i></i><span>01</span><span class="hero-eyebrow-sep"></span><span>Environmental test systems</span></div>
+
       <!-- Bottom-Left Title -->
       <h1 class="Hero_title__FZMTC Hero_medium__iqLWV">
         <div class="line-mask">
@@ -44,10 +47,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import gsap from 'gsap'
+import { splitChars, CH_FROM, chCascade } from '../utils/splitChars'
 
 const downBtnRef = ref<HTMLElement | null>(null)
+
+onMounted(() => splitChars('.Hero_title__FZMTC .line > span'))
 
 const emit = defineEmits<{
   (e: 'scroll-down'): void
@@ -69,6 +75,7 @@ function playEntrance() {
     opacity: 0,
     scale: 0.8
   })
+  gsap.fromTo('.hero-eyebrow', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.8, delay: 0.5, ease: 'power2.out' })
 
   // Animate title lines upward with crisp timing
   tl.to('.Hero_title__FZMTC .line', {
@@ -77,6 +84,9 @@ function playEntrance() {
     stagger: 0.08,
     ease: 'power3.out'
   }, 0.05)
+  // Signature character cascade on top of the line reveal
+  gsap.set('.Hero_title__FZMTC .ch', CH_FROM)
+  tl.to('.Hero_title__FZMTC .ch', chCascade(0.9, 0.02), 0.1)
 
   // Animate description lines upward
   tl.to('.Hero_text__cn7Li .line', {
@@ -154,17 +164,35 @@ defineExpose({
   pointer-events: none;
 }
 
+/* Ember eyebrow — shared label system across phases */
+.hero-eyebrow {
+  position: absolute;
+  top: clamp(88px, 11vh, 116px);
+  left: 5%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+}
+.hero-eyebrow i { width: 6px; height: 6px; background: var(--ember); display: block; }
+.hero-eyebrow-sep { width: 22px; height: 1px; background: rgba(255, 255, 255, 0.35); display: block; }
+
 /* Bottom-Left Title (The Tagline) */
 .Hero_title__FZMTC {
   position: absolute;
   bottom: calc(28 * var(--vr, 1px));
   left: calc(24 * var(--vr, 1px));
-  font-family: LayGrotesk-Semibold, sans-serif;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-weight: 400;
   font-style: normal;
-  font-size: 34px;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-size: 25px;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
   text-rendering: geometricPrecision;
   color: #fff;
   margin: 0;
@@ -189,7 +217,7 @@ defineExpose({
 }
 
 .Hero_trademark__LT07p {
-  font-family: LayGrotesk-Semibold, sans-serif;
+  font-family: var(--font-display);
   font-size: calc(30 * var(--vr, 1px) * 0.8);
   line-height: calc(88 / 100 * 30 * var(--vr, 1px) * 0.8);
   letter-spacing: calc(-0.45 * var(--vr, 1px));
@@ -205,12 +233,12 @@ defineExpose({
   right: calc(24 * var(--vr, 1px));
   transform: translateY(-50%);
   width: calc(453 * var(--vr, 1px));
-  font-family: LayGrotesk-Semibold, sans-serif;
+  font-family: var(--font-body);
   font-weight: 400;
   font-style: normal;
-  font-size: calc(18 * var(--vr, 1px));
-  line-height: calc(103 / 100 * 18 * var(--vr, 1px));
-  letter-spacing: 0;
+  font-size: calc(13 * var(--vr, 1px));
+  line-height: calc(140 / 100 * 13 * var(--vr, 1px));
+  letter-spacing: -0.01em;
   text-rendering: geometricPrecision;
   color: #fff;
   pointer-events: none;

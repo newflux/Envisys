@@ -52,11 +52,11 @@
               clip-path="url(#envisys-wipe-clip)" 
               x="0" 
               y="24" 
-              font-family="'LayGrotesk-Semibold', -apple-system, sans-serif" 
-              font-weight="600" 
-              font-size="22" 
+              font-family="'Monument Extended', sans-serif" 
+              font-weight="800" 
+              font-size="16" 
               fill="#F8F8F8" 
-              letter-spacing="0.04em"
+              letter-spacing="0.03em"
             >ENVISYS</text>
           </svg>
         </div>

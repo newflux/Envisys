@@ -24,6 +24,7 @@
 
     <!-- Zone: Top-Left Title Block (Strictly above 34% viewport height) -->
     <div class="fleet-header-block">
+      <div class="fleet-eyebrow fleet-fade"><i></i><span>03</span><span class="fleet-eyebrow-sep"></span><span>The Fleet</span></div>
       <h2 class="fleet-headline">
         <div class="fleet-line-mask">
           <div class="fleet-line fleet-title-line">{{ config.titleLine1 }}</div>
@@ -36,6 +37,7 @@
 
     <!-- Zone: Top-Right Lead Paragraph (Strictly above 34% viewport height, max-width 360px, max 3 lines) -->
     <div class="fleet-lead-block">
+      <div class="fleet-eyebrow fleet-fade"><span>Overview</span></div>
       <p class="fleet-lead-text">
         {{ config.leadParagraph }}
       </p>
@@ -110,6 +112,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
+import { splitChars, CH_FROM } from '../utils/splitChars'
 import { defaultFleetConfig, type FleetOverviewConfig } from '../config/fleetConfig'
 
 const props = withDefaults(
@@ -161,6 +164,8 @@ function handleResize() {
 }
 
 onMounted(() => {
+  splitChars('.fleet-title-line')
+  gsap.set('.fleet-title-line .ch', CH_FROM)
   window.addEventListener('resize', handleResize)
   handleResize()
 })
@@ -360,24 +365,42 @@ defineExpose({
 /* ── Zone: Top-Left Title Block (Strictly above 34% viewport height) ── */
 .fleet-header-block {
   position: absolute;
-  top: clamp(65px, 8vh, 90px);
+  top: clamp(88px, 11vh, 116px);
   left: 5%;
   display: flex;
   flex-direction: column;
+  gap: 14px;
   pointer-events: none;
   z-index: 10;
 }
 
 .fleet-headline {
-  font-family: var(--font-primary, 'LayGrotesk-Semibold', sans-serif);
-  font-size: clamp(32px, 3.8vw, 54px);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.15vw, 38px);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
   color: #FFFFFF;
   margin: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.32em;
+  white-space: nowrap;
   text-rendering: geometricPrecision;
 }
+
+.fleet-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.fleet-eyebrow i { width: 6px; height: 6px; background: var(--ember); display: block; }
+.fleet-eyebrow-sep { width: 22px; height: 1px; background: rgba(255, 255, 255, 0.35); display: block; }
 
 .fleet-line-mask {
   overflow: hidden;
@@ -395,23 +418,26 @@ defineExpose({
 /* ── Zone: Top-Right Lead Paragraph (Strictly above 34% viewport height, max 3 lines, max-width 360px) ── */
 .fleet-lead-block {
   position: absolute;
-  top: clamp(65px, 8.5vh, 92px);
+  top: clamp(88px, 11vh, 116px);
   right: 5%;
-  max-width: 360px;
+  width: min(400px, 28vw);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   pointer-events: none;
   z-index: 10;
 }
 
 .fleet-lead-text {
-  font-family: var(--font-primary, 'LayGrotesk-Semibold', sans-serif);
-  font-size: 14px;
+  font-family: var(--font-body);
+  font-size: 11px;
   font-weight: 400;
-  line-height: 1.45;
-  letter-spacing: 0.02em; /* Relaxed tracking for 14px */
+  line-height: 1.55;
+  letter-spacing: 0; 
   color: rgba(255, 255, 255, 0.85);
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-rendering: geometricPrecision;
@@ -460,13 +486,23 @@ defineExpose({
 }
 
 .tag-model {
-  font-family: var(--font-mono, 'AkkuratMono', monospace);
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em; /* Clean, open tracking */
   color: inherit;
   display: block;
   line-height: 1.2;
+}
+
+.chamber-tag-wrapper.is-highlighted .tag-model::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 7px;
+  vertical-align: 1px;
+  background: var(--ember);
 }
 
 .tag-vertical-hairline {
@@ -533,7 +569,7 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-mono, 'AkkuratMono', monospace);
+  font-family: var(--font-body);
   font-size: 13px;
   line-height: 1.3;
   letter-spacing: 0.04em; /* Relaxed open tracking for 13px */

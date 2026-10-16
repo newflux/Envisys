@@ -54,27 +54,43 @@
       @unit-hover="onFleetUnitHover"
     />
 
+    <!-- PHASE 4 TYPOGRAPHY (3D "We are ..." statement over the chamber dive) -->
+    <PhaseFourText />
+
+    <!-- PHASE 4 INTERIOR TAKEOVER (statement lit word-by-word on scroll) -->
+    <ChamberStatement />
+
+    <!-- Persistent temperature gauge: enters with us, stays while the page scrolls past it -->
+    <TempGauge ref="tempGaugeRef" />
+
+    <!-- Radial hand-over to white, then trust + autonomy sections -->
+    <TrustSection />
+    <CompareSection />
+
+    <!-- ENDING: call to action -> footer -->
+    <EndingSection @build="handleBuildClick" />
+
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
-  <div class="canvas-fixed-wrap">    <TresCanvas window-size :clear-color="'#111c1e'" :clear-alpha="1" :tone-mapping-exposure="1.22" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
+  <div class="canvas-fixed-wrap">    <TresCanvas window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
       <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.5" :far="250" />
       
       <!-- Fog (Soft cold bluish-ash atmospheric gallery void, slightly brightened) -->
-      <TresFog :args="['#111c1e', 38, 160]" />
+      <TresFog :args="['#050609', 38, 160]" />
 
       <!-- Gentle Global Ambient Base Light (Brightened to lift deep shadow values) -->
-      <TresAmbientLight :intensity="0.80" color="#d4e6e3" />
+      <TresAmbientLight :intensity="0.80" color="#d8dee8" />
 
       <!-- Environment Lighting (Brightened studio illumination with crisp metallic reflections) -->
       <Environment :background="false" :environment-intensity="0.72" :frames="1" :resolution="256">
         <!-- Overhead luminous ceiling flood centered directly over chamber (cold bluish-ash tint) -->
-        <Lightformer :intensity="5.8" :position="[0, tunnelH - 2.5, 0]" :scale="[8, 12, 1]" :rotation="[-Math.PI/2, 0, 0]" color="#e0eeec" />
+        <Lightformer :intensity="5.8" :position="[0, tunnelH - 2.5, 0]" :scale="[8, 12, 1]" :rotation="[-Math.PI/2, 0, 0]" color="#fff7ee" />
         <!-- Rear Top Rim Lightformer: cuts metallic outlines along top bevels -->
-        <Lightformer :intensity="6.8" :position="[0, 3.8, -3.5]" :scale="[6, 0.5, 1]" color="#d2e4e1" />
+        <Lightformer :intensity="6.8" :position="[0, 3.8, -3.5]" :scale="[6, 0.5, 1]" color="#d9e4f5" />
         <!-- Left & Right Kickers -->
-        <Lightformer :intensity="5.0" :position="[-3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, Math.PI/3, 0]" color="#bcd2cf" />
-        <Lightformer :intensity="5.0" :position="[3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, -Math.PI/3, 0]" color="#bcd2cf" />
+        <Lightformer :intensity="5.0" :position="[-3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, Math.PI/3, 0]" color="#bccbe2" />
+        <Lightformer :intensity="5.0" :position="[3.8, 1, -1.5]" :scale="[0.4, 7, 1]" :rotation="[0, -Math.PI/3, 0]" color="#bccbe2" />
       </Environment>
 
       <!-- Background 3D Text Effect (ENVISYS in Monument Extended with Seamless Looping Video Inside) -->
@@ -122,26 +138,43 @@
         />
       </TresGroup>
 
+      <!-- PHASE 4 HEADLINE: lives in the scene (camera flies between the words, floor reflects them) -->
+      <TresGroup ref="p4GroupRef" :visible="false">
+        <TresText
+          v-for="w in p4Words"
+          :key="w.text"
+          :text="w.text"
+          font="/fonts/MonumentExtended-Regular.woff"
+          :fontSize="0.9"
+          :letterSpacing="-0.035"
+          :material="w.mat"
+          :anchorX="w.anchor"
+          anchorY="middle"
+          :position="w.pos"
+          :rotation="[0, w.rotY, 0]"
+        />
+      </TresGroup>
+
       <!-- Clean Studio Rim & Key Lights (Brightened cold bluish ash) -->
       <!-- High rear grazing directional light for clean metallic silhouette -->
-      <TresDirectionalLight :position="[0, 5.5, -4]" :intensity="5.2" color="#d8ebe8" />
+      <TresDirectionalLight :position="[0, 5.5, -4]" :intensity="5.2" color="#d6e3f6" />
       <!-- Left & Right grazing rim directional kickers -->
-      <TresDirectionalLight :position="[-4.5, 3.5, -3]" :intensity="3.5" color="#c4dbd8" />
-      <TresDirectionalLight :position="[4.5, 3.5, -3]" :intensity="3.5" color="#c4dbd8" />
+      <TresDirectionalLight :position="[-4.5, 3.5, -3]" :intensity="3.5" color="#c4d1e6" />
+      <TresDirectionalLight :position="[4.5, 3.5, -3]" :intensity="3.5" color="#c4d1e6" />
       <!-- High-angle side fill lights (soft cold architectural bounce) -->
-      <TresPointLight :position="[-4.5, 2.5, -2]" :intensity="3.8" color="#a6c4c1" :distance="16" />
-      <TresPointLight :position="[4.5, 2.5, -2]" :intensity="3.8" color="#a6c4c1" :distance="16" />
+      <TresPointLight :position="[-4.5, 2.5, -2]" :intensity="3.8" color="#9db0cc" :distance="16" />
+      <TresPointLight :position="[4.5, 2.5, -2]" :intensity="3.8" color="#9db0cc" :distance="16" />
 
       <!-- Side Wall Subtle Cold Bluish-Ash Ambient Fill -->
-      <TresPointLight :position="[-tunnelW/2 + 2, 3, -4]" :intensity="4.6" color="#345054" :distance="38" />
-      <TresPointLight :position="[tunnelW/2 - 2, 3, -4]" :intensity="4.6" color="#345054" :distance="38" />
-      <TresPointLight :position="[-tunnelW/2 + 2, 3, 12]" :intensity="3.8" color="#2b4246" :distance="32" />
-      <TresPointLight :position="[tunnelW/2 - 2, 3, 12]" :intensity="3.8" color="#2b4246" :distance="32" />
+      <TresPointLight :position="[-tunnelW/2 + 2, 3, -4]" :intensity="3.0" color="#343c4c" :distance="38" />
+      <TresPointLight :position="[tunnelW/2 - 2, 3, -4]" :intensity="3.0" color="#343c4c" :distance="38" />
+      <TresPointLight :position="[-tunnelW/2 + 2, 3, 12]" :intensity="2.4" color="#2c3342" :distance="32" />
+      <TresPointLight :position="[tunnelW/2 - 2, 3, 12]" :intensity="2.4" color="#2c3342" :distance="32" />
 
       <!-- Phase 3 Fleet Fill Lights (Evenly lit, no pure black faces) -->
-      <TresPointLight ref="fleetL" :position="[-14, 2, 14]" :intensity="0" color="#bdd4d1" :distance="45" />
-      <TresPointLight ref="fleetCenter" :position="[0, 2, 16]" :intensity="0" color="#bdd4d1" :distance="45" />
-      <TresPointLight ref="fleetR" :position="[14, 2, 14]" :intensity="0" color="#bdd4d1" :distance="45" />
+      <TresPointLight ref="fleetL" :position="[-14, 2, 14]" :intensity="0" color="#e6ebf3" :distance="45" />
+      <TresPointLight ref="fleetCenter" :position="[0, 2, 16]" :intensity="0" color="#e6ebf3" :distance="45" />
+      <TresPointLight ref="fleetR" :position="[14, 2, 14]" :intensity="0" color="#e6ebf3" :distance="45" />
 
       <!-- Interactive Mouse Spotlight -->
       <TresSpotLight 
@@ -149,29 +182,29 @@
         :angle="0.4" 
         :penumbra="1" 
         :intensity="spotlightIntensity" 
-        color="#d8e8e6"
+        color="#fff6ee"
       />
 
       <!-- Tunnel Scene -->
-      <TresGroup>
+      <TresGroup ref="tunnelGroupRef">
         <!-- Floor (Dark polished industrial obsidian floor with clamped subtle highlights) -->
         <TresMesh :rotation="[-Math.PI/2, 0, 0]" :position="[0, -2.05, 0]">
           <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
           <MeshReflectionMaterial 
             v-if="!isMobile && floorSeamMap && scrollProxy.transitionScale < 0.1"
-            color="#0c1517"
+            color="#08090c"
             :map="floorSeamMap"
             :metalness="0.12"
             :roughness="0.30"
-            :resolution="256"
-            :blur="[0, 0]"
+            :resolution="1024"
+            :blur="[220, 70]"
             :mixBlur="0.95"
-            :mixStrength="0.32"
+            :mixStrength="0.42"
             :mirror="0.16"
             :depthScale="0"
             :fog="true"
           />
-          <TresMeshStandardMaterial v-else-if="floorSeamMap" color="#0c1517" :map="floorSeamMap" :metalness="0.15" :roughness="0.3" :fog="true" />
+          <TresMeshStandardMaterial v-else-if="floorSeamMap" color="#08090c" :map="floorSeamMap" :metalness="0.15" :roughness="0.3" :fog="true" />
         </TresMesh>
 
         <!-- Ceiling (Industrial Aperture: heavy radial vignette light pool directly over the chamber) -->
@@ -179,7 +212,7 @@
           <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
           <TresMeshStandardMaterial 
             v-if="ceilingGridMap && ceilingVignetteMap" 
-            color="#07080a" 
+            color="#05060a" 
             :map="ceilingGridMap" 
             :emissiveMap="ceilingVignetteMap" 
             emissive="#ffffff" 
@@ -193,7 +226,7 @@
           <TresPlaneGeometry :args="[tunnelD, tunnelH]" />
           <TresMeshStandardMaterial 
             v-if="wallNoiseMap && wallEmissiveMap" 
-            color="#222327" 
+            color="#17191e" 
             :map="wallNoiseMap" 
             :emissiveMap="wallEmissiveMap" 
             emissive="#ffffff" 
@@ -209,7 +242,7 @@
           <TresPlaneGeometry :args="[tunnelD, tunnelH]" />
           <TresMeshStandardMaterial 
             v-if="wallNoiseMap && wallEmissiveMap" 
-            color="#222327" 
+            color="#17191e" 
             :map="wallNoiseMap" 
             :emissiveMap="wallEmissiveMap" 
             emissive="#ffffff" 
@@ -222,7 +255,7 @@
       </TresGroup>
 
       <!-- Main Chamber Shadow (Render Once) -->
-      <ContactShadows :position="[0, -2.04, 0]" :opacity="0.5" :blur="2.5" :resolution="256" :scale="10" :frames="1" />
+      <ContactShadows :position="[0, -2.04, 0]" :opacity="0.8" :blur="1.8" :resolution="512" :scale="10" :frames="1" />
 
       <!-- Main chamber group (Unit 02 in Phase 3) -->
       <TresGroup 
@@ -260,6 +293,13 @@
         <primitive v-if="transitionChamber" :object="transitionChamber" :scale="2.5" :position="[0, -2.05, 0]" />
       </TresGroup>
 
+      <!-- Chamber portal: a smoke "window" sitting exactly on the interior back wall -->
+      <TresMesh v-if="portal" :position="portal.pos" :material="portalMat">
+        <TresPlaneGeometry :args="portal.size" />
+      </TresMesh>
+      <!-- Cold smoke rolling out of the door as it opens -->
+      <primitive :object="smokeGroup" />
+
       <!-- 3D Floating Dust Particles System -->
       <primitive v-if="dustPoints" :object="dustPoints" />
     </TresCanvas>
@@ -267,14 +307,7 @@
   </div><!-- /canvas-fixed-wrap -->
 
 </div></div></div></div></main>
-<div class="cursor" data-v-37e7b582 data-v-314f53c6>
-  <div class="cursor__inner" data-v-37e7b582>
-    <span data-v-37e7b582></span>
-    <span data-v-37e7b582></span>
-    <span data-v-37e7b582></span>
-    <span data-v-37e7b582></span>
-  </div>
-</div>
+<ReticleCursor />
 </div></div>
   </div>
 </template>
@@ -296,9 +329,157 @@ import Navbar from './components/Navbar.vue'
 import HeroOverlay from './components/HeroOverlay.vue'
 import TelemetryCallouts from './components/TelemetryCallouts.vue'
 import FleetOverview from './components/FleetOverview.vue'
+import PhaseFourText from './components/PhaseFourText.vue'
+import ChamberStatement from './components/ChamberStatement.vue'
+import EndingSection from './components/EndingSection.vue'
+import TempGauge from './components/TempGauge.vue'
+import TrustSection from './components/TrustSection.vue'
+import CompareSection from './components/CompareSection.vue'
+import ReticleCursor from './components/ReticleCursor.vue'
+import { CH_FROM, chCascade } from './utils/splitChars'
 
 extend({ Text })
 
+
+// ── Phase 4 3D headline: per-glyph flip-up cascade, driven by p4 progress ──
+function makeGlyphMat() {
+  const uProg = { value: 0 }
+  const uOut = { value: 0 }
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, depthWrite: false, toneMapped: false, fog: false })
+  mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uProg = uProg
+    shader.uniforms.uOut = uOut
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nuniform float uProg;\nuniform float uOut;\nvarying float vP;')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+        float tw = max(uTroikaTotalBounds.z - uTroikaTotalBounds.x, 0.0001);
+        float gn = clamp((aTroikaGlyphBounds.x - uTroikaTotalBounds.x) / tw, 0.0, 1.0);
+        float pp = clamp((uProg - gn * 0.6) / 0.4, 0.0, 1.0);
+        pp = 1.0 - pow(1.0 - pp, 3.0);
+        float ang = (1.0 - pp) * -1.45;
+        float py = aTroikaGlyphBounds.y - uTroikaPositionOffset.y;
+        float dy = transformed.y - py;
+        transformed.y = py + dy * cos(ang);
+        transformed.z += dy * sin(ang);
+        vP = pp * (1.0 - uOut);`)
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vP;')
+      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.a *= vP;')
+  }
+  return { mat, uProg, uOut }
+}
+// Two blocks flank the chamber (behind its front plane), left high / right low; as the camera
+// dives in they stream off the sides in order — we pass them.
+const p4Words = [
+  { text: 'Built for', anchor: 'right', pos: [-2.5, 2.0, -1.5],  rotY: 0.18,  ...makeGlyphMat() },
+  { text: 'extremes',  anchor: 'right', pos: [-2.5, 0.9, -1.5],  rotY: 0.18,  ...makeGlyphMat() },
+  { text: 'Tested to', anchor: 'left',  pos: [2.5, 0.0, -1.5],   rotY: -0.18, ...makeGlyphMat() },
+  { text: 'failure',   anchor: 'left',  pos: [2.5, -1.1, -1.5],  rotY: -0.18, ...makeGlyphMat() }
+]
+const p4 = { w0: 0, w1: 0, w2: 0, w3: 0, out: 0 }
+const p4GroupRef = ref<any>(null)
+
+// ── Chamber portal: moving smoke "window" on the interior back wall (Jesko-style, our palette) ──
+const portal = shallowRef<{ pos: number[]; size: number[]; frontZ: number } | null>(null)
+const tunnelGroupRef = ref<any>(null)
+let lastPortalOnly = false
+let portalCamZ = -0.3 // final camera z; recomputed from the model's real interior depth
+
+const portalMat = new THREE.ShaderMaterial({
+  transparent: true,
+  toneMapped: false,
+  uniforms: { uTime: { value: 0 }, uReveal: { value: 0 }, uCool: { value: 0 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `
+    varying vec2 vUv;
+    uniform float uTime, uReveal, uCool;
+    float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+    float noise(vec2 p){
+      vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+    }
+    float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { v += a * noise(p); p = p * 2.02 + vec2(1.7, 9.2); a *= 0.5; } return v; }
+    void main(){
+      float t = uTime * 0.05;
+      float cool = clamp(uCool, 0.0, 1.0);
+
+      // HOT: heat, not stripes. Domain-warped turbulence gives soft rising tongues of ember:
+      // black → deep red → orange → amber, with a white-hot core where the heat is strongest.
+      // As the chamber cools it lifts away upward while the blue rises.
+      float lift = smoothstep(0.35, 0.8, cool);
+      float yy = vUv.y - lift * 1.25;
+      vec2 hp = vec2(vUv.x * 1.7, yy * 1.3);
+      float w1 = fbm(hp * 1.5 + vec2(0.0, -t * 2.2));
+      float w2 = fbm(hp * 2.6 + vec2(w1 * 1.9, w1 * 1.4 - t * 3.0));
+      float shimmer = 0.5 + 0.5 * sin((yy * 9.0 - t * 14.0) + w2 * 6.0);
+      float k = smoothstep(-0.1, 0.85, yy - 0.28 + (w2 - 0.5) * 0.95 + shimmer * 0.03);
+      vec3 black  = vec3(0.006, 0.002, 0.0005);
+      vec3 red    = vec3(0.62, 0.035, 0.01);
+      vec3 orange = vec3(1.0, 0.36, 0.05);
+      vec3 amber  = vec3(1.0, 0.58, 0.14);
+      vec3 core   = vec3(1.0, 0.86, 0.55);
+      vec3 hot = mix(black, red, smoothstep(0.0, 0.32, k));
+      hot = mix(hot, orange, smoothstep(0.28, 0.62, k));
+      hot = mix(hot, amber, smoothstep(0.6, 0.9, k));
+      hot = mix(hot, core, smoothstep(0.88, 1.0, k) * (0.4 + 0.6 * w1));
+      float x = vUv.x;
+
+      // COLD: deep blue light rising from the bottom centre, with a few soft clouds in it
+      float dist = length((vUv - vec2(0.5, -0.1)) * vec2(1.0, 2.4));
+      float R = mix(0.0, 2.55, smoothstep(0.3, 1.0, cool));
+      float bl = smoothstep(R, R - 0.95, dist);
+      float cloud = fbm(vUv * vec2(2.4, 1.7) + vec2(t * 0.6, -t * 0.35));
+      vec3 deep = vec3(0.0015, 0.004, 0.009);
+      vec3 mid  = vec3(0.001, 0.075, 0.155);
+      vec3 hi   = vec3(0.10, 0.36, 0.60);
+      vec3 cold = mix(deep, mid, smoothstep(0.0, 0.6, bl));
+      cold = mix(cold, hi, smoothstep(0.55, 1.0, bl) * (0.35 + 0.65 * cloud) * 0.3 * smoothstep(0.6, 1.0, cool));
+
+      vec3 col = mix(hot, cold, smoothstep(0.0, 0.5, bl));
+      col += (hash(vUv * 900.0 + uTime) - 0.5) * 0.006;           // dither: no banding
+
+      // the window brightens up from the bottom as the door opens
+      float a = smoothstep(0.0, 0.3, uReveal * 1.6 - (1.0 - vUv.y));
+      gl_FragColor = vec4(col, a);
+      #include <colorspace_fragment>
+    }
+  `
+})
+const camRight = new THREE.Vector3()
+const camUp = new THREE.Vector3()
+const pq = new THREE.Vector3()
+
+function makePuffTexture() {
+  const c = document.createElement('canvas')
+  c.width = c.height = 128
+  const g = c.getContext('2d')!
+  const base = g.createRadialGradient(64, 64, 4, 64, 64, 62)
+  base.addColorStop(0, 'rgba(255,255,255,0.9)')
+  base.addColorStop(1, 'rgba(255,255,255,0)')
+  g.fillStyle = base
+  g.fillRect(0, 0, 128, 128)
+  for (let i = 0; i < 34; i++) {
+    const x = 20 + Math.random() * 88, y = 20 + Math.random() * 88, r = 10 + Math.random() * 26
+    const b = g.createRadialGradient(x, y, 0, x, y, r)
+    b.addColorStop(0, `rgba(255,255,255,${0.06 + Math.random() * 0.16})`)
+    b.addColorStop(1, 'rgba(255,255,255,0)')
+    g.fillStyle = b
+    g.fillRect(x - r, y - r, r * 2, r * 2)
+  }
+  return new THREE.CanvasTexture(c)
+}
+const smokeGroup = new THREE.Group()
+const puffTex = makePuffTexture()
+const puffs = Array.from({ length: 28 }, () => {
+  const mat = new THREE.SpriteMaterial({ map: puffTex, color: 0xddd4d0, transparent: true, opacity: 0, depthWrite: false, fog: false, toneMapped: false })
+  const s = new THREE.Sprite(mat)
+  smokeGroup.add(s)
+  return { s, mat, off: new THREE.Vector3(), seed: Math.random(), v: 0.5 + Math.random() * 0.6, x: (Math.random() - 0.5) * 2.8, y: -1.95 + Math.random() * 1.0, size: 2.0 + Math.random() * 2.4, sway: Math.random() * 6.28 }
+})
+
+
+
+const tempGaugeRef = ref<any>(null)
 const heroOverlayRef = ref<any>(null)
 const telemetryCalloutsRef = ref<any>(null)
 const fleetOverviewRef = ref<any>(null)
@@ -387,7 +568,7 @@ function generateTextures() {
   const wCtx = wallCanvas.getContext('2d')!
   
   // Base architectural concrete tone (tinty cold bluish ash slate)
-  wCtx.fillStyle = '#1c2426'
+  wCtx.fillStyle = '#1b1e24'
   wCtx.fillRect(0, 0, 1024, 1024)
   
   // Natural fine aggregate concrete stippling with cold bluish-ash tone
@@ -405,11 +586,11 @@ function generateTextures() {
   const horizontalSeams = [256, 512, 768]
   horizontalSeams.forEach(y => {
     // Reveal groove shadow
-    wCtx.strokeStyle = 'rgba(10, 16, 17, 0.65)'
+    wCtx.strokeStyle = 'rgba(7, 8, 11, 0.65)'
     wCtx.lineWidth = 3
     wCtx.beginPath(); wCtx.moveTo(0, y); wCtx.lineTo(1024, y); wCtx.stroke()
     // Concrete edge chamfer catchlight (cold ash highlight)
-    wCtx.strokeStyle = 'rgba(210, 230, 228, 0.09)'
+    wCtx.strokeStyle = 'rgba(222, 228, 238, 0.09)'
     wCtx.lineWidth = 1.5
     wCtx.beginPath(); wCtx.moveTo(0, y + 2); wCtx.lineTo(1024, y + 2); wCtx.stroke()
   })
@@ -417,10 +598,10 @@ function generateTextures() {
   // Major vertical slab expansion joints (wide spacing = 12m wide bays)
   const verticalSeams = [512]
   verticalSeams.forEach(x => {
-    wCtx.strokeStyle = 'rgba(10, 16, 17, 0.65)'
+    wCtx.strokeStyle = 'rgba(7, 8, 11, 0.65)'
     wCtx.lineWidth = 3
     wCtx.beginPath(); wCtx.moveTo(x, 0); wCtx.lineTo(x, 1024); wCtx.stroke()
-    wCtx.strokeStyle = 'rgba(210, 230, 228, 0.09)'
+    wCtx.strokeStyle = 'rgba(222, 228, 238, 0.09)'
     wCtx.lineWidth = 1.5
     wCtx.beginPath(); wCtx.moveTo(x + 2, 0); wCtx.lineTo(x + 2, 1024); wCtx.stroke()
   })
@@ -431,13 +612,13 @@ function generateTextures() {
   tieX.forEach(x => {
     tieY.forEach(y => {
       // Outer subtle shadow bevel
-      wCtx.fillStyle = 'rgba(8, 14, 15, 0.45)'
+      wCtx.fillStyle = 'rgba(5, 6, 9, 0.45)'
       wCtx.beginPath(); wCtx.arc(x, y + 0.5, 4, 0, Math.PI * 2); wCtx.fill()
       // Recessed hole interior
-      wCtx.fillStyle = '#0f1718'
+      wCtx.fillStyle = '#0d0f13'
       wCtx.beginPath(); wCtx.arc(x, y, 3, 0, Math.PI * 2); wCtx.fill()
       // Tiny bottom rim catchlight
-      wCtx.strokeStyle = 'rgba(210, 230, 228, 0.1)'
+      wCtx.strokeStyle = 'rgba(222, 228, 238, 0.1)'
       wCtx.lineWidth = 1
       wCtx.beginPath(); wCtx.arc(x, y, 3, 0.2 * Math.PI, 0.8 * Math.PI); wCtx.stroke()
     })
@@ -446,7 +627,7 @@ function generateTextures() {
   // Smooth ambient occlusion at bottom (seamless junction with floor)
   const floorShadow = wCtx.createLinearGradient(0, 860, 0, 1024)
   floorShadow.addColorStop(0, 'rgba(0, 0, 0, 0)')
-  floorShadow.addColorStop(1, 'rgba(8, 14, 15, 0.75)')
+  floorShadow.addColorStop(1, 'rgba(5, 6, 9, 0.75)')
   wCtx.fillStyle = floorShadow
   wCtx.fillRect(0, 860, 1024, 164)
 
@@ -464,8 +645,8 @@ function generateTextures() {
 
   // Overhead lightbox grazing glow running down the top of the wall
   const eWash = eCtx.createLinearGradient(0, 0, 0, 320)
-  eWash.addColorStop(0, 'rgba(210, 232, 230, 0.22)')
-  eWash.addColorStop(0.5, 'rgba(180, 208, 205, 0.07)')
+  eWash.addColorStop(0, 'rgba(226, 232, 242, 0.22)')
+  eWash.addColorStop(0.5, 'rgba(190, 200, 218, 0.07)')
   eWash.addColorStop(1, 'rgba(0, 0, 0, 0)')
   eCtx.fillStyle = eWash
   eCtx.fillRect(0, 0, 1024, 320)
@@ -479,7 +660,7 @@ function generateTextures() {
   const floorCanvas = document.createElement('canvas')
   floorCanvas.width = 512; floorCanvas.height = 512
   const fCtx = floorCanvas.getContext('2d')!
-  fCtx.fillStyle = '#091012'
+  fCtx.fillStyle = '#080a0e'
   fCtx.fillRect(0, 0, 512, 512)
 
   // Silky aggregate micro-texture
@@ -494,7 +675,7 @@ function generateTextures() {
   fCtx.putImageData(fImg, 0, 0)
 
   // Architectural expansion joint border
-  fCtx.strokeStyle = 'rgba(200, 225, 222, 0.035)'
+  fCtx.strokeStyle = 'rgba(214, 222, 236, 0.035)'
   fCtx.lineWidth = 1
   fCtx.strokeRect(0, 0, 512, 512)
 
@@ -665,7 +846,10 @@ function onChamberPointerUp(unitIdx: number) {
 
 const hoveredFleetUnit = ref<number | null>(null)
 
+let hoveredChamberIdx = -1
+
 function onChamberHover(unitIdx: number) {
+  hoveredChamberIdx = unitIdx
   document.body.classList.add('is-hovering-chamber')
   if (scrollProxy.cloneScale > 0.3) {
     hoveredFleetUnit.value = unitIdx
@@ -674,6 +858,7 @@ function onChamberHover(unitIdx: number) {
 }
 
 function onChamberLeave() {
+  hoveredChamberIdx = -1
   document.body.classList.remove('is-hovering-chamber')
   hoveredFleetUnit.value = null
   fleetOverviewRef.value?.onHoverEnd()
@@ -746,7 +931,7 @@ let videoElB: HTMLVideoElement | null = null
 
 // Reactive scene state
 const exposure       = ref(1)
-const spotlightIntensity = ref(120) // Default for touch devices (+0.2 boost)
+const spotlightIntensity = ref(95) // Default for touch devices (retuned for Neutral tone mapping, which clips highlights harder)
 let mouseHasMoved = false
 
 // GLB scenes
@@ -815,6 +1000,7 @@ const scrollProxy = {
   lookX: 0, lookY: 0, lookZ: 0,
   camRoll: 0,
   fogFar: 35, // Dynamic fog distance
+  temp: 180, // chamber temperature (deg C). We enter hot (+180, ember) and cool to -70 (deep blue) as the page scrolls
   cloneAx: 0, cloneAy: 0, cloneAz: -80, 
   cloneBx: 0, cloneBy: 0, cloneBz: -80,
   cloneScale: 0, // Used to keep clones completely invisible until Phase 3
@@ -962,7 +1148,8 @@ onMounted(() => {
   const scrollerEl = document.querySelector('#scroller') as HTMLElement
   if (scrollerEl) scrollerEl.scrollTop = 0 // Reset custom scroller
   
-  const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, lerp: 0.08, smoothWheel: true })
+  // eventsTarget: window so wheel/touch still scrolls while the pointer is over the interactive overlay sections
+  const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, eventsTarget: window, lerp: 0.08, smoothWheel: true })
   ;(window as any).lenisInstance = lenis
   
   lenis.on('scroll', (e: any) => {
@@ -976,7 +1163,7 @@ onMounted(() => {
   window.addEventListener('mousemove', (e) => {
     if (!mouseHasMoved) {
       mouseHasMoved = true
-      gsap.to(spotlightIntensity, { value: 180, duration: 0.5, overwrite: true }) // +0.2 boost
+      gsap.to(spotlightIntensity, { value: 140, duration: 0.5, overwrite: true }) // +0.2 boost
     }
     const nx = (e.clientX/window.innerWidth)*2-1
     const ny = -(e.clientY/window.innerHeight)*2+1
@@ -984,8 +1171,6 @@ onMounted(() => {
     targetMouseOffsetY = ny*0.08
     targetMouseX       = nx
     targetMouseY       = ny
-    const cursor = document.querySelector('.cursor') as HTMLElement
-    if (cursor) gsap.to(cursor,{ x:e.clientX, y:e.clientY, xPercent:-50, yPercent:-50, duration:0.1, ease:'power2.out' })
   })
 
   // ── Main ticker (render loop logic) ────────────────────────────────────
@@ -1075,8 +1260,10 @@ onMounted(() => {
     if (cloneARef.value && cloneBRef.value) {
       const fade = scrollProxy.cloneFade
       
-      const updateClone = (cloneRef: any, x: number, y: number, z: number) => {
+      const updateClone = (cloneRef: any, x: number, y: number, z: number, unit: number) => {
         cloneRef.position.set(isDebug ? 0 : x, isDebug ? y : y, isDebug ? 0 : z)
+        const lean = hoveredFleetUnit.value === unit ? targetMouseX * 0.3 : 0
+        cloneRef.rotation.y += (lean - cloneRef.rotation.y) * 0.08
         cloneRef.scale.setScalar(isDebug ? 1 : scrollProxy.cloneScale)
         
         // Only toggle visibility. Do not traverse materials on every frame!
@@ -1087,14 +1274,82 @@ onMounted(() => {
       }
       
       // Uniform chamber sizing matching reference
-      updateClone(cloneARef.value, scrollProxy.cloneAx, scrollProxy.cloneAy, scrollProxy.cloneAz)
-      updateClone(cloneBRef.value, scrollProxy.cloneBx, scrollProxy.cloneBy, scrollProxy.cloneBz)
+      updateClone(cloneARef.value, scrollProxy.cloneAx, scrollProxy.cloneAy, scrollProxy.cloneAz, 0)
+      updateClone(cloneBRef.value, scrollProxy.cloneBx, scrollProxy.cloneBy, scrollProxy.cloneBz, 2)
     }
     // Hide transition chamber completely when scale is 0 to save massive draw calls
     if (transitionChamberRef.value) {
       transitionChamberRef.value.position.set(0, 0, scrollProxy.transitionZ)
       transitionChamberRef.value.scale.setScalar(scrollProxy.transitionScale)
       transitionChamberRef.value.visible = scrollProxy.transitionScale > 0
+    }
+
+    // A hovered chamber that has since been hidden/moved away fires no pointerleave: drop the state.
+    if (hoveredChamberIdx !== -1) {
+      const ref = [cloneARef.value, chamberGroupRef.value, cloneBRef.value][hoveredChamberIdx]
+      if (!ref || !ref.visible || (hoveredChamberIdx !== 1 && scrollProxy.cloneFade <= 0) || scrollProxy.camZ < portalCamZ + 1.1) onChamberLeave()
+    }
+
+    // Once the smoke window fills the screen, nothing else is visible: stop drawing the
+    // tunnel, chambers and floor mirror (huge saving) and render the portal alone.
+    const portalOnly = scrollProxy.camZ < portalCamZ + 1.1
+    if (portalOnly !== lastPortalOnly) {
+      lastPortalOnly = portalOnly
+      ;[tunnelGroupRef.value, chamberGroupRef.value, bgTextGroupRef.value].forEach((g: any) => { if (g) g.visible = !portalOnly })
+      if (dustPoints.value) dustPoints.value.visible = !portalOnly
+    }
+
+    // Hot/cold window field + the smoke that rolls out of the door
+    if (portal.value) {
+      const u = portalMat.uniforms
+      u.uTime.value = time
+      u.uReveal.value = MathUtils.smoothstep(scrollProxy.door, 0.04, 0.9)
+      u.uCool.value = MathUtils.clamp((180 - scrollProxy.temp) / 250, 0, 1)
+
+      // Smoke seeps out of the opening as soon as the lid cracks, and parts around the cursor
+      const open = MathUtils.smoothstep(scrollProxy.door, 0.02, 0.35)
+      const near = MathUtils.smoothstep(scrollProxy.camZ, 3.5, 8)
+      const cam = cameraRef.value
+      if (cam) {
+        camRight.setFromMatrixColumn(cam.matrixWorld, 0)
+        camUp.setFromMatrixColumn(cam.matrixWorld, 1)
+      }
+      const aspect = window.innerWidth / window.innerHeight
+      puffs.forEach((p) => {
+        const life = (time * 0.045 * p.v + p.seed) % 1
+        const bx = p.x * (1 + life * 1.5) + Math.sin(time * 0.4 + p.sway) * 0.25 * life
+        const by = p.y + life * 0.9
+        const bz = portal.value!.frontZ - 0.9 + life * 6.5
+        let tx = 0, ty = 0, tz = 0
+        if (cam && mouseHasMoved && open * near > 0.05) {
+          pq.set(bx + p.off.x, by + p.off.y, bz + p.off.z).project(cam)
+          const dx = (pq.x - targetMouseX) * aspect, dy = pq.y - targetMouseY
+          const d = Math.hypot(dx, dy), R = 0.55
+          if (d < R && pq.z < 1) {
+            const f = 1 - d / R, push = f * f * 2.8, nx = dx / (d || 1), ny = dy / (d || 1)
+            tx = (camRight.x * nx + camUp.x * ny) * push
+            ty = (camRight.y * nx + camUp.y * ny) * push
+            tz = (camRight.z * nx + camUp.z * ny) * push
+          }
+        }
+        p.off.x += (tx - p.off.x) * 0.09
+        p.off.y += (ty - p.off.y) * 0.09
+        p.off.z += (tz - p.off.z) * 0.09
+        p.s.position.set(bx + p.off.x, by + p.off.y, bz + p.off.z)
+        const sc = p.size * (0.45 + life * 1.9)
+        p.s.scale.set(sc, sc, 1)
+        p.mat.opacity = open * near * 0.34 * Math.sin(Math.PI * life)
+      })
+    }
+
+    // Persistent temperature gauge
+    tempGaugeRef.value?.setTemp(scrollProxy.temp)
+
+    // Phase 4 headline progress -> shader uniforms
+    if (p4GroupRef.value) {
+      const prog = [p4.w0, p4.w1, p4.w2, p4.w3]
+      p4Words.forEach((w, i) => { w.uProg.value = prog[i]; w.uOut.value = p4.out })
+      p4GroupRef.value.visible = p4.w0 > 0 && p4.out < 1
     }
 
     // Update Phase 0 Text/Logo Handoff
@@ -1266,6 +1521,36 @@ onMounted(() => {
     console.log(`[BASE Y CHECK] Chamber Base Y: -2.05. Floor Plane Y: -2.05. Sits exactly on floor.`)
     console.log("------------------------")
 
+    // Interior cavity -> exact-size smoke window on its back wall (world = model * 2.5 + (0,-2.05,0))
+    let cavity: any = null
+    gltf.scene.traverse((o: any) => { if (o.isMesh && o.material?.name === 'Cavity_Interior.001') cavity = o })
+    gltf.scene.updateMatrixWorld(true)
+    const cb = cavity ? new Box3().setFromObject(cavity) : new Box3(new Vector3(-0.623, 0.769, -1.005), new Vector3(0.623, 2.038, 0.937))
+    const W = (cb.max.x - cb.min.x) * 2.5, H = (cb.max.y - cb.min.y) * 2.5
+    const pcx = ((cb.max.x + cb.min.x) / 2) * 2.5, pcy = ((cb.max.y + cb.min.y) / 2) * 2.5 - 2.05
+    // The visible interior back (fan plate + shelf) sits well in front of the cavity's rear bound,
+    // so find the nearest surface by casting rays from inside the cavity toward the back.
+    let hitZ = cb.min.z
+    {
+      const rc = new THREE.Raycaster()
+      const midY = (cb.min.y + cb.max.y) / 2, startZ = cb.max.z - 0.25
+      const spanX = (cb.max.x - cb.min.x) * 0.3, spanY = (cb.max.y - cb.min.y) * 0.3
+      let nearest = -Infinity
+      ;[[0, 0], [spanX, spanY], [-spanX, spanY], [spanX, -spanY], [-spanX, -spanY]].forEach(([dx, dy]) => {
+        rc.set(new Vector3((cb.max.x + cb.min.x) / 2 + dx, midY + dy, startZ), new Vector3(0, 0, -1))
+        const hit = rc.intersectObject(gltf.scene, true)[0]
+        if (hit) nearest = Math.max(nearest, hit.point.z)
+      })
+      if (nearest > -Infinity) hitZ = nearest
+    }
+    const portalZ = hitZ * 2.5 + 0.04
+    portalCamZ = portalZ + 2.2 // distance at which the window fills the frame (incl. wide viewports)
+    portal.value = {
+      pos: [pcx, pcy, portalZ],
+      size: [W - 0.02, H - 0.02],
+      frontZ: cb.max.z * 2.5 + 0.1
+    }
+
     baseSizeY = size.y
     const center = new Vector3(); box.getCenter(center)
     center.multiplyScalar(2.5); center.add(new Vector3(0,-2.05,0))
@@ -1299,8 +1584,27 @@ onMounted(() => {
       doorAnim.duration = gltf.animations[0].duration
     }
 
-    cloneA.value = gltf.scene.clone(true)
-    cloneB.value = gltf.scene.clone(true)
+    // Side units are small on screen: use a ~37% triangle LOD (178k vs 477k, topology-preserving: no fold artifacts) so the fleet phase
+    // (3 chambers + mirrored floor pass) stays as light as the hero. Falls back to the full mesh.
+    const useFullClones = () => {
+      cloneA.value = gltf.scene.clone(true)
+      cloneB.value = gltf.scene.clone(true)
+    }
+    loader.load('/models/chamber_lod.glb', (lod: any) => {
+      // Guard: if the main model was replaced and this LOD is stale, fall back to the full mesh.
+      const a = new Box3().setFromObject(gltf.scene), b = new Box3().setFromObject(lod.scene)
+      const sa = new Vector3(), sb = new Vector3(); a.getSize(sa); b.getSize(sb)
+      if (sa.distanceTo(sb) > 0.03 * sa.length()) { useFullClones(); return }
+      lod.scene.traverse((child: any) => {
+        if (!child.isMesh) return
+        child.castShadow = true
+        child.receiveShadow = false
+        const mats = Array.isArray(child.material) ? child.material : [child.material]
+        mats.forEach((mat: any) => { if (mat) { mat.fog = false; mat.depthWrite = true } })
+      })
+      cloneA.value = lod.scene.clone(true)
+      cloneB.value = lod.scene.clone(true)
+    }, undefined, useFullClones)
     transitionChamber.value = gltf.scene.clone(true)
 
     buildScrollTimeline()
@@ -1319,6 +1623,11 @@ function buildScrollTimeline() {
         scrub: 1.5, // 1.5s physical smoothing delay (Awwwards heavy physics)
       }
     })
+
+    // Fleet tags/strips are invisible outside phase 3 — they must not catch the pointer either.
+    tl.set(['.chamber-tag-wrapper', '.product-spec-strip'], { pointerEvents: 'none' }, 0)
+    tl.set(['.chamber-tag-wrapper', '.product-spec-strip'], { pointerEvents: 'auto' }, 59)
+    tl.set(['.chamber-tag-wrapper', '.product-spec-strip'], { pointerEvents: 'none' }, 104.5)
 
     // ── Phase 0 & 2: Intro Dissolve & Seamless Spec Pan (0 to 30) ──
     // 1. Immediately dissolve 3D background text on scroll start
@@ -1397,6 +1706,8 @@ function buildScrollTimeline() {
       25
     )
 
+    tl.fromTo('.callout-heading .ch', CH_FROM, chCascade(5, 0.02), 24)
+    tl.fromTo('.callout-fade', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 5, stagger: 0.3, ease: 'power2.out' }, 23)
     // Retract lines and slide typography out through line masks before Phase 3
     tl.to('.vanishing-line', { scaleX: 0, transformOrigin: 'right center', duration: 5, stagger: 0.1, ease: 'power2.in' }, 47.5)
     tl.to('.callout-line', { y: '-115%', opacity: 0, duration: 4.5, stagger: 0.05, ease: 'power2.in' }, 48)
@@ -1435,6 +1746,7 @@ function buildScrollTimeline() {
       { y: '0%', opacity: 1, duration: 4.5, stagger: 0.1, ease: 'power3.out' }, 
       56.5
     )
+    tl.fromTo('.fleet-title-line .ch', CH_FROM, chCascade(4.5, 0.03), 56.8)
     tl.fromTo('.fleet-vector-line', 
       { opacity: 0 }, 
       { opacity: 1, duration: 3.5, ease: 'power2.out' }, 
@@ -1445,6 +1757,7 @@ function buildScrollTimeline() {
       { opacity: 1, scale: 1, duration: 3.5, stagger: 0.1, ease: 'back.out(1.5)' }, 
       57.5
     )
+    tl.fromTo('.fleet-fade', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 3, stagger: 0.2, ease: 'power2.out' }, 57)
     tl.fromTo('.fleet-lead-text', 
       { opacity: 0, y: 15 }, 
       { opacity: 1, y: 0, duration: 4, ease: 'power2.out' }, 
@@ -1459,41 +1772,102 @@ function buildScrollTimeline() {
     // ── Phase 3 Extended Plateau (74 to 104): 30 full units of peaceful resting state! ──
     // All 3 chambers rest solidly in place, tags and specs are fully visible and clickable.
 
+    // Plateau is never frozen: slow dolly keeps the hold alive (pacing)
+    tl.to(scrollProxy, { camX: -7.8, camY: baseCameraPos.y + 5.6, duration: 30, ease: 'none' }, 74)
+
     // ── Fleet Overview UI Exit (104 to 108): smoothly slide out before Phase 4 door dive ──
     tl.to('.fleet-title-line', { y: '-115%', opacity: 0, duration: 3, stagger: 0.04, ease: 'power2.in' }, 104)
-    tl.to(['.fleet-vector-line', '.chamber-tag-wrapper', '.fleet-lead-text', '.product-spec-strip'], { opacity: 0, duration: 2.5, ease: 'power2.in' }, 104.5)
+    tl.to(['.fleet-vector-line', '.chamber-tag-wrapper', '.fleet-lead-text', '.fleet-fade', '.product-spec-strip'], { opacity: 0, duration: 2.5, ease: 'power2.in' }, 104.5)
     tl.to('.fleet-overview-container', { opacity: 0, duration: 2, ease: 'power2.in' }, 107)
 
-    // ── Phase 4: Cinematic Transition into Chamber Breach (108 to 142) ──
-    // Fade out clones smoothly as the camera aligns
-    tl.to(scrollProxy, { cloneFade: 0, duration: 5, ease: 'power2.out' }, 108)
-    
-    // 1. Center the camera's X/Y smoothly (108 to 122)
-    tl.to(scrollProxy, { 
-      camX: 0, 
-      camY: baseCameraTarget.y + 0.8, 
+    // ── Dive into the chamber (104 to 158) ──
+    // Re-timed for a gentler entrance: the camera takes 52 units instead of 32, and every move
+    // starts before the previous one stops so the fleet -> dive handoff never stalls.
+    // The side units shrink away instead of popping out of existence.
+    // The fleet folds back into one unit: both side units glide in and tuck behind the main chamber.
+    tl.to(scrollProxy, { cloneAx: 0, cloneBx: 0, cloneAz: -7, cloneBz: -7, duration: 16, ease: 'power3.inOut' }, 104)
+    tl.to(scrollProxy, { cloneFade: 0, duration: 0.1 }, 122)
+
+    // 1. Centre the camera's X/Y (104 to 130)
+    tl.to(scrollProxy, {
+      camX: 0,
+      camY: baseCameraTarget.y + 0.8,
       lookX: 0,
       lookY: baseCameraTarget.y + 0.8,
       lookZ: 0,
       fogFar: 35, // Return fog to normal
       fleetLightIntensity: 0, // Fade out side lights as we center
-      duration: 14, 
-      ease: "power2.inOut" 
-    }, 108)
+      duration: 26,
+      ease: 'sine.inOut'
+    }, 104)
 
-    // 2. Start opening the door seamlessly on approach (114 to 130)
-    tl.to(scrollProxy, { door: 1, duration: 16, ease: "power2.inOut" }, 114)
+    // 2. Door opens on approach (114 to 140)
+    tl.to(scrollProxy, { door: 1, duration: 26, ease: 'power2.inOut' }, 114)
 
-    // 3. Fluid Z-dive towards the chamber (110 to 142)
-    tl.to(scrollProxy, { camZ: 2.0, duration: 32, ease: "power2.inOut" }, 110)
+    // 3. Fluid Z-dive all the way into the chamber, until the smoke window fills the screen (106 to 158)
+    tl.to(scrollProxy, { camZ: portalCamZ, duration: 52, ease: 'power2.inOut' }, 106)
+    tl.to(scrollProxy, { lookZ: -12, duration: 24, ease: 'sine.inOut' }, 134) // keep looking forward once inside
 
-    // ── Phase 5: Next-Scene Transition Chamber (134 to 142) ──
-    tl.to(scrollProxy, {
-      transitionZ: -5,
-      transitionScale: 1,
-      duration: transitionChamberArrivalDuration,
-      ease: "power3.out"
-    }, 134)
+    // ── Pacing: 108–124 is deliberate silence — the door opens on an empty frame. ──
+    // ── Phase 4 headline (124 to 143): a slower build, the camera flies between the words ──
+    tl.to(p4, { w0: 1, duration: 7, ease: 'power2.out' }, 124)
+    tl.to(p4, { w1: 1, duration: 7, ease: 'power2.out' }, 125)
+    tl.to(p4, { w2: 1, duration: 7, ease: 'power2.out' }, 126.8)
+    tl.to(p4, { w3: 1, duration: 7, ease: 'power2.out' }, 127.8)
+    tl.to(p4, { out: 1, duration: 4, ease: 'power1.in' }, 139.5)
+    tl.fromTo('.p4-fade', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 4, stagger: 0.3, ease: 'power2.out' }, 128)
+    tl.to('.p4-fade', { opacity: 0, y: -10, duration: 3, ease: 'power2.in' }, 136)
+
+    // ── Inside the chamber (142 to 262) ──
+    // We enter hot (ember window), then the chamber cools to -70 (deep blue) while the page
+    // scrolls: the statement rises past a persistent temperature gauge. Then the call to action.
+    // Timeline end is pinned to 262; .layout__page is sized to match (see style block).
+    tl.set('.cs-root', { visibility: 'visible' }, 142)
+    tl.fromTo('.cs-text',
+      { y: () => window.innerHeight * 1.1 },
+      { y: () => -((document.querySelector('.cs-statement') as HTMLElement).offsetHeight + window.innerHeight * 0.12), duration: 34, ease: 'none' },
+      166
+    )
+    // The ember eyebrow lives only until we enter the chamber
+    tl.fromTo('.p4-eyebrow', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 3, ease: 'power2.out' }, 124)
+    tl.to('.p4-eyebrow', { opacity: 0, duration: 2 }, 143)
+
+    // Temperature gauge: constant presence; the marker drops as the field turns from ember to blue
+    tl.set('.tg-root', { visibility: 'visible' }, 146)
+    tl.fromTo('.tg-root', { opacity: 0, x: 16 }, { opacity: 1, x: 0, duration: 4, ease: 'power2.out' }, 148)
+    tl.to(scrollProxy, { temp: -70, duration: 58, ease: 'power1.inOut' }, 164)
+    tl.to('.tg-root', { opacity: 0, x: 16, duration: 4, ease: 'power2.in' }, 224)
+
+    // The trust column keeps scrolling straight on from the statement, over the cold chamber
+    tl.set('.tr-root', { visibility: 'visible' }, 188)
+    tl.fromTo('.tr-scroll',
+      { y: () => window.innerHeight * 1.1 },
+      { y: () => -((document.querySelector('.tr-scroll') as HTMLElement).offsetHeight + window.innerHeight * 0.1), duration: 44, ease: 'none' },
+      192
+    )
+
+    // Whiteout: the cold blue lifts into white, then the white clears to the brand tint
+    tl.fromTo('.tr-haze', { opacity: 1, yPercent: 100 }, { yPercent: 0, duration: 16, ease: 'power1.inOut' }, 228)
+    tl.set('.tr-sky', { opacity: 1 }, 245)
+    tl.to('.tr-haze', { opacity: 0, duration: 12, ease: 'power1.inOut' }, 247)
+    tl.to('.tr-cloud', { opacity: 1, duration: 14, stagger: 4 }, 252)
+
+    // B: manual vs autonomous. The dark panels slide in from the left as you scroll.
+    tl.set('.cp-root', { visibility: 'visible' }, 250)
+    tl.fromTo('.cp-fade', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 4, stagger: 0.5, ease: 'power2.out' }, 252)
+    tl.fromTo('.cp-dark', { xPercent: -101 }, { xPercent: 0, duration: 16, stagger: 7, ease: 'power2.inOut' }, 255)
+    tl.set('.cp-dark', { pointerEvents: 'auto' }, 278)
+    tl.set('.cp-dark', { pointerEvents: 'none' }, 296)
+    tl.to('.cp-panels, .cp-fade', { opacity: 0, y: -24, duration: 4, ease: 'power2.in' }, 296)
+    tl.set('.cp-root', { visibility: 'hidden' }, 300.1)
+
+    // Call to action on the blue
+    tl.set('.end-root', { visibility: 'visible' }, 299)
+    tl.set('.end-interactive', { pointerEvents: 'none' }, 0)
+    tl.fromTo('.cta-line .ch', CH_FROM, chCascade(5, 0.03), 301)
+    tl.fromTo('.end-cta-fade', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 3.5, stagger: 0.5, ease: 'power2.out' }, 306)
+    tl.set('.end-interactive', { pointerEvents: 'auto' }, 309)
+    tl.to({}, { duration: 1 }, 321) // pins timeline end at 322
 
   }, 600)
 }
@@ -1591,15 +1965,18 @@ onMounted(() => {
 @import "./assets/style.css";
 
 /* ── 6.5×100vh scroll space for deeper cinematic timing and resting plateau ── */
-.layout__page { min-height: 650vh; }
+:root {
+  --font-display: 'Monument Extended', sans-serif;
+  --font-body: 'AkkuratMono', ui-monospace, monospace;
+  --ember: #ff6a1a;
+}
+.layout__page { min-height: 1356vh; } /* 100vh + 3.9007vh per timeline unit; timeline ends at 322 */
 
 body, #app { background: transparent !important; overflow-x: hidden; }
 .preloader, .loader, .popup.faq { display: none !important; }
 .start-screen-wrapper,.start-screen,.main-page,.layout,.layout__page { visibility:visible !important; opacity:1 !important; }
 .start-header,.start-screen__footer,.nightmode-label { opacity:1 !important; visibility:visible !important; }
 .start-screen__mode-switcher { visibility:visible !important; opacity:1 !important; z-index:50; cursor:pointer; }
-.cursor { position:fixed !important; left:0; top:0; pointer-events:none !important; z-index:9999; }
-.cursor * { pointer-events:none !important; }
 
 /* Force ALL wrappers transparent — override scoped styles */
 [data-v-34202237].start-screen,
@@ -1626,14 +2003,23 @@ body, #app { background: transparent !important; overflow-x: hidden; }
 /* Film grain - High-performance texture (zero SVG filter stalls, 120+ FPS) */
 .film-grain {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: -50px;
   pointer-events: none;
   z-index: 995;
-  opacity: 0.035;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 80%);
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
+  background-size: 220px 220px;
+  animation: film-grain-shift 0.6s steps(6) infinite;
+}
+@keyframes film-grain-shift {
+  0% { transform: translate(0, 0); }
+  17% { transform: translate(-31px, 18px); }
+  33% { transform: translate(24px, -27px); }
+  50% { transform: translate(-12px, -35px); }
+  67% { transform: translate(33px, 21px); }
+  83% { transform: translate(-26px, 29px); }
+  100% { transform: translate(0, 0); }
 }
 
 /* ── Volumetric Atmospheric Haze (Kills pure digital black without compositor blend stalls) ── */
@@ -1642,9 +2028,10 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   top: 0; left: 0; width: 100vw; height: 100vh;
   pointer-events: none;
   z-index: 4;
-  background: 
-    radial-gradient(ellipse 65% 55% at 50% 48%, rgba(200, 225, 222, 0.03) 0%, rgba(10, 18, 20, 0.04) 55%, transparent 85%),
-    linear-gradient(180deg, rgba(10, 16, 17, 0.3) 0%, transparent 40%, rgba(5, 10, 11, 0.5) 100%);
+  /* Grade: crush the edges, never lift the blacks. Cool-neutral, no tint. */
+  background:
+    radial-gradient(ellipse 78% 70% at 50% 46%, transparent 38%, rgba(2, 3, 6, 0.62) 100%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.28) 0%, transparent 28%, transparent 72%, rgba(2, 3, 6, 0.4) 100%);
 }
 
 /* ── Smoky Frosted Blob & Info Block ── */
@@ -1730,7 +2117,7 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   transform: translate(-50%, -50%);
   width: 340px;
   color: #e8ece6;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   z-index: 1001;
   pointer-events: none;
   visibility: hidden;
@@ -1749,18 +2136,13 @@ body, #app { background: transparent !important; overflow-x: hidden; }
 }
 .info-close-btn:hover { opacity: 1; }
 .info-index { font-weight: 300; letter-spacing: 4px; font-size: 12px; margin-bottom: 20px; }
-.info-title { font-weight: 800; font-size: 42px; line-height: 1.1; margin: 0 0 15px 0; letter-spacing: -1px; }
+.info-title { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-height: 1.1; margin: 0 0 15px 0; letter-spacing: -1px; }
 .info-title .outline-text {
   -webkit-text-stroke: 1px #e8ece6;
   color: transparent;
 }
 .info-subtitle { font-weight: 600; font-size: 10px; letter-spacing: 2px; margin-bottom: 20px; }
-.info-pill { display: inline-block; font-family: monospace; background: #e8ece6; color: black; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-bottom: 20px; font-weight: 600; }
+.info-pill { display: inline-block; font-family: var(--font-body); background: #e8ece6; color: black; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-bottom: 20px; font-weight: 600; }
 .info-desc { font-weight: 300; font-size: 14px; line-height: 1.5; margin-bottom: 20px; opacity: 0.8; letter-spacing: 0.02em; }
 .info-specs { font-weight: 400; font-size: 11px; letter-spacing: 1px; opacity: 0.6; display: flex; flex-direction: column; gap: 4px; align-items: center; }
-
-body.is-hovering-chamber .cursor__inner {
-  transform: scale(1.5);
-  transition: transform 0.2s ease;
-}
 </style>

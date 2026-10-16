@@ -1,5 +1,6 @@
 <template>
   <div class="telemetry-callouts-layer" :class="{ 'is-active': isActive }">
+    <div class="callouts-eyebrow callout-fade"><i></i><span>02</span><span class="callout-sep"></span><span>Anatomy</span></div>
     <div
       v-for="(item, idx) in callouts"
       :key="item.id"
@@ -7,6 +8,10 @@
       :style="{ top: item.top, left: item.left }"
       :ref="el => setItemRef(el, idx)"
     >
+      <div class="callout-meta callout-fade">
+        <span class="callout-idx">{{ item.index }}</span><span class="callout-sep"></span><span>{{ item.part }}</span>
+      </div>
+
       <!-- Heading (White, Semi-bold, large) with Line Mask Entrance -->
       <div class="callout-line-mask">
         <h3 class="callout-heading callout-line">{{ item.heading }}</h3>
@@ -20,17 +25,18 @@
         <div class="vanishing-line"></div>
         <!-- Target Reticle [ + ] exactly at the point on the chamber -->
         <div class="callout-target callout-dot">
+          <span class="callout-pulse"></span>
           <svg class="target-reticle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <!-- Top-Left Corner -->
-            <path d="M2 7V2H7" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <path d="M2 7V2H7" stroke="#FF6A1A" stroke-width="2" stroke-linecap="square"/>
             <!-- Top-Right Corner -->
-            <path d="M17 2H22V7" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <path d="M17 2H22V7" stroke="#FF6A1A" stroke-width="2" stroke-linecap="square"/>
             <!-- Bottom-Left Corner -->
-            <path d="M2 17V22H7" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <path d="M2 17V22H7" stroke="#FF6A1A" stroke-width="2" stroke-linecap="square"/>
             <!-- Bottom-Right Corner -->
-            <path d="M17 22H22V17" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <path d="M17 22H22V17" stroke="#FF6A1A" stroke-width="2" stroke-linecap="square"/>
             <!-- Center Crosshair + -->
-            <path d="M12 9V15M9 12H15" stroke="#EC5748" stroke-width="2" stroke-linecap="square"/>
+            <path d="M12 9V15M9 12H15" stroke="#FF6A1A" stroke-width="2" stroke-linecap="square"/>
           </svg>
         </div>
       </div>
@@ -44,11 +50,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import gsap from 'gsap'
+import { splitChars, CH_FROM, chCascade } from '../utils/splitChars'
 
 interface CalloutData {
   id: string
+  index: string
+  part: string
   heading: string
   text: string
   top: string
@@ -60,6 +69,8 @@ interface CalloutData {
 const callouts: CalloutData[] = [
   {
     id: 'matrix',
+    index: '01',
+    part: 'Thermal core',
     heading: 'Environmental Simulation Matrix',
     text: 'Scalable thermodynamic architecture engineered for custom extreme-stress profiles.',
     top: '20%',
@@ -68,6 +79,8 @@ const callouts: CalloutData[] = [
   },
   {
     id: 'enclosures',
+    index: '02',
+    part: 'Payload volume',
     heading: 'Modular Payload Enclosures',
     text: 'Configurable testing volumes built for rapid payload integration across defense and aerospace sectors.',
     top: '46%',
@@ -76,6 +89,8 @@ const callouts: CalloutData[] = [
   },
   {
     id: 'telemetry',
+    index: '03',
+    part: 'Control interface',
     heading: 'Agnostic Telemetry & Control',
     text: 'Universal PID processing with isolated digital and CAN bus passthroughs for real-time hardware diagnostics.',
     top: '78%',
@@ -83,6 +98,11 @@ const callouts: CalloutData[] = [
     lineWidth: 'max(470px, calc(84vw - 11%))' // Points directly to the digital touchscreen panel
   }
 ]
+
+onMounted(() => {
+  splitChars('.callout-heading')
+  gsap.set('.callout-heading .ch', CH_FROM)
+})
 
 const isActive = ref(false)
 const itemElements = ref<HTMLElement[]>([])
@@ -101,6 +121,7 @@ function show(duration = 0.85) {
   activeTween = tl
 
   tl.set('.telemetry-callouts-layer', { opacity: 1, pointerEvents: 'auto' })
+  gsap.set('.callout-heading .ch', CH_FROM)
 
   // Reset lines below masks
   gsap.set('.callout-line', {
@@ -129,6 +150,9 @@ function show(duration = 0.85) {
     { y: '0%', duration: duration * 0.85, stagger: 0.15, ease: 'power3.out' },
     0.15
   )
+
+  tl.to('.callout-heading .ch', chCascade(duration * 0.9, 0.018), 0.2)
+  tl.fromTo('.callout-fade', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: duration * 0.7, stagger: 0.12, ease: 'power2.out' }, 0.1)
 
   tl.to(
     '.callout-text.callout-line',
@@ -223,13 +247,45 @@ defineExpose({
   will-change: transform;
 }
 
+/* Section eyebrow + per-callout index/part label (shared system with the fleet phase) */
+.callouts-eyebrow,
+.callout-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.callouts-eyebrow { position: absolute; top: clamp(88px, 11vh, 116px); left: 5%; font-size: 11px; }
+.callouts-eyebrow i { width: 6px; height: 6px; background: var(--ember); display: block; }
+.callout-meta { margin-bottom: 12px; }
+.callout-idx { color: var(--ember); }
+.callout-sep { width: 20px; height: 1px; background: rgba(255, 255, 255, 0.3); display: block; }
+
+/* Target-lock pulse on each reticle */
+.callout-pulse {
+  position: absolute;
+  inset: -8px;
+  border: 1px solid var(--ember);
+  border-radius: 50%;
+  opacity: 0;
+  animation: callout-lock 2.4s cubic-bezier(0.2, 0.6, 0.2, 1) infinite;
+}
+@keyframes callout-lock {
+  0% { transform: scale(0.5); opacity: 0.9; }
+  70%, 100% { transform: scale(1.6); opacity: 0; }
+}
+
 /* Heading: White, Semi-bold, large */
 .callout-heading {
-  font-family: LayGrotesk-Semibold, sans-serif;
-  font-size: 21px;
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
   color: #FFFFFF;
   margin: 0 0 8px 0;
   white-space: nowrap;
@@ -273,15 +329,15 @@ defineExpose({
   width: 20px;
   height: 20px;
   display: block;
-  filter: drop-shadow(0 0 6px rgba(236, 87, 72, 0.7));
+  filter: drop-shadow(0 0 6px rgba(255, 106, 26, 0.7));
 }
 
 /* Text: Muted gray #888888, smaller text */
 .callout-text {
-  font-family: LayGrotesk-Semibold, sans-serif;
-  font-size: 13.5px;
+  font-family: var(--font-body);
+  font-size: 12px;
   font-weight: 400;
-  line-height: 1.45;
+  line-height: 1.5;
   letter-spacing: -0.01em;
   color: #888888;
   margin: 0;
@@ -291,7 +347,7 @@ defineExpose({
 
 @media (max-width: 1200px) {
   .callout-heading {
-    font-size: 18px;
+    font-size: 13px;
   }
   .callout-text {
     font-size: 12px;

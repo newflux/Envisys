@@ -63,12 +63,9 @@
     <!-- Persistent temperature gauge: enters with us, stays while the page scrolls past it -->
     <TempGauge ref="tempGaugeRef" />
 
-    <!-- Radial hand-over to white, then trust + autonomy sections -->
-    <TrustSection />
-    <CompareSection />
-
-    <!-- ENDING: call to action -> footer -->
-    <EndingSection @build="handleBuildClick" />
+    <!-- After the chamber: one scrolling column (trust → autonomy → call to action → footer),
+         with the cold blue lifting into white and clearing to a pale tint on the way -->
+    <TrustSection @build="handleBuildClick" />
 
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
@@ -331,10 +328,8 @@ import TelemetryCallouts from './components/TelemetryCallouts.vue'
 import FleetOverview from './components/FleetOverview.vue'
 import PhaseFourText from './components/PhaseFourText.vue'
 import ChamberStatement from './components/ChamberStatement.vue'
-import EndingSection from './components/EndingSection.vue'
 import TempGauge from './components/TempGauge.vue'
 import TrustSection from './components/TrustSection.vue'
-import CompareSection from './components/CompareSection.vue'
 import ReticleCursor from './components/ReticleCursor.vue'
 import { CH_FROM, chCascade } from './utils/splitChars'
 
@@ -1838,36 +1833,16 @@ function buildScrollTimeline() {
     tl.to(scrollProxy, { temp: -70, duration: 58, ease: 'power1.inOut' }, 164)
     tl.to('.tg-root', { opacity: 0, x: 16, duration: 4, ease: 'power2.in' }, 224)
 
-    // The trust column keeps scrolling straight on from the statement, over the cold chamber
+    // Everything after the chamber is one column that scrolls straight on from the statement,
+    // at roughly the same speed as the page itself. The light change and the section reveals
+    // are keyed to positions inside the column (see TrustSection / CompareSection / EndingSection).
     tl.set('.tr-root', { visibility: 'visible' }, 188)
     tl.fromTo('.tr-scroll',
       { y: () => window.innerHeight * 1.1 },
-      { y: () => -((document.querySelector('.tr-scroll') as HTMLElement).offsetHeight + window.innerHeight * 0.1), duration: 44, ease: 'none' },
+      { y: () => -((document.querySelector('.tr-scroll') as HTMLElement).offsetHeight - window.innerHeight), duration: 276, ease: 'none' },
       192
     )
-
-    // Whiteout: the cold blue lifts into white, then the white clears to the brand tint
-    tl.fromTo('.tr-haze', { opacity: 1, yPercent: 100 }, { yPercent: 0, duration: 16, ease: 'power1.inOut' }, 228)
-    tl.set('.tr-sky', { opacity: 1 }, 245)
-    tl.to('.tr-haze', { opacity: 0, duration: 12, ease: 'power1.inOut' }, 247)
-    tl.to('.tr-cloud', { opacity: 1, duration: 14, stagger: 4 }, 252)
-
-    // B: manual vs autonomous. The dark panels slide in from the left as you scroll.
-    tl.set('.cp-root', { visibility: 'visible' }, 250)
-    tl.fromTo('.cp-fade', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 4, stagger: 0.5, ease: 'power2.out' }, 252)
-    tl.fromTo('.cp-dark', { xPercent: -101 }, { xPercent: 0, duration: 16, stagger: 7, ease: 'power2.inOut' }, 255)
-    tl.set('.cp-dark', { pointerEvents: 'auto' }, 278)
-    tl.set('.cp-dark', { pointerEvents: 'none' }, 296)
-    tl.to('.cp-panels, .cp-fade', { opacity: 0, y: -24, duration: 4, ease: 'power2.in' }, 296)
-    tl.set('.cp-root', { visibility: 'hidden' }, 300.1)
-
-    // Call to action on the blue
-    tl.set('.end-root', { visibility: 'visible' }, 299)
-    tl.set('.end-interactive', { pointerEvents: 'none' }, 0)
-    tl.fromTo('.cta-line .ch', CH_FROM, chCascade(5, 0.03), 301)
-    tl.fromTo('.end-cta-fade', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 3.5, stagger: 0.5, ease: 'power2.out' }, 306)
-    tl.set('.end-interactive', { pointerEvents: 'auto' }, 309)
-    tl.to({}, { duration: 1 }, 321) // pins timeline end at 322
+    tl.to({}, { duration: 1 }, 468) // pins timeline end at 469
 
   }, 600)
 }
@@ -1970,7 +1945,7 @@ onMounted(() => {
   --font-body: 'AkkuratMono', ui-monospace, monospace;
   --ember: #ff6a1a;
 }
-.layout__page { min-height: 1356vh; } /* 100vh + 3.9007vh per timeline unit; timeline ends at 322 */
+.layout__page { min-height: 1930vh; } /* 100vh + 3.9007vh per timeline unit; timeline ends at 469 */
 
 body, #app { background: transparent !important; overflow-x: hidden; }
 .preloader, .loader, .popup.faq { display: none !important; }

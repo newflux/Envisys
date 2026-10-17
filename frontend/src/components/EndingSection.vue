@@ -1,36 +1,37 @@
 <template>
-  <div class="end-root">
+  <section class="end-root" ref="rootRef">
     <!-- Call to action -->
     <div class="cta-block">
       <h2 class="cta-title"><span class="cta-line">Test</span> <span class="cta-line">without</span> <span class="cta-line">limits.</span></h2>
-      <p class="cta-copy end-fade end-cta-fade">Tell us the profile. We build the chamber.</p>
-      <button class="cta-btn end-fade end-cta-fade end-interactive" ref="btnRef" @click="$emit('build')"
+      <p class="cta-copy end-cta-fade">Tell us the profile. We build the chamber.</p>
+      <button class="cta-btn end-cta-fade" ref="btnRef" @click="$emit('build')"
         @pointermove="onBtnMove" @pointerleave="onBtnLeave">
         <span class="cta-btn-label">Build w/ Envisys</span>
         <svg viewBox="0 0 10 10" class="cta-arrow"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4" /></svg>
       </button>
     </div>
 
-    <footer class="end-foot end-fade end-cta-fade">
+    <footer class="end-foot end-cta-fade">
       <span>© 2026 Envisys</span>
       <nav class="end-links">
-        <a class="end-interactive" href="/products">Products</a>
-        <a class="end-interactive" href="/verticles">Verticles</a>
-        <a class="end-interactive" href="/industries">Industries</a>
-        <a class="end-interactive" href="/about">The Company</a>
-        <button class="end-interactive end-top" @click="toTop">Back to top ↑</button>
+        <a href="/products">Products</a>
+        <a href="/verticles">Verticles</a>
+        <a href="/industries">Industries</a>
+        <a href="/about">The Company</a>
+        <button class="end-top" @click="toTop">Back to top ↑</button>
       </nav>
     </footer>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
-import { splitChars, CH_FROM } from '../utils/splitChars'
+import { splitChars, CH_FROM, CH_TO } from '../utils/splitChars'
 
 defineEmits<{ (e: 'build'): void }>()
 
+const rootRef = ref<HTMLElement | null>(null)
 const btnRef = ref<HTMLElement | null>(null)
 
 // Micro-interaction: the CTA leans toward the pointer
@@ -46,31 +47,45 @@ function toTop() {
   ;(window as any).lenisInstance?.scrollTo(0, { duration: 2.4 })
 }
 
+// This section scrolls with the page, so it reveals when it comes into view (and resets when it leaves)
+let shown = false
+function tick() {
+  const el = rootRef.value
+  if (!el) return
+  const top = el.getBoundingClientRect().top
+  const H = window.innerHeight
+  if (!shown && top < H * 0.55) {
+    shown = true
+    gsap.to('.cta-line .ch', { ...CH_TO, duration: 1.1, stagger: 0.03, overwrite: true })
+    gsap.to('.end-cta-fade', { opacity: 1, y: 0, duration: 0.9, stagger: 0.12, delay: 0.35, ease: 'power2.out', overwrite: true })
+  } else if (shown && top > H * 0.9) {
+    shown = false
+    gsap.set('.cta-line .ch', CH_FROM)
+    gsap.set('.end-cta-fade', { opacity: 0, y: 14 })
+  }
+}
+
 onMounted(() => {
   splitChars('.cta-line')
   gsap.set('.cta-line .ch', CH_FROM)
+  gsap.set('.end-cta-fade', { opacity: 0, y: 14 })
+  gsap.ticker.add(tick)
 })
-
+onUnmounted(() => gsap.ticker.remove(tick))
 </script>
 
 <style scoped>
 .end-root {
-  position: fixed;
-  inset: 0;
-  z-index: 107;
-  pointer-events: none;
-  visibility: hidden;
-  color: #fff;
+  position: relative;
+  height: 100vh;
+  color: var(--ink, #0d2340);
 }
-
-.end-fade { opacity: 0; }
-.end-interactive { pointer-events: none; }
 
 /* ── Call to action ── */
 .cta-block {
   position: absolute;
-  left: 5%;
-  top: 50%;
+  left: 0;
+  top: 46%;
   transform: translateY(-50%);
   max-width: 82vw;
 }
@@ -91,7 +106,7 @@ onMounted(() => {
   font-family: var(--font-body);
   font-size: clamp(12px, 0.95vw, 15px);
   letter-spacing: -0.01em;
-  color: rgba(255, 255, 255, 0.8);
+  opacity: 0.7;
 }
 .cta-btn {
   display: inline-flex;
@@ -100,8 +115,8 @@ onMounted(() => {
   padding: 16px 26px;
   border: 0;
   border-radius: 7px;
-  background: #fff;
-  color: #0a3f86;
+  background: #0d2340;
+  color: #fff;
   font-family: var(--font-body);
   font-size: 12px;
   letter-spacing: 0.06em;
@@ -110,26 +125,26 @@ onMounted(() => {
   overflow: hidden;
   isolation: isolate;
   will-change: transform;
+  pointer-events: auto;
+  transition: color 0.3s ease;
 }
 .cta-btn::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: #0a3f86;
+  background: #1a6cb8;
   transform: translateY(101%);
   transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1);
   z-index: -1;
 }
 .cta-btn:hover::before { transform: translateY(0); }
-.cta-btn:hover { color: #fff; }
-.cta-btn { transition: color 0.3s ease; }
 .cta-arrow { width: 11px; height: 11px; transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.2, 1); }
 .cta-btn:hover .cta-arrow { transform: translate(3px, -3px); }
 
 .end-foot {
   position: absolute;
-  left: 5%;
-  right: 5%;
+  left: 0;
+  right: 0;
   bottom: 5vh;
   display: flex;
   justify-content: space-between;
@@ -138,15 +153,16 @@ onMounted(() => {
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
-  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  border-top: 1px solid rgba(13, 35, 64, 0.16);
   padding-top: 18px;
 }
+.end-foot > span { opacity: 0.6; }
 .end-links { display: flex; gap: 28px; align-items: center; }
 .end-links a,
 .end-top {
   position: relative;
   color: inherit;
+  opacity: 0.6;
   text-decoration: none;
   background: none;
   border: 0;
@@ -154,7 +170,8 @@ onMounted(() => {
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
-  transition: color 0.25s ease;
+  pointer-events: auto;
+  transition: opacity 0.25s ease;
 }
 .end-links a::after,
 .end-top::after {
@@ -170,7 +187,7 @@ onMounted(() => {
   transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.2, 1);
 }
 .end-links a:hover,
-.end-top:hover { color: #fff; }
+.end-top:hover { opacity: 1; }
 .end-links a:hover::after,
 .end-top:hover::after { transform: scaleX(1); transform-origin: left; }
 

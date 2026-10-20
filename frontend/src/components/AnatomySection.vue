@@ -1,31 +1,38 @@
 <template>
-  <!-- A tall spacer; the stage inside it is held on screen while the door is drawn, built,
-       exploded, collapsed to a single line, and that line opens to white. -->
+  <!-- Tall spacer; the stage inside is held on screen while the real ET950 drawing is drawn, lit,
+       taken apart, put back, and flattened to a single line that opens into the light-blue page. -->
   <section class="an-root" ref="rootRef">
     <div class="an-stage" ref="stageRef">
-      <canvas ref="canvasRef" class="an-canvas"></canvas>
-
       <svg class="an-grid" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <path v-for="(d, i) in gridPaths" :key="i" :d="d" pathLength="1" class="an-gl" :ref="(el) => (gridEls[i] = el as SVGPathElement)" />
       </svg>
 
-      <!-- Layer labels, placed each frame by projecting the layer's anchor -->
+      <canvas ref="canvasRef" class="an-canvas"></canvas>
+
+      <!-- Callouts run along the bottom edge on vertical leaders, clear of both model and headline -->
+      <svg class="an-leaders" ref="leadSvg" aria-hidden="true"></svg>
       <div class="an-labels">
-        <div v-for="(l, i) in labelDefs" :key="l.text" class="an-label" :ref="(el) => (labelEls[i] = el as HTMLElement)">
-          <i></i><span>{{ l.text }}</span>
+        <div v-for="(l, i) in labelDefs" :key="l.key" class="an-label" :ref="(el) => (labelEls[i] = el as HTMLElement)">
+          <b>0{{ i + 1 }}</b><span>{{ l.text }}</span>
         </div>
       </div>
 
       <div class="an-steps">
-        <div v-for="(s, i) in steps" :key="s.title" class="an-step" :class="`an-step-${i}`" :ref="(el) => (stepEls[i] = el as HTMLElement)">
+        <div v-for="(s, i) in steps" :key="s.title" class="an-step" :ref="(el) => (stepEls[i] = el as HTMLElement)">
+          <span class="an-eyebrow">{{ s.name }}</span>
           <h3>{{ s.title }}</h3>
           <p>{{ s.body }}</p>
         </div>
       </div>
-      <div class="an-count"><span>{{ stepName }}</span><b>0{{ stepIdx + 1 }}</b><i></i><b>04</b></div>
+      <div class="an-count"><span>ET950 · drawing</span><b>{{ stepIdx + 1 }}</b><i></i><b>4</b></div>
 
-      <!-- The closing line and its spread to white -->
       <div class="an-line" ref="lineRef"></div>
+
+      <!-- Once the line has opened into the light blue: the heading that hands over to the range -->
+      <div class="an-next" ref="nextRef">
+        <span>Our products</span>
+        <h2><i v-for="(w, i) in nextWords" :key="i" :ref="(el) => (nextEls[i] = el as HTMLElement)">{{ w }}</i></h2>
+      </div>
     </div>
   </section>
 </template>
@@ -34,22 +41,22 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import * as THREE from 'three'
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 
-// Every label is a feature listed on envisystech.com (ET-series construction).
+// Groups come from the ET950-70H-5K STEP assembly (baked to public/models/et950_parts.json)
 const labelDefs = [
-  { key: 'skin', text: 'Powder-coated CRCS exterior' },
-  { key: 'hinge', text: 'Die-cast aluminium hinges' },
-  { key: 'heater', text: 'De-fog heaters + LED light' },
-  { key: 'glass', text: 'Multi-pane vacuumised glass' },
-  { key: 'liner', text: 'High-grade stainless interior' },
-  { key: 'seal', text: 'Double-layer silicone seal' }
+  { key: 'control', text: 'Control panel' },
+  { key: 'door', text: 'Insulated door' },
+  { key: 'hinge', text: 'Door hinges' },
+  { key: 'core', text: 'Inner chamber' },
+  { key: 'air', text: 'Evaporator · heater · fan' },
+  { key: 'machine', text: 'Compressor base' },
+  { key: 'shell', text: 'Outer cabinet' }
 ]
 const steps = [
-  { name: 'Drawing', title: 'Drawn for the test.', body: 'Every chamber starts as a drawing, sized to the volume, the ports and the range it has to hold.' },
-  { name: 'Build', title: 'Built to hold.', body: '−70°C to +180°C and 10–95% RH, held to ±1°C behind a single door.' },
-  { name: 'Anatomy', title: 'Every layer has a job.', body: 'Nothing on the door is decoration. Each part keeps the test in and the room out.' },
-  { name: 'Resolution', title: 'Then it disappears.', body: 'Close it, and all of it becomes one line between your product and the test.' }
+  { name: 'Drawing', title: 'Drawn to the millimetre.', body: 'This is the ET950 as engineered: every panel, hinge and clamp, straight from the CAD.' },
+  { name: 'Structure', title: 'It takes shape.', body: 'Panels close into a cabinet that holds −70°C to +180°C, one part at a time.' },
+  { name: 'Anatomy', title: 'Every part earns its place.', body: 'Door, chamber, air path and compressor base: each one built, tested and serviced as a block.' },
+  { name: 'Resolution', title: 'Then it disappears.', body: 'Put it back together and it is one line between your product and the test.' }
 ]
 const gridPaths = [
   'M0 0 L1600 900', 'M1600 0 L0 900', 'M800 0 L800 900', 'M0 450 L1600 450',
@@ -61,11 +68,14 @@ const rootRef = ref<HTMLElement | null>(null)
 const stageRef = ref<HTMLElement | null>(null)
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const lineRef = ref<HTMLElement | null>(null)
+const nextRef = ref<HTMLElement | null>(null)
+const nextWords = 'A chamber for every test.'.split(' ')
+const nextEls: HTMLElement[] = []
+const leadSvg = ref<SVGSVGElement | null>(null)
 const gridEls: SVGPathElement[] = []
 const labelEls: HTMLElement[] = []
 const stepEls: HTMLElement[] = []
 const stepIdx = ref(0)
-const stepName = ref(steps[0].name)
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const smooth = (a: number) => a * a * (3 - 2 * a)
@@ -73,106 +83,148 @@ const seg = (p: number, a: number, b: number) => smooth(clamp01((p - a) / (b - a
 
 // ── scene ──
 let renderer: THREE.WebGLRenderer | null = null
-let scene: THREE.Scene, camera: THREE.PerspectiveCamera, door: THREE.Group
-type Layer = { key: string; group: THREE.Group; mats: THREE.MeshStandardMaterial[]; lines: THREE.LineSegments[]; z: number; spread: THREE.Vector3; anchor: THREE.Vector3; baseOpacity: number[] }
-const layers: Layer[] = []
-let keyLight: THREE.DirectionalLight
+let scene: THREE.Scene, camera: THREE.PerspectiveCamera, rig: THREE.Group
+const uniforms = { uSweep: { value: 0 }, uFill: { value: 0 }, uWhite: { value: 0 }, uY0: { value: 0 }, uY1: { value: 1 } }
 
-const W = 1.0, HT = 1.45, WIN_W = 0.5, WIN_H = 0.52, WIN_Y = 0.2
+type G = { id: string; group: THREE.Group; edges: THREE.LineSegments[]; box: THREE.Box3; centre: THREE.Vector3; dir: THREE.Vector3; dist: number; pgs: { pg: THREE.Group; off: THREE.Vector3 }[]; anchor: THREE.Group }
+const groups: G[] = []
+let loaded = false
+let modelH = 1.8, modelW = 1, modelD = 1
+let disposed = false
 
-function rectShape(w: number, h: number, r = 0.02, cx = 0, cy = 0) {
-  const s = new THREE.Shape()
-  const x = cx - w / 2, y = cy - h / 2
-  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r)
-  s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
-  s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r)
-  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y)
-  return s
-}
-function panelWithWindow(w: number, h: number, depth: number, holeW = WIN_W, holeH = WIN_H) {
-  const s = rectShape(w, h, 0.03)
-  s.holes.push(rectShape(holeW, holeH, 0.02, 0, WIN_Y) as unknown as THREE.Path)
-  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false, curveSegments: 6 })
-  g.translate(0, 0, -depth / 2)
-  return g
-}
-function frameGeo(outW: number, outH: number, inW: number, inH: number, depth: number) {
-  const s = rectShape(outW, outH, 0.02, 0, WIN_Y)
-  s.holes.push(rectShape(inW, inH, 0.015, 0, WIN_Y) as unknown as THREE.Path)
-  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false, curveSegments: 4 })
-  g.translate(0, 0, -depth / 2)
-  return g
-}
-function sealGeo(w: number, h: number, r: number) {
-  const pts: THREE.Vector3[] = []
-  const shape = rectShape(w, h, 0.05)
-  shape.getSpacedPoints(160).forEach((p) => pts.push(new THREE.Vector3(p.x, p.y, 0)))
-  return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 220, r, 8, true)
+// The sweep: both hairlines and surfaces are revealed bottom-up by world height, with a soft edge,
+// so the drawing appears to be plotted rather than faded in.
+function patch(mat: THREE.Material, kind: 'line' | 'mesh') {
+  mat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, uniforms)
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying float vH;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvH = (modelMatrix * vec4(transformed, 1.0)).y;')
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vH;\nuniform float uSweep, uFill, uWhite, uY0, uY1;')
+      .replace('void main() {', `void main() {\n  float hn = (vH - uY0) / (uY1 - uY0);\n  float lim = ${kind === 'line' ? 'uSweep' : 'uFill'};\n  if (hn > lim * 1.06) discard;`)
+    if (kind === 'mesh') {
+      sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', `
+        // the leading edge of the fill glows ice-blue, then settles
+        float edge = smoothstep(0.0, 0.06, lim * 1.06 - hn);
+        outgoingLight = mix(vec3(0.55, 0.78, 1.0) * 0.9, outgoingLight, edge);
+        outgoingLight = mix(outgoingLight, vec3(1.0), uWhite);
+        #include <opaque_fragment>`)
+    } else {
+      sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', 'outgoingLight = mix(outgoingLight, vec3(1.0), uWhite);\n#include <opaque_fragment>')
+    }
+  }
 }
 
-function addLayer(key: string, parts: { geo: THREE.BufferGeometry; mat: THREE.MeshStandardMaterial; pos?: [number, number, number] }[], z: number, spread: [number, number, number], anchor: [number, number, number]) {
-  const group = new THREE.Group()
-  const mats: THREE.MeshStandardMaterial[] = []
-  const lines: THREE.LineSegments[] = []
-  const baseOpacity: number[] = []
-  parts.forEach(({ geo, mat, pos }) => {
-    const m = new THREE.Mesh(geo, mat)
-    if (pos) m.position.set(...pos)
-    mat.transparent = true
-    baseOpacity.push(mat.opacity)
-    mats.push(mat)
-    group.add(m)
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 24), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 }))
-    if (pos) e.position.set(...pos)
-    lines.push(e)
-    group.add(e)
-  })
-  group.position.z = z
-  door.add(group)
-  layers.push({ key, group, mats, lines, z, spread: new THREE.Vector3(...spread), anchor: new THREE.Vector3(...anchor), baseOpacity })
+// True matte (Lambert, no reflections): the form reads from soft light and shadow only, like unglazed clay.
+const GROUP_STYLE: Record<string, { color: number; emissive?: number; ei?: number }> = {
+  shell: { color: 0xe9e8e4 },
+  door: { color: 0xf3f2ee },
+  hinge: { color: 0xb9bcbf },
+  control: { color: 0xa9b3c2, emissive: 0x4a86e0, ei: 0.05 },
+  core: { color: 0xdcdcd8 },
+  air: { color: 0xe2a073, emissive: 0xff6a1a, ei: 0.06 },
+  machine: { color: 0x9aa0a6 }
+}
+
+function b64(s: string) {
+  const bin = atob(s)
+  const u = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i)
+  return u.buffer
+}
+
+async function loadModel() {
+  let data: any
+  try {
+    const res = await fetch('/models/et950_parts.json')
+    if (!res.ok || !(res.headers.get('content-type') || '').includes('json')) return
+    data = await res.json()
+  } catch {
+    return
+  }
+  if (disposed) return
+  modelW = data.size[0]; modelH = data.size[1]; modelD = data.size[2]
+  uniforms.uY1.value = modelH * 1.6 // headroom: exploded parts sit above the original height and must not be swept away
+  for (const gd of data.groups) {
+    const st = GROUP_STYLE[gd.id] ?? GROUP_STYLE.shell
+    const group = new THREE.Group()
+    const edges: THREE.LineSegments[] = []
+    const pgs: { pg: THREE.Group; off: THREE.Vector3 }[] = []
+    const mat = new THREE.MeshLambertMaterial({ color: st.color, emissive: st.emissive ?? 0, emissiveIntensity: st.ei ?? 0, side: THREE.DoubleSide })
+    patch(mat, 'mesh')
+    for (const part of gd.parts) {
+      const geo = new THREE.BufferGeometry()
+      geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(b64(part.p)), 3))
+      geo.setIndex(new THREE.BufferAttribute(part.i.t === 16 ? new Uint16Array(b64(part.i.d)) : new Uint32Array(b64(part.i.d)), 1))
+      geo.computeVertexNormals()
+      const pg = new THREE.Group()
+      pg.add(new THREE.Mesh(geo, mat))
+      // minimal hairline: outline only the big panels (small parts and fasteners get no line)
+      geo.computeBoundingBox()
+      const diag = geo.boundingBox!.getSize(new THREE.Vector3()).length()
+      if (diag > modelH * 0.34 && (geo.index?.count ?? 0) / 3 < 2500) {
+        const lm = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 })
+        patch(lm, 'line')
+        const ln = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 55), lm)
+        pg.add(ln)
+        edges.push(ln)
+      }
+      group.add(pg)
+      pgs.push({ pg, off: new THREE.Vector3() })
+    }
+    rig.add(group)
+    group.updateMatrixWorld(true)
+    // callouts point at the group's largest part, so one stray sensor cannot drag the anchor off the model
+    let gb = new THREE.Box3(), best = -1, anchor = pgs[0].pg
+    const whole = new THREE.Box3()
+    pgs.forEach(({ pg }) => {
+      const b = new THREE.Box3().setFromObject(pg)
+      whole.union(b)
+      const sz = b.getSize(new THREE.Vector3())
+      const vol = sz.x * sz.y + sz.y * sz.z + sz.x * sz.z
+      if (vol > best) { best = vol; gb = b; anchor = pg }
+    })
+    // every part flies off radially from the middle of its own group, so panels separate from each other
+    const gc = whole.getCenter(new THREE.Vector3())
+    pgs.forEach((e) => { e.off.copy(new THREE.Box3().setFromObject(e.pg).getCenter(new THREE.Vector3())).sub(gc).multiplyScalar(0.75) })
+    groups.push({ id: gd.id, group, edges, box: gb, centre: gb.getCenter(new THREE.Vector3()), dir: new THREE.Vector3(), dist: 0, pgs, anchor })
+  }
+  // explode vectors [x, y, z, distance as a fraction of model height]; depth axis is z (front = +z)
+  const V: Record<string, [number, number, number, number]> = {
+    door: [0, 0.02, 1, 0.7],
+    hinge: [-1, 0, 1, 0.5],
+    control: [1, 0.12, 0.6, 0.55],
+    core: [0, 0.03, 0.15, 0.2],
+    air: [0, 0.1, -1, 0.65],
+    machine: [0, -1, -0.1, 0.5],
+    shell: [0, 0, -0.35, 0.18]
+  }
+  for (const g of groups) {
+    const v = V[g.id] ?? [0, 0, 0, 0]
+    g.dir.set(v[0], v[1], v[2]).normalize()
+    g.dist = v[3] * modelH
+  }
+  loaded = true
+  resize()
+  lastP = -1
 }
 
 function buildScene(canvas: HTMLCanvasElement) {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false })
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
-  renderer.setClearColor(0x000000, 1)
+  renderer.setClearColor(0x000000, 0)
   renderer.toneMapping = THREE.NeutralToneMapping
+  renderer.toneMappingExposure = 1.0
   scene = new THREE.Scene()
-  const pm = new THREE.PMREMGenerator(renderer)
-  scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture
-  camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50)
-  keyLight = new THREE.DirectionalLight(0xffffff, 0)
-  keyLight.position.set(2, 3, 4)
-  scene.add(keyLight)
-  door = new THREE.Group()
-  scene.add(door)
-
-  const metal = (c: number, rough: number, metalness = 0.6) => new THREE.MeshStandardMaterial({ color: c, roughness: rough, metalness })
-  // front → back
-  addLayer('skin', [
-    { geo: panelWithWindow(W, HT, 0.03), mat: metal(0xcfd2d6, 0.55, 0.2) },
-    { geo: new THREE.CylinderGeometry(0.016, 0.016, 0.62, 16), mat: metal(0x1b1c1f, 0.35, 0.6), pos: [0.4, -0.02, 0.06] }
-  ], 0.075, [0, 0, 0.62], [W / 2, HT / 2, 0])
-  addLayer('hinge', [
-    { geo: new THREE.BoxGeometry(0.05, 0.16, 0.07), mat: metal(0x9da1a6, 0.3, 0.9), pos: [-0.525, 0.42, 0] },
-    { geo: new THREE.BoxGeometry(0.05, 0.16, 0.07), mat: metal(0x9da1a6, 0.3, 0.9), pos: [-0.525, -0.42, 0] }
-  ], 0.06, [-0.62, 0, 0.62], [-0.55, 0.5, 0])
-  const led = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff6a1a, emissiveIntensity: 1.6, roughness: 0.4 })
-  addLayer('heater', [
-    { geo: frameGeo(WIN_W + 0.1, WIN_H + 0.1, WIN_W, WIN_H, 0.008), mat: metal(0x3a3c40, 0.5, 0.4) },
-    { geo: new THREE.BoxGeometry(WIN_W - 0.04, 0.012, 0.01), mat: led, pos: [0, WIN_Y + WIN_H / 2 + 0.025, 0.006] }
-  ], 0.035, [0, 0, 0.38], [WIN_W / 2 + 0.05, WIN_Y + WIN_H / 2 + 0.05, 0])
-  const glassMat = () => new THREE.MeshStandardMaterial({ color: 0xbcd8ee, roughness: 0.05, metalness: 0.1, opacity: 0.22 })
-  addLayer('glass', [
-    { geo: new THREE.BoxGeometry(WIN_W + 0.02, WIN_H + 0.02, 0.006), mat: glassMat(), pos: [0, WIN_Y, 0.03] },
-    { geo: new THREE.BoxGeometry(WIN_W + 0.02, WIN_H + 0.02, 0.006), mat: glassMat(), pos: [0, WIN_Y, 0] },
-    { geo: new THREE.BoxGeometry(WIN_W + 0.02, WIN_H + 0.02, 0.006), mat: glassMat(), pos: [0, WIN_Y, -0.03] }
-  ], 0.0, [0, 0, 0.14], [WIN_W / 2, WIN_Y - WIN_H / 2, 0])
-  addLayer('liner', [{ geo: panelWithWindow(W - 0.08, HT - 0.08, 0.012), mat: metal(0xc8ccd1, 0.24, 1.0) }], -0.05, [0, 0, -0.34], [(W - 0.08) / 2, -(HT - 0.08) / 2, 0])
-  addLayer('seal', [
-    { geo: sealGeo(W - 0.12, HT - 0.12, 0.009), mat: metal(0x141416, 0.7, 0.0) },
-    { geo: sealGeo(W - 0.2, HT - 0.2, 0.009), mat: metal(0x141416, 0.7, 0.0) }
-  ], -0.068, [0, 0, -0.62], [-(W - 0.12) / 2, -(HT - 0.12) / 2, 0])
+  camera = new THREE.PerspectiveCamera(16, 1, 0.1, 80)
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x2a3446, 2.7)
+  const key = new THREE.DirectionalLight(0xfff6ea, 2.4); key.position.set(2.4, 3.6, 3.2)
+  const rim = new THREE.DirectionalLight(0x9cc4ff, 0.9); rim.position.set(-3.5, 1.2, -2.5)
+  scene.add(hemi, key, rim)
+  rig = new THREE.Group()
+  scene.add(rig)
+  loadModel()
 }
 
 function resize() {
@@ -183,53 +235,89 @@ function resize() {
   camera.updateProjectionMatrix()
 }
 
-const v = new THREE.Vector3()
+const tmp = new THREE.Vector3()
 let lastP = -1
 function render(p: number) {
-  if (!renderer) return
-  const draw = seg(p, 0.02, 0.22)          // hairlines draw in
-  const build = seg(p, 0.2, 0.4)           // surfaces fill in and light up
-  const explode = seg(p, 0.42, 0.62) * (1 - seg(p, 0.72, 0.84))
-  const edge = seg(p, 0.72, 0.86)          // turn edge-on and flatten into a line
-  const whiten = seg(p, 0.78, 0.86)
+  if (!renderer || !loaded) return
+  const sweep = seg(p, 0.03, 0.2)                                 // hairlines plotted bottom-up
+  const fill = seg(p, 0.22, 0.4)                                  // surfaces fill in the same way
+  const explode = seg(p, 0.42, 0.6) * (1 - seg(p, 0.8, 0.88))
+  const orbit = seg(p, 0.2, 0.4) * 0.45 + seg(p, 0.5, 0.7) * 0.55 // 0 → front elevation, 1 → full side profile
+  const flat = seg(p, 0.84, 0.92)                                 // squash the depth axis: side profile → a single line
+  const white = seg(p, 0.86, 0.93)
 
-  // camera: 3/4 front → more side while exploded → exactly side-on at the end
-  const yaw = THREE.MathUtils.degToRad(22 + 30 * seg(p, 0.42, 0.62) + 38 * edge)
-  const dist = 4.6 - 0.5 * build + 0.4 * explode
-  camera.position.set(Math.sin(yaw) * dist, 0.16 * (1 - edge), Math.cos(yaw) * dist)
-  camera.lookAt(0, 0.02 * (1 - edge), 0)
-  const w = renderer.domElement.width, h = renderer.domElement.height
-  camera.setViewOffset(w, h, -w * 0.13 * explode, 0, w, h)
-  door.scale.z = 1 - 0.94 * edge
-  door.rotation.y = 0
-  keyLight.intensity = 2.4 * build
+  uniforms.uSweep.value = sweep
+  uniforms.uFill.value = fill
+  uniforms.uWhite.value = white
 
-  layers.forEach((L) => {
-    L.group.position.set(L.spread.x * explode, L.spread.y * explode, L.z + L.spread.z * explode)
-    L.mats.forEach((m, i) => {
-      const base = L.baseOpacity[i]
-      m.opacity = base * build * (1 - whiten) + whiten
-      m.emissive.setRGB(whiten, whiten, whiten)
-      m.depthWrite = m.opacity > 0.95
-    })
-    L.lines.forEach((ln) => {
-      const g = ln.geometry as THREE.BufferGeometry
-      g.setDrawRange(0, Math.floor((g.attributes.position.count * draw) / 2) * 2)
-      ;(ln.material as THREE.LineBasicMaterial).opacity = 0.9 - 0.75 * build
-    })
+  // straight-on elevation first, easing round to a true side view (a near-orthographic lens keeps it technical)
+  const yaw = THREE.MathUtils.degToRad(orbit * 90)
+  const pitch = THREE.MathUtils.degToRad(6 * Math.sin(Math.min(1, orbit * 1.6) * Math.PI) * (1 - flat))
+  const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
+  const aspect = camera.aspect
+  const zSpread = modelH * 1.3 * explode
+  const projW = Math.abs(Math.sin(yaw)) * (modelD + zSpread) + Math.abs(Math.cos(yaw)) * modelW
+  const visH = Math.max((modelH * (1 + 0.95 * explode)) / 0.66, projW / 0.52 / aspect)
+  const dist = visH / (2 * tanH)
+  tmp.set(0, modelH * (0.5 - 0.06 * explode), 0)
+  camera.position.set(Math.sin(yaw) * Math.cos(pitch) * dist, tmp.y + Math.sin(pitch) * dist, Math.cos(yaw) * Math.cos(pitch) * dist)
+  camera.lookAt(tmp)
+  // model sits slightly right of centre: the copy lives bottom-left, callouts in the right-hand column
+  const cw = renderer.domElement.width, ch = renderer.domElement.height
+  camera.setViewOffset(cw, ch, 0, 0, cw, ch)
+  rig.scale.set(1, 1, 1 - 0.996 * flat)
+
+  groups.forEach((g) => {
+    g.group.position.copy(g.dir).multiplyScalar(g.dist * explode)
+    g.pgs.forEach((e) => e.pg.position.copy(e.off).multiplyScalar(explode))
+    g.edges.forEach((e) => ((e.material as THREE.LineBasicMaterial).opacity = 0.9 - 0.8 * fill))
   })
 
-  // labels
-  const lab = seg(p, 0.5, 0.58) * (1 - seg(p, 0.68, 0.74))
+  // callouts: two columns (left/right of the model) ordered by height. Each leader starts on the near edge of its
+  // part, runs level, then bends to its label, so lines never cut across the other blocks.
   const rect = stageRef.value!.getBoundingClientRect()
+  const W = rect.width, Hh = rect.height
+  const lab = seg(p, 0.6, 0.64) * (1 - seg(p, 0.78, 0.82))
+  type It = { i: number; cx: number; y: number; x0: number; x1: number; ly: number; left: boolean }
+  const items: It[] = []
   labelDefs.forEach((d, i) => {
-    const el = labelEls[i]
-    const L = layers.find((x) => x.key === d.key)
-    if (!el || !L) return
-    v.copy(L.anchor).applyMatrix4(L.group.matrixWorld).project(camera)
-    el.style.transform = `translate3d(${((v.x * 0.5 + 0.5) * rect.width).toFixed(1)}px, ${((-v.y * 0.5 + 0.5) * rect.height).toFixed(1)}px, 0)`
-    el.style.opacity = lab.toFixed(3)
+    const g = groups.find((x) => x.id === d.key)
+    if (!g) return
+    tmp.copy(g.centre).addScaledVector(g.dir, g.dist * explode).add(g.anchor.position)
+    rig.localToWorld(tmp)
+    tmp.project(camera)
+    const sx = (tmp.x * 0.5 + 0.5) * W, sy = (-tmp.y * 0.5 + 0.5) * Hh
+    items.push({ i, cx: sx, y: sy, x0: sx, x1: sx, ly: 0, left: false })
   })
+  items.sort((a, b) => a.cx - b.cx)
+  items.forEach((it, k) => (it.left = k < Math.floor(items.length / 2)))
+  const GAP = 46
+  const place = (list: It[], top: number, bot: number) => {
+    list.sort((a, b) => a.y - b.y)
+    let prevY = top - GAP
+    list.forEach((it) => { it.ly = Math.max(prevY + GAP, Math.min(it.y, bot)); prevY = it.ly })
+    for (let k = list.length - 1, lim = bot; k >= 0; k--) { list[k].ly = Math.min(list[k].ly, lim); lim = list[k].ly - GAP }
+  }
+  place(items.filter((i) => i.left), Hh * 0.2, Hh * 0.52)
+  place(items.filter((i) => !i.left), Hh * 0.2, Hh * 0.86)
+  let svg = ''
+  items.forEach((it) => {
+    const el = labelEls[it.i]
+    const labelW = W * 0.14
+    const lx = it.left ? W * 0.05 : W * 0.84
+    el.style.width = `${labelW}px`
+    el.style.transform = `translate3d(${lx.toFixed(1)}px, ${(it.ly - 7).toFixed(1)}px, 0)`
+    el.style.opacity = lab.toFixed(3)
+    const ax = it.left ? it.x0 : it.x1
+    const kx = it.left ? W * 0.245 : W * 0.805
+    const end = it.left ? lx + labelW + 8 : lx - 10
+    const mid = it.left ? Math.min(ax - 12, kx + 26) : Math.max(ax + 12, kx - 26)
+    svg += `<path d="M${ax.toFixed(1)} ${it.y.toFixed(1)} L${mid.toFixed(1)} ${it.y.toFixed(1)} L${kx.toFixed(1)} ${it.ly.toFixed(1)} L${end.toFixed(1)} ${it.ly.toFixed(1)}" /><circle cx="${ax.toFixed(1)}" cy="${it.y.toFixed(1)}" r="2.5" />`
+  })
+  if (leadSvg.value) {
+    leadSvg.value.innerHTML = svg
+    leadSvg.value.style.opacity = lab.toFixed(3)
+  }
 
   renderer.render(scene, camera)
 }
@@ -240,38 +328,44 @@ function tick() {
   const H = window.innerHeight
   const r = root.getBoundingClientRect()
   const travel = r.height - H
-  // hold the stage on screen while the spacer passes
   const hold = Math.min(Math.max(-r.top, 0), travel)
   stage.style.transform = `translate3d(0, ${hold.toFixed(2)}px, 0)`
   if (r.bottom < 0 || r.top > H) return
-  const p = clamp01(-r.top / travel)
+  const p = clamp01(-r.top / (travel * 0.88)) // the last 12% holds the products heading on the light blue
   if (Math.abs(p - lastP) < 0.0004) return
   lastP = p
 
-  // construction lines
-  const gl = seg(p, 0.0, 0.18) * (1 - seg(p, 0.4, 0.55))
+  const gl = seg(p, 0.0, 0.14) * (1 - seg(p, 0.4, 0.55))
   gridEls.forEach((el, i) => { if (el) { el.style.strokeDashoffset = String(1 - clamp01(gl * 1.4 - i * 0.04)); el.style.opacity = String(Math.min(1, gl * 1.5)) } })
 
-  // copy
-  const bounds = [[0.0, 0.2], [0.22, 0.4], [0.44, 0.68], [0.72, 0.86]]
+  // headline copy, bottom-left, one block at a time (fade windows never overlap)
+  const win = [[0, 0, 0.17, 0.2], [0.22, 0.25, 0.38, 0.41], [0.44, 0.47, 0.76, 0.79], [0.82, 0.85, 0.9, 0.92]]
   let idx = 0
-  bounds.forEach(([a, b], i) => {
-    const o = seg(p, a - 0.04, a + 0.02) * (1 - seg(p, b, b + 0.04))
+  win.forEach(([i0, i1, o0, o1], i) => {
+    const o = (i0 === i1 ? 1 : seg(p, i0, i1)) * (1 - seg(p, o0, o1))
     const el = stepEls[i]
-    if (el) { el.style.opacity = o.toFixed(3); el.style.transform = `translate3d(0, ${((1 - o) * 16).toFixed(1)}px, 0)` }
-    if (p >= a - 0.02) idx = i
+    if (el) { el.style.opacity = o.toFixed(3); el.style.transform = `translate3d(0, ${((1 - o) * 14).toFixed(1)}px, 0)` }
+    if (p >= i1 - 0.01) idx = i
   })
-  if (idx !== stepIdx.value) { stepIdx.value = idx; stepName.value = steps[idx].name }
+  if (idx !== stepIdx.value) stepIdx.value = idx
 
-  // closing line: appears as the door goes edge-on, then opens to fill the screen with white
-  const lineIn = seg(p, 0.84, 0.88)
-  const open = seg(p, 0.88, 0.99)
+  // closing line: the flattened chamber becomes a white line, and the line opens into the light-blue page
+  const lineIn = seg(p, 0.9, 0.94)
+  const open = seg(p, 0.93, 0.995)
   const line = lineRef.value!
   line.style.opacity = lineIn.toFixed(3)
   line.style.width = `calc(2px + ${(open * 100).toFixed(3)}vw)`
-  line.style.height = `${(62 + 42 * open).toFixed(2)}vh`
-  canvasRef.value!.style.opacity = String(1 - seg(p, 0.86, 0.9))
+  line.style.height = `${(70 + 34 * open).toFixed(2)}vh`
+  const c = (a: number, b: number) => Math.round(a + (b - a) * open)
+  line.style.background = `rgb(${c(255, 213)},${c(255, 230)},${c(255, 246)})`
+  canvasRef.value!.style.opacity = String(1 - seg(p, 0.92, 0.95))
   stage.dataset.white = open > 0.5 ? '1' : ''
+  nextRef.value!.style.visibility = open > 0.4 ? 'visible' : 'hidden'
+  nextEls.forEach((w, i) => {
+    const a = seg(p, 0.945 + i * 0.006, 0.975 + i * 0.006)
+    w.style.opacity = a.toFixed(3)
+    w.style.transform = `translate3d(0, ${((1 - a) * 0.4).toFixed(3)}em, 0)`
+  })
 
   render(p)
 }
@@ -283,6 +377,7 @@ onMounted(() => {
   gsap.ticker.add(tick)
 })
 onUnmounted(() => {
+  disposed = true
   window.removeEventListener('resize', resize)
   gsap.ticker.remove(tick)
   renderer?.dispose()
@@ -290,35 +385,40 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.an-root { position: relative; height: 420vh; }
-.an-stage { position: absolute; left: 0; right: 0; top: 0; height: 100vh; overflow: hidden; background: #000; color: #fff; will-change: transform; }
+.an-root { position: relative; height: 350vh; }
+.an-stage { position: absolute; left: 0; right: 0; top: 0; height: 100vh; overflow: hidden; background: radial-gradient(ellipse 50% 58% at 50% 54%, #0f1a2c 0%, #070b13 50%, #000 80%); color: #fff; will-change: transform; }
 .an-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
 .an-grid { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.an-gl { fill: none; stroke: rgba(255, 255, 255, 0.16); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+.an-gl { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
 
+.an-leaders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; }
+.an-leaders :deep(path) { stroke: rgba(255, 255, 255, 0.4); stroke-width: 1; fill: none; }
+.an-leaders :deep(circle) { fill: #fff; }
 .an-labels { position: absolute; inset: 0; pointer-events: none; }
-.an-label { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 10px; opacity: 0; white-space: nowrap; will-change: transform; }
-.an-label i { display: block; width: 5px; height: 5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15); margin: -2.5px 0 0 -2.5px; }
-.an-label span { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85); padding-left: 16px; border-left: 1px solid rgba(255, 255, 255, 0.35); }
+.an-label { position: absolute; left: 0; top: 0; display: flex; align-items: baseline; gap: 10px; max-width: 15vw; white-space: normal; opacity: 0; }
+.an-label b { font-family: var(--font-body); font-weight: 400; font-size: 10px; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.45); }
+.an-label span { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.9); }
 
-.an-steps { position: absolute; inset: 0; pointer-events: none; }
-.an-step { position: absolute; max-width: 30vw; opacity: 0; }
-.an-step h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(26px, 3.2vw, 60px); line-height: 1.04; letter-spacing: -0.04em; }
-.an-step p { margin: 22px 0 0; max-width: 34ch; font-family: var(--font-body); font-size: clamp(12px, 1vw, 15px); line-height: 1.55; color: rgba(255, 255, 255, 0.65); }
-.an-step-0 { left: 5vw; top: 42vh; }
-.an-step-1 { right: 5vw; top: 22vh; }
-.an-step-2 { left: 5vw; top: 16vh; }
-.an-step-3 { right: 5vw; top: 22vh; }
+.an-steps { position: absolute; left: 5vw; bottom: 9vh; width: min(22vw, 340px); height: 0; pointer-events: none; }
+.an-step { position: absolute; left: 0; bottom: 0; opacity: 0; }
+.an-eyebrow { display: block; margin-bottom: 18px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+.an-step h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, 2.3vw, 44px); line-height: 1.04; letter-spacing: -0.045em; }
+.an-step p { margin: 20px 0 0; max-width: 32ch; font-family: var(--font-body); font-size: clamp(12px, 0.95vw, 14px); line-height: 1.55; color: rgba(255, 255, 255, 0.62); }
 
-.an-count { position: absolute; right: 5vw; bottom: 5vh; display: flex; align-items: center; gap: 12px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
-.an-count span { margin-right: 24px; color: rgba(255, 255, 255, 0.6); }
+.an-count { position: absolute; right: 5vw; top: 14vh; display: flex; align-items: center; gap: 12px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+.an-count span { margin-right: 20px; color: rgba(255, 255, 255, 0.5); }
 .an-count i { width: 1px; height: 12px; background: rgba(255, 255, 255, 0.4); }
 
-.an-line { position: absolute; left: 50%; top: 50%; width: 2px; height: 62vh; transform: translate(-50%, -50%); background: #fff; opacity: 0; }
+.an-line { position: absolute; left: 50%; top: 50%; width: 2px; height: 70vh; transform: translate(-50%, -50%); background: #fff; opacity: 0; }
+
+.an-next { position: absolute; left: 5vw; right: 5vw; top: 50%; transform: translateY(-50%); text-align: center; color: #0d2340; visibility: hidden; }
+.an-next span { display: block; margin-bottom: 26px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.55; }
+.an-next h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(32px, 5.4vw, 104px); line-height: 1.02; letter-spacing: -0.05em; text-wrap: balance; }
+.an-next i { font-style: normal; display: inline-block; margin: 0 0.13em; opacity: 0; }
 
 @media (max-width: 800px) {
-  .an-step { max-width: 80vw; }
-  .an-step-1, .an-step-3 { right: auto; left: 5vw; top: 12vh; }
+  .an-steps { width: 80vw; }
+  .an-count { display: none; }
 }
 </style>

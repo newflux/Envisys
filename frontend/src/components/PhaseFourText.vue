@@ -16,7 +16,7 @@
 const config = {
   copyTitle: ['Thermal cycling,', 'humidity, endurance —', 'run on repeat'],
   copyBody:
-    'From −70°C to +180°C and 10% to 98% RH, every profile runs autonomously and is logged to the second, so what leaves our chambers is already qualified.'
+    'From −70°C to +180°C and 10% to 95% RH, every profile runs autonomously and is logged to the second, so what leaves our chambers is already qualified.'
 }
 </script>
 

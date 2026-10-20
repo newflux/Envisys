@@ -40,6 +40,8 @@
 
     <!-- EXACT ICOMAT NAVBAR & BRAND LOGO -->
     <Navbar ref="navbarRef" @build-click="handleBuildClick" />
+    <ScrollBar />
+    <ContactPanel :open="contactOpen" @close="contactOpen = false" />
 
     <!-- EXACT ICOMAT HERO OVERLAY (TITLE, PARAGRAPH, SCROLL PILL) -->
     <HeroOverlay ref="heroOverlayRef" @scroll-down="onScrollDown" />
@@ -70,7 +72,7 @@
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
-  <div class="canvas-fixed-wrap">    <TresCanvas window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
+  <div class="canvas-fixed-wrap">    <TresCanvas ref="tresCanvasRef" window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
       <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.5" :far="250" />
       
       <!-- Fog (Soft cold bluish-ash atmospheric gallery void, slightly brightened) -->
@@ -193,7 +195,7 @@
             :map="floorSeamMap"
             :metalness="0.12"
             :roughness="0.30"
-            :resolution="1024"
+            :resolution="512"
             :blur="[220, 70]"
             :mixBlur="0.95"
             :mixStrength="0.42"
@@ -323,6 +325,8 @@ import { extend } from '@tresjs/core'
 import { Text } from 'troika-three-text'
 import Preloader from './components/Preloader.vue'
 import Navbar from './components/Navbar.vue'
+import ScrollBar from './components/ScrollBar.vue'
+import ContactPanel from './components/ContactPanel.vue'
 import HeroOverlay from './components/HeroOverlay.vue'
 import TelemetryCallouts from './components/TelemetryCallouts.vue'
 import FleetOverview from './components/FleetOverview.vue'
@@ -510,7 +514,7 @@ const chamberModalList: Record<number, ChamberModalData> = {
     subtitle: 'ENVIRONMENTAL TEST CHAMBER',
     tempRange: '-70°C to +180°C',
     desc: 'Compact precision simulation chamber engineered for high-frequency thermal cycling and sensor qualification in tight laboratory footprints.',
-    spec1: 'HUMIDITY: 10% to 98% RH',
+    spec1: 'HUMIDITY: 10% to 95% RH',
     spec2: 'CONTROLLER: ET-Touch 5.7" HMI'
   },
   1: {
@@ -519,7 +523,7 @@ const chamberModalList: Record<number, ChamberModalData> = {
     subtitle: 'ENVIRONMENTAL TEST CHAMBER',
     tempRange: '-70°C to +180°C',
     desc: 'Simulates extreme environmental conditions flawlessly for the next generation of testing. Designed for precision and reliability.',
-    spec1: 'HUMIDITY: 10% to 98% RH',
+    spec1: 'HUMIDITY: 10% to 95% RH',
     spec2: 'CONTROLLER: ET-Touch 5.7" HMI'
   },
   2: {
@@ -528,7 +532,7 @@ const chamberModalList: Record<number, ChamberModalData> = {
     subtitle: 'HIGH-CAPACITY WALK-IN CHAMBER',
     tempRange: '-60°C to +150°C',
     desc: 'Heavy-capacity walk-in environmental suite designed for large automotive battery assemblies, aerospace structures, and long-duration endurance validation.',
-    spec1: 'HUMIDITY: 10% to 98% RH',
+    spec1: 'HUMIDITY: 10% to 95% RH',
     spec2: 'CONTROLLER: ET-Touch 10.4" Multi-Zone HMI'
   }
 }
@@ -840,6 +844,11 @@ function onChamberPointerUp(unitIdx: number) {
 }
 
 const hoveredFleetUnit = ref<number | null>(null)
+
+// Once the opaque pages cover the whole screen the 3D scene is invisible: stop rendering it and stop
+// it catching hover/clicks (it used to open the ET950 panel from anywhere down the page).
+const pageCovered = ref(false)
+const tresCanvasRef = ref<any>(null)
 
 let hoveredChamberIdx = -1
 
@@ -1169,24 +1178,35 @@ onMounted(() => {
   })
 
   // ── Main ticker (render loop logic) ────────────────────────────────────
+  // Adaptive resolution: the best frame rate seen stands in for the screen's refresh rate (60, 120, 144 Hz...).
+  // While the 3D scene is drawing, any 2s window that falls clearly short of it steps the resolution down, to 1x.
   let frameCount = 0
   let lastFpsTime = performance.now()
-  let hasLoweredPixelRatio = false
+  let bestFps = 0
 
   gsap.ticker.add((time) => {
+    const covered = document.documentElement.dataset.covered === '1'
+    if (covered !== pageCovered.value) {
+      pageCovered.value = covered
+      if (covered) onChamberLeave()
+      // pause / resume Tres's own render loop (changing props would rebuild the whole scene)
+      const loop = tresCanvasRef.value?.context?.loop
+      if (loop) covered ? loop.stop() : loop.start()
+    }
     // Adaptive Pixel Ratio Rule
-    if (!hasLoweredPixelRatio) {
+    if (!covered && pixelRatio.value > 1) {
       frameCount++
       const now = performance.now()
       if (now - lastFpsTime >= 2000) {
         const fps = (frameCount * 1000) / (now - lastFpsTime)
-        if (fps < 45) {
-          pixelRatio.value = Math.max(1, pixelRatio.value - 0.25)
-          hasLoweredPixelRatio = true
-        }
+        bestFps = Math.max(bestFps, fps)
+        if (fps < bestFps * 0.85) pixelRatio.value = Math.max(1, pixelRatio.value - 0.25)
         frameCount = 0
         lastFpsTime = now
       }
+    } else {
+      frameCount = 0
+      lastFpsTime = performance.now()
     }
 
     lenis.raf(time * 1000)
@@ -1333,7 +1353,7 @@ onMounted(() => {
         p.s.position.set(bx + p.off.x, by + p.off.y, bz + p.off.z)
         const sc = p.size * (0.45 + life * 1.9)
         p.s.scale.set(sc, sc, 1)
-        p.mat.opacity = open * near * 0.34 * Math.sin(Math.PI * life)
+        p.mat.opacity = open * near * 0.2 * Math.sin(Math.PI * life)
       })
     }
 
@@ -1369,7 +1389,15 @@ onMounted(() => {
     }
 
     // Seamless continuous crossfade loop (zero frame drops, zero sync calls)
-    if (textVideoMatA.value && textVideoMatB.value && videoElA && videoElB) {
+    // the smoke clips only feed the 3D title: once it has faded out, stop decoding them
+    const textShown = scrollProxy.textOpacity > 0.005
+    if (videoElA && videoElB && !textShown) {
+      if (!videoElA.paused) videoElA.pause()
+      if (!videoElB.paused) videoElB.pause()
+    } else if (videoElA && videoElB && videoElA.paused && videoElB.paused) {
+      ;(activeVideo === 'A' ? videoElA : videoElB).play().catch(() => {})
+    }
+    if (textShown && textVideoMatA.value && textVideoMatB.value && videoElA && videoElB) {
       const dur = videoElA.duration || 5.466
       const fadeSec = 0.95
 
@@ -1521,7 +1549,21 @@ onMounted(() => {
     gltf.scene.traverse((o: any) => { if (o.isMesh && o.material?.name === 'Cavity_Interior.001') cavity = o })
     gltf.scene.updateMatrixWorld(true)
     const cb = cavity ? new Box3().setFromObject(cavity) : new Box3(new Vector3(-0.623, 0.769, -1.005), new Vector3(0.623, 2.038, 0.937))
-    const W = (cb.max.x - cb.min.x) * 2.5, H = (cb.max.y - cb.min.y) * 2.5
+    // The exterior mesh also carries the parts inside the cavity (shelf rail, rod, feet), which show as stray shapes
+    // in front of the window: its shader skips anything inside the cavity volume, keeping a thin lip at the front
+    gltf.scene.traverse((o: any) => {
+      if (!o.isMesh || o.material?.name !== 'Cavity_Exterior.001') return
+      const inner = new Box3(cb.min.clone().addScalar(0.004), cb.max.clone().add(new Vector3(-0.004, -0.004, -0.03)))
+        .applyMatrix4(o.matrixWorld.clone().invert())
+      o.material.onBeforeCompile = (sh: any) => {
+        sh.uniforms.uCavMin = { value: inner.min }
+        sh.uniforms.uCavMax = { value: inner.max }
+        sh.vertexShader = 'varying vec3 vCavPos;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvCavPos = position;')
+        sh.fragmentShader = 'uniform vec3 uCavMin, uCavMax;\nvarying vec3 vCavPos;\n' + sh.fragmentShader.replace('void main() {', 'void main() {\n  if (all(greaterThan(vCavPos, uCavMin)) && all(lessThan(vCavPos, uCavMax))) discard;')
+      }
+      o.material.needsUpdate = true
+    })
+    const W =(cb.max.x - cb.min.x) * 2.5, H = (cb.max.y - cb.min.y) * 2.5
     const pcx = ((cb.max.x + cb.min.x) / 2) * 2.5, pcy = ((cb.max.y + cb.min.y) / 2) * 2.5 - 2.05
     // The visible interior back (fan plate + shelf) sits well in front of the cavity's rear bound,
     // so find the nearest surface by casting rays from inside the cavity toward the back.
@@ -1587,8 +1629,9 @@ onMounted(() => {
     }
     loader.load('/models/chamber_lod.glb', (lod: any) => {
       // Guard: if the main model was replaced and this LOD is stale, fall back to the full mesh.
-      const a = new Box3().setFromObject(gltf.scene), b = new Box3().setFromObject(lod.scene)
-      const sa = new Vector3(), sb = new Vector3(); a.getSize(sa); b.getSize(sb)
+      // (compare unscaled sizes: by now the main scene sits in the world at 2.5x, which always failed this check)
+      const b = new Box3().setFromObject(lod.scene)
+      const sa = size.clone().divideScalar(2.5), sb = new Vector3(); b.getSize(sb)
       if (sa.distanceTo(sb) > 0.03 * sa.length()) { useFullClones(); return }
       lod.scene.traverse((child: any) => {
         if (!child.isMesh) return
@@ -1835,14 +1878,17 @@ function buildScrollTimeline() {
 
     // Everything after the chamber is one column that scrolls straight on from the statement,
     // at roughly the same speed as the page itself. The light change and the section reveals
-    // are keyed to positions inside the column (see TrustSection / CompareSection / EndingSection).
+    // are keyed to positions inside the column (see TrustSection and the section components).
     tl.set('.tr-root', { visibility: 'visible' }, 188)
     tl.fromTo('.tr-scroll',
       { y: () => window.innerHeight * 1.1 },
-      { y: () => -((document.querySelector('.tr-scroll') as HTMLElement).offsetHeight - window.innerHeight), duration: 276, ease: 'none' },
+      { y: () => -((document.querySelector('.tr-scroll') as HTMLElement).offsetHeight - window.innerHeight), duration: 581, ease: 'none' },
       192
     )
-    tl.to({}, { duration: 1 }, 468) // pins timeline end at 469
+    tl.to({}, { duration: 1 }, 772) // pins timeline end at 773
+    ;(window as any).__envTl = { start: 192, dur: 581, end: 773 } // read by utils/columnScroll
+    ;(window as any).__envMainTl = tl // read by utils/scrollTop
+    if (import.meta.env.DEV) (window as any).__tresCtx = tresCanvasRef.value?.context // dev: renderer stats for perf checks
 
   }, 600)
 }
@@ -1924,8 +1970,10 @@ function onScrollDown() {
   }
 }
 
+// "Build w/ Envisys" (navbar and page) opens the contact drawer
+const contactOpen = ref(false)
 function handleBuildClick() {
-  openPanel(window.innerWidth / 2, window.innerHeight / 2)
+  contactOpen.value = true
 }
 
 onMounted(() => {
@@ -1945,7 +1993,7 @@ onMounted(() => {
   --font-body: 'AkkuratMono', ui-monospace, monospace;
   --ember: #ff6a1a;
 }
-.layout__page { min-height: 1930vh; } /* 100vh + 3.9007vh per timeline unit; timeline ends at 469 */
+.layout__page { min-height: 3115vh; } /* 100vh + 3.9007vh per timeline unit; timeline ends at 773 */
 
 body, #app { background: transparent !important; overflow-x: hidden; }
 .preloader, .loader, .popup.faq { display: none !important; }
@@ -1973,6 +2021,10 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   overflow: hidden;
   z-index: 0;
   pointer-events: auto; /* MUST be auto for raycaster chamber clicks! */
+}
+html[data-covered="1"] .canvas-fixed-wrap {
+  pointer-events: none;
+  visibility: hidden;
 }
 
 /* Film grain - High-performance texture (zero SVG filter stalls, 120+ FPS) */

@@ -342,6 +342,11 @@ function startAnimation() {
         if (loaderRootRef.value) {
           loaderRootRef.value.style.display = 'none'
         }
+        // it stays mounted, so stop its draw loop and hand its GPU context back
+        if (animationFrameId) cancelAnimationFrame(animationFrameId)
+        animationFrameId = null
+        gl?.getExtension('WEBGL_lose_context')?.loseContext()
+        gl = null
         emit('complete')
       }
     },

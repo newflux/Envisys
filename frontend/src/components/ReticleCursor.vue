@@ -25,7 +25,8 @@ const dotRef = ref<HTMLElement | null>(null)
 const state = ref<'idle' | 'link' | 'chamber'>('idle')
 const isDown = ref(false)
 const hidden = ref(true)
-const label = computed(() => (state.value === 'chamber' ? 'INSPECT' : ''))
+const tagText = ref('')
+const label = computed(() => (state.value === 'chamber' ? 'INSPECT' : tagText.value))
 
 const SIZE = { idle: 30, chamber: 76 }
 
@@ -67,6 +68,7 @@ function update(x: number, y: number, target: EventTarget | null) {
 
   const overChamber = !locked && document.body.classList.contains('is-hovering-chamber')
   state.value = locked ? 'link' : overChamber ? 'chamber' : 'idle'
+  tagText.value = locked?.dataset.cursor ?? ''
 
   if (locked) {
     // Magnetic: wrap the element, pulled slightly toward the pointer
@@ -177,7 +179,8 @@ onUnmounted(() => {
   opacity: 0;
   transition: opacity 0.2s ease;
 }
-.is-chamber .rc-label { opacity: 1; }
+.is-chamber .rc-label,
+.is-link .rc-label { opacity: 1; }
 </style>
 
 <style>

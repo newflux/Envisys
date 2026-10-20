@@ -6,7 +6,7 @@
         class="Header_brandLogo__AXo7t" 
         aria-label="ENVISYS - Back home" 
         href="/"
-        @mouseenter="playLogoAnim"
+        @click.prevent="onLogoClick"
       >
         <!-- 7-Arc Sphere Brandmark with Animated Alternating ClipPaths -->
         <svg 
@@ -112,15 +112,15 @@
               </a>
             </li>
 
-            <!-- 2. Verticles Link (formerly tech) -->
+            <!-- 2. Verticals Link (formerly tech) -->
             <li 
               class="Nav_item__uIn_C" 
               :class="{ 'is-dimmed': activeIndex !== null && activeIndex !== 2 }"
               @mouseenter="onItemEnter(2)"
             >
-              <a class="Nav_link__Vx_8M" href="/verticles">
+              <a class="Nav_link__Vx_8M" href="/verticals">
                 <span class="Nav_label__EHdHO">
-                  <div class="line-mask"><div class="line">verticles</div></div>
+                  <div class="line-mask"><div class="line">verticals</div></div>
                 </span>
               </a>
             </li>
@@ -280,8 +280,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
+import { scrollToTop } from '../utils/scrollTop'
 
 defineEmits<{
   (e: 'build-click'): void
@@ -472,13 +473,58 @@ function animIn() {
   gsap.delayedCall(0.18, () => {
     playLogoAnim()
   })
+  gsap.delayedCall(1, () => { introDone = true })
+}
+
+// Scroll down: the links drop out one by one, the capsule slides off to the right and the nav lifts away
+// (the logo stays).
+// Scroll up: the same intro plays again. Always shown near the top and while a menu is open.
+let introDone = false
+let hidden = false
+let lastY = 0
+function navLines() {
+  return headerRef.value?.querySelectorAll('.Nav_mainMenu__pDzJf .line') ?? []
+}
+// The logo is home: back to the top (behind a curtain from deep in the page), with its arc sweep as it lands.
+function onLogoClick() {
+  scrollToTop(playLogoAnim)
+}
+function hideNav() {
+  const bars = [headerRef.value]
+  gsap.killTweensOf([...bars, navBgRef.value, ...navLines()])
+  gsap.to(navLines(), { opacity: 0, y: -8, duration: 0.28, stagger: 0.03, ease: 'power2.in' })
+  gsap.to(navBgRef.value, { xPercent: 105, duration: 0.55, ease: 'power3.in', delay: 0.08 })
+  gsap.to(bars, { autoAlpha: 0, y: -24, filter: 'blur(6px)', duration: 0.5, ease: 'power2.in', delay: 0.22 })
+}
+function showNav() {
+  const bars = [headerRef.value]
+  gsap.killTweensOf([...bars, navBgRef.value, ...navLines()])
+  gsap.to(bars, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power3.out' })
+  gsap.fromTo(navBgRef.value, { xPercent: 105 }, { xPercent: 0, duration: 0.75, ease: 'power3.out', delay: 0.05 })
+  gsap.fromTo(navLines(), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.04, ease: 'power2.out', delay: 0.12, clearProps: 'transform,opacity' })
+}
+function watchScroll() {
+  if (!introDone) return
+  const sc = document.getElementById('scroller')
+  const y = (window as any).lenisInstance?.scroll ?? sc?.scrollTop ?? 0
+  const dy = y - lastY
+  lastY = y
+  let hide = hidden
+  if (y < 80 || isCompanyOpen.value || isMobileOpen.value) hide = false
+  else if (dy > 4) hide = true
+  else if (dy < -4) hide = false
+  if (hide === hidden) return
+  hidden = hide
+  hide ? hideNav() : showNav()
 }
 
 onMounted(() => {
   if (navBgRef.value) {
     gsap.set(navBgRef.value, { transformOrigin: 'right center' })
   }
+  gsap.ticker.add(watchScroll)
 })
+onUnmounted(() => gsap.ticker.remove(watchScroll))
 
 defineExpose({
   animIn,

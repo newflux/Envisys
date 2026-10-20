@@ -99,7 +99,6 @@ onUnmounted(() => {
 .cs-word {
   display: inline-block;
   opacity: 0.2;
-  will-change: opacity;
 }
 .cs-cold { color: var(--cs-cold); }
 .cs-hot { color: var(--cs-hot); }

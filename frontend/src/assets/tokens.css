@@ -1,0 +1,6 @@
+/* Design tokens shared by every page */
+:root {
+  --font-display: 'Monument Extended', sans-serif;
+  --font-body: 'AkkuratMono', ui-monospace, monospace;
+  --ember: #ff6a1a;
+}

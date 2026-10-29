@@ -1988,11 +1988,6 @@ onMounted(() => {
 @import "./assets/style.css";
 
 /* ── 6.5×100vh scroll space for deeper cinematic timing and resting plateau ── */
-:root {
-  --font-display: 'Monument Extended', sans-serif;
-  --font-body: 'AkkuratMono', ui-monospace, monospace;
-  --ember: #ff6a1a;
-}
 .layout__page { min-height: 3115vh; } /* 100vh + 3.9007vh per timeline unit; timeline ends at 773 */
 
 body, #app { background: transparent !important; overflow-x: hidden; }

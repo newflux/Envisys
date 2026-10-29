@@ -487,6 +487,7 @@ function navLines() {
 }
 // The logo is home: back to the top (behind a curtain from deep in the page), with its arc sweep as it lands.
 function onLogoClick() {
+  if (location.pathname !== '/') { location.href = '/'; return } // on any other page the logo goes home
   scrollToTop(playLogoAnim)
 }
 function hideNav() {

@@ -1,5 +1,8 @@
 <template>
   <div class="navbar-root">
+    <SearchOverlay :open="searchOpen" @close="searchOpen = false" />
+    <!-- softens whatever is behind the open menu, so the page never fights with it -->
+    <div class="Nav_scrim" :class="{ on: isCompanyOpen }" aria-hidden="true"></div>
     <!-- Top Bar with Left Brand Logo & Mobile Trigger -->
     <div ref="topBarRef" class="Header_topBar__t3Nfy">
       <a 
@@ -74,7 +77,7 @@
     </div>
 
     <!-- Main Navigation Pill (Top Right) & Dropdown Submenu Cards -->
-    <header ref="headerRef" class="Header_header__qBw1J">
+    <header ref="headerRef" class="Header_header__qBw1J" :class="{ 'is-mobile-open': isMobileOpen }">
       <div class="Header_brandLogoSpacer__MPAO1"></div>
       
       <div 
@@ -165,6 +168,13 @@
               </button>
             </li>
 
+            <!-- search: opens the product search sheet -->
+            <li class="Nav_search" @mouseenter="onItemEnter(6)">
+              <button class="Nav_searchBtn" aria-label="Search products" @click="searchOpen = true">
+                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.3"></path></svg>
+              </button>
+            </li>
+
             <!-- 5. Build w/ ENVISYS CTA Button (Crisp White Rounded Button, Solid Black on Hover) -->
             <li 
               class="Nav_contact__H607i" 
@@ -213,9 +223,10 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img src="/images/pages/manifesto.png" alt="" aria-hidden="true" />
+                <img src="/media/team.jpg" alt="" aria-hidden="true" style="object-position: 58% 40%" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">about us</div></div>
+                  <small class="CompanySubmenuItem_sub">Our story, our team, our sites</small>
                 </span>
               </div>
               <div class="CompanySubmenuItem_right__Aj08A">
@@ -237,9 +248,10 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img src="/images/pages/career.png" alt="" aria-hidden="true" />
+                <img src="/media/step-3.jpg" alt="" aria-hidden="true" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">resources</div></div>
+                  <small class="CompanySubmenuItem_sub">Guides and documents</small>
                 </span>
               </div>
               <div class="CompanySubmenuItem_right__Aj08A">
@@ -261,9 +273,10 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img src="/images/pages/whitePapers.png" alt="" aria-hidden="true" />
+                <img src="/media/site-aerial.jpg" alt="" aria-hidden="true" style="object-position: 52% 50%" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">contact</div></div>
+                  <small class="CompanySubmenuItem_sub">Peenya, Bengaluru</small>
                 </span>
               </div>
               <div class="CompanySubmenuItem_right__Aj08A">
@@ -280,9 +293,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import { scrollToTop } from '../utils/scrollTop'
+import SearchOverlay from './SearchOverlay.vue'
 
 defineEmits<{
   (e: 'build-click'): void
@@ -291,10 +305,14 @@ defineEmits<{
 // UI state
 const isCompanyOpen = ref(false)
 const isMobileOpen = ref(false)
+const searchOpen = ref(false)
 const isContactHovered = ref(false)
 const activeIndex = ref<number | null>(null)
 const hoveredSubIndex = ref<number | null>(null)
 let closeTimer: any = null
+// the landing page draws its giant wordmark in a canvas behind the menu; tell the page so it can step back
+watch(isCompanyOpen, (v) => { document.documentElement.dataset.menu = v ? '1' : '' })
+watch(isMobileOpen, (v) => { document.documentElement.dataset.mnav = v ? '1' : ''; (window as any).lenisInstance?.[v ? 'stop' : 'start']?.() })
 
 // DOM refs
 const topBarRef = ref<HTMLElement | null>(null)
@@ -327,11 +345,15 @@ function onItemEnter(index: number) {
   }
 }
 
+let openTimer: any = null
 function openCompanyMenu(index: number) {
   clearTimeout(closeTimer)
+  clearTimeout(openTimer)
   activeIndex.value = index
-  isCompanyOpen.value = true
-  
+  if (isCompanyOpen.value) return
+  openTimer = setTimeout(() => { isCompanyOpen.value = true; stagger() }, 110)
+}
+function stagger() {
   if (submenuRef.value) {
     const cards = submenuRef.value.querySelectorAll('.CompanySubmenuItem_submenuItem__irMc_')
     gsap.killTweensOf(cards)
@@ -344,7 +366,9 @@ function openCompanyMenu(index: number) {
 }
 
 function toggleCompanyMenu() {
+  clearTimeout(openTimer)
   isCompanyOpen.value = !isCompanyOpen.value
+  if (isCompanyOpen.value) stagger()
 }
 
 function keepCompanyMenuOpen() {
@@ -364,6 +388,7 @@ function onSubmenuLeave() {
 }
 
 function onNavWrapperLeave() {
+  clearTimeout(openTimer)
   clearTimeout(closeTimer)
   closeTimer = setTimeout(() => {
     isCompanyOpen.value = false
@@ -519,6 +544,15 @@ function watchScroll() {
   hide ? hideNav() : showNav()
 }
 
+// anything on the page can open the search: the nav button, a field on the products page, or the keyboard
+const openSearch = () => { searchOpen.value = true }
+const onKey = (e: KeyboardEvent) => {
+  const t = e.target as HTMLElement
+  if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !/INPUT|TEXTAREA/.test(t?.tagName))) { e.preventDefault(); searchOpen.value = true }
+}
+onMounted(() => { window.addEventListener('envisys:search', openSearch); window.addEventListener('keydown', onKey) })
+onUnmounted(() => { window.removeEventListener('envisys:search', openSearch); window.removeEventListener('keydown', onKey) })
+
 onMounted(() => {
   if (navBgRef.value) {
     gsap.set(navBgRef.value, { transformOrigin: 'right center' })
@@ -623,6 +657,13 @@ defineExpose({
   .mobile-hamburger {
     display: flex;
   }
+  /* phones: the menu is closed until the button opens it, then it fills the screen */
+  .Header_header__qBw1J:not(.is-mobile-open) { display: none !important; }
+  .Header_header__qBw1J.is-mobile-open { inset: 0; padding: 96px 7vw 7vw; background: rgba(4, 6, 10, 0.97); overflow-y: auto; pointer-events: auto; }
+  .Header_header__qBw1J.is-mobile-open .Nav_wrapper__EfAHX { width: 100%; align-items: stretch; }
+  .Header_header__qBw1J.is-mobile-open .Nav_nav__ABerH { background: none; overflow: visible; padding: 0; }
+  .Header_header__qBw1J.is-mobile-open .Nav_backgroundNav__kGWok { display: none; }
+  .Header_header__qBw1J.is-mobile-open .Nav_mainMenu__pDzJf { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; width: 100%; font-size: 26px; }
 }
 
 /* ── Header Container (Top Right Nav) - Spacious, Elegant & Long ── */
@@ -880,6 +921,13 @@ defineExpose({
 }
 
 /* ── Company Dropdown Submenu Cards (Wide, Tall, Luxury Floating Cards) ── */
+.Nav_search { list-style: none; display: flex; align-items: center; }
+.Nav_searchBtn { width: 34px; height: 34px; margin: 0 4px 0 2px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: #fff; opacity: 0.7; cursor: pointer; transition: background 0.3s ease, opacity 0.3s ease; }
+.Nav_searchBtn:hover { background: rgba(255, 255, 255, 0.14); opacity: 1; }
+.Nav_scrim { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0; background: radial-gradient(70% 90% at 85% 0%, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5) 70%); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: opacity 0.45s ease; }
+.Nav_scrim.on { opacity: 1; }
+.CompanySubmenuItem_sub { display: block; margin-top: 3px; font-size: 9.5px; letter-spacing: 0.1em; opacity: 0.5; text-transform: uppercase; transition: opacity 0.3s ease; }
+.CompanySubmenuItem_submenuItem__irMc_:hover .CompanySubmenuItem_sub { opacity: 0.65; }
 .Nav_submenu__EKbU9 {
   width: 100%;
   margin-top: 12.35px;
@@ -986,6 +1034,7 @@ defineExpose({
 
 /* Large, crisp preview image (80px x 80px square) matching reference screenshot */
 .CompanySubmenuItem_left__OLqdH img {
+  transition: transform 0.7s cubic-bezier(0.2, 0.9, 0.2, 1);
   width: 79.7px;
   height: 79.7px;
   object-fit: cover;
@@ -1028,7 +1077,14 @@ defineExpose({
   transition: color 0.3s ease, transform 0.25s ease;
 }
 
+.CompanySubmenuItem_submenuItem__irMc_:hover .CompanySubmenuItem_left__OLqdH img { transform: scale(1.06); }
 .CompanySubmenuItem_submenuItem__irMc_:hover .CompanySubmenuItem_right__Aj08A {
   transform: translateX(3px);
 }
+</style>
+
+<style>
+/* while the company menu is open the 3D scene behind it softens and darkens, so the wordmark never fights the cards */
+.canvas-fixed-wrap { transition: filter 0.5s ease; }
+html[data-menu="1"] .canvas-fixed-wrap { filter: blur(12px) brightness(0.3); }
 </style>

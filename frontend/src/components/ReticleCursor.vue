@@ -1,11 +1,14 @@
 <template>
-  <div ref="rootRef" class="rc" :class="[`is-${state}`, { 'is-down': isDown, 'is-hidden': hidden }]" aria-hidden="true">
-    <div ref="boxRef" class="rc-box">
-      <i></i><i></i><i></i><i></i>
-      <span class="rc-label">{{ label }}</span>
+  <!-- teleported to body so it stays above pop-ups that are teleported there too (the native cursor is hidden page-wide) -->
+  <Teleport to="body">
+    <div ref="rootRef" class="rc" :class="[`is-${state}`, { 'is-down': isDown, 'is-hidden': hidden }]" aria-hidden="true">
+      <div ref="boxRef" class="rc-box">
+        <i></i><i></i><i></i><i></i>
+        <span class="rc-label">{{ label }}</span>
+      </div>
+      <div ref="dotRef" class="rc-dot-pos"><div class="rc-dot"></div></div>
     </div>
-    <div ref="dotRef" class="rc-dot-pos"><div class="rc-dot"></div></div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -64,7 +67,8 @@ function update(x: number, y: number, target: EventTarget | null) {
   if (under && !isShown(under)) under = null
   const prev = locked
   if (under) locked = under
-  else if (locked && !inside(locked.getBoundingClientRect(), x, y, STICKY)) locked = null
+  // the slack only holds across gaps; if something unrelated (a pop-up) now covers the element, let go
+  else if (locked && (!inside(locked.getBoundingClientRect(), x, y, STICKY) || (target instanceof Node && !locked.contains(target) && !target.contains(locked)))) locked = null
 
   const overChamber = !locked && document.body.classList.contains('is-hovering-chamber')
   state.value = locked ? 'link' : overChamber ? 'chamber' : 'idle'

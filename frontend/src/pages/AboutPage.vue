@@ -38,7 +38,6 @@
             <div class="ab-frame" ref="frameRef" aria-hidden="true">
               <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
               <div class="ab-frame-img" ref="frameImgRef"><img src="/media/step-4.jpg" alt="" /></div>
-              <span class="ab-frame-cap">Envisys · test chamber</span>
             </div>
             <div class="ab-two">
               <span class="ab-label rv">What we make</span>
@@ -58,6 +57,7 @@
           <section class="ab-glow" ref="glowRef">
             <div class="ab-glow-in">
               <canvas class="ab-wave" ref="waveRef"></canvas>
+              <div class="ab-glow-fill" ref="glowFillRef"></div>
               <div class="ab-glow-txt" ref="glowTxtRef">
               <p class="ab-glow-t">We are Envisys.<br />Test without limits.</p>
               <button class="ab-pill" :class="{ light: glowLight }" v-magnetic="0.2" data-cursor="BUILD" @click="contactOpen = true">
@@ -73,7 +73,6 @@
             <div class="ab-bento">
               <figure v-for="t in tiles" :key="t.img" class="ab-clip ab-bt" :style="{ gridColumn: `${t.c} / span ${t.w}`, gridRow: `${t.r} / span ${t.h}` }" data-cursor="">
                 <img :src="t.img" alt="" loading="lazy" />
-                <figcaption><i>+</i>{{ t.cap }}</figcaption>
               </figure>
             </div>
           </section>
@@ -126,6 +125,7 @@
               <address>{{ u.addr }}</address>
             </a>
           </section>
+          <NextUp label="Next up" title="What we build" text="Five flagship ranges and a catalogue of everything else, with the search to find any of it." href="/products" />
         </div>
 
         <SiteFooter @build="contactOpen = true" />
@@ -148,6 +148,7 @@ import ScrollBar from '../components/ScrollBar.vue'
 import ContactPanel from '../components/ContactPanel.vue'
 import ReticleCursor from '../components/ReticleCursor.vue'
 import SiteFooter from '../components/SiteFooter.vue'
+import NextUp from '../components/NextUp.vue'
 import AboutBuilding from '../components/AboutBuilding.vue'
 import AboutDirectors from '../components/AboutDirectors.vue'
 import AboutMap from '../components/AboutMap.vue'
@@ -202,6 +203,7 @@ const tapeRef = ref<HTMLElement | null>(null)
 const readRef = ref<HTMLElement | null>(null)
 const waveRef = ref<HTMLCanvasElement | null>(null)
 const glowTxtRef = ref<HTMLElement | null>(null)
+const glowFillRef = ref<HTMLElement | null>(null)
 let beatImgSec: HTMLElement | null = null
 let beatImg: HTMLElement | null = null
 const frameRef = ref<HTMLElement | null>(null)
@@ -269,13 +271,16 @@ function tick() {
   const gr = glowRef.value!.getBoundingClientRect()
   if (visible(gr)) {
     const p = clamp01(-gr.top / (gr.height - H))
-    wp += (smooth(clamp01((p - 0.12) / 0.7)) - wp) * 0.12
+    wp += (smooth(clamp01((p - 0.06) / 0.56)) - wp) * 0.12
     mx += (mxT - mx) * 0.06
     drawWave(window.innerWidth, H)
-    const k = smooth(clamp01((waveAlpha(0.5, 0.5) - 0.3) / 0.4))
+    const k = smooth(clamp01((waveAlpha(0.5, 0.5) - 0.42) / 0.16))
+    // once the wave has covered the screen the page is simply light, so there is no seam when the section ends
+    glowFillRef.value!.style.opacity = smooth(clamp01((p - 0.56) / 0.16)).toFixed(3)
     const c = Math.round(lerp(243, 10, k))
     glowTxtRef.value!.style.color = `rgb(${c}, ${c}, ${Math.round(lerp(250, 12, k))})`
-    glowTxtRef.value!.style.opacity = (smooth(clamp01(p * 5)) * (1 - smooth(clamp01((p - 0.9) / 0.1)))).toFixed(3)
+    glowTxtRef.value!.style.opacity = (smooth(clamp01(p * 5)) * (1 - smooth(clamp01((p - 0.93) / 0.07)))).toFixed(3)
+    glowTxtRef.value!.style.textShadow = k > 0.5 ? '0 0 26px rgba(244,244,242,0.55)' : '0 0 26px rgba(0,0,0,0.45)'
     glowLight.value = k > 0.5
   }
 
@@ -479,7 +484,8 @@ onUnmounted(() => {
 .ab-beat.dk .ab-say { font-size: clamp(22px, 2.6vw, 48px); line-height: 1.15; }
 
 /* 4 · black to light on the preloader's smoke wave; below the pinned stage the page is already light */
-.ab-glow { height: 280vh; background: linear-gradient(180deg, #000 0, #000 calc(100% - 100vh), var(--lt) calc(100% - 100vh)); }
+.ab-glow { height: 300vh; background: #000; }
+.ab-glow-fill { position: absolute; inset: 0; background: var(--lt); opacity: 0; pointer-events: none; will-change: opacity; }
 .ab-glow-in { position: sticky; top: 0; height: 100vh; }
 .ab-wave { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .ab-glow-txt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5vh; text-align: center; opacity: 0; will-change: opacity; }

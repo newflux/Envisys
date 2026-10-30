@@ -38,12 +38,13 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import { scrollColumnTo } from '../utils/columnScroll'
 
-// PLACEHOLDER copy. Replace each quote and attribution with a real, approved client testimonial before launch.
+// Real Google reviews, supplied by Envisys (Envisys Testimonials.pdf). Quotes are trimmed and lightly copy-edited for grammar; the meaning is untouched.
 const items = [
-  { sector: 'Automotive', quote: 'Client quote goes here: two sentences on the test programme, the turnaround and the support they got from Envisys.', who: 'NAME, ROLE @COMPANY' },
-  { sector: 'Electronics', quote: 'Client quote goes here: what they needed to validate, and how the chamber held the profile through the whole run.', who: 'NAME, ROLE @COMPANY' },
-  { sector: 'Defence', quote: 'Client quote goes here: the qualification they had to meet and why they trusted the result.', who: 'NAME, ROLE @COMPANY' },
-  { sector: 'Aerospace', quote: 'Client quote goes here: the environment they had to recreate, and what it saved them in the field.', who: 'NAME, ROLE @COMPANY' }
+  { sector: 'Since day one', quote: 'We have been using the products from Envisys since the inception of the company. Unique about this company is service support, quality of products and innovation every time we procure a new product.', who: 'PRAKASH RATHOD · GOOGLE REVIEW' },
+  { sector: 'Ten years on', quote: 'We are using the ECS 300 chamber for the last 10 years, and now one more order. Quality wise, very good.', who: 'VR PRABU · GOOGLE REVIEW' },
+  { sector: 'Built to order', quote: 'Envisys is one of the best options for climatic chambers built with customized features. Their technical know-how gives them an edge over other competitors. Their service support is excellent.', who: 'VENU GOPAL · GOOGLE REVIEW' },
+  { sector: 'Testing lab', quote: 'Their recent NABL accreditation confirms their high testing standards. The lab is well equipped, organized and delivers clear, reliable reports with reasonable turnaround times.', who: 'BAIKUNTHANATH KHUNTIA · GOOGLE REVIEW' },
+  { sector: 'After sales', quote: 'We have been using their chambers for the last 7 years. There has not been a single issue on these. Their maintenance is also excellent.', who: 'SUNIL NAMBIAR · GOOGLE REVIEW' }
 ]
 const N = items.length
 const titleLines = ['Our customers', 'have no margin', 'for error.']
@@ -189,7 +190,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.ts-root { position: relative; height: 240vh; color: #0d2340; }
+.ts-root { position: relative; height: 300vh; color: #0d2340; }
 .ts-stage { position: absolute; left: 0; right: 0; top: 0; height: 100vh; overflow: hidden; will-change: transform; }
 
 /* the preloader's smoke wave, scroll-driven: black rising from below on a soft, slowly flattening curve */

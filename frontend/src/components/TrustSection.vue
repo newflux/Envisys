@@ -87,18 +87,18 @@ import IndustriesSection from './IndustriesSection.vue'
 
 defineEmits<{ (e: 'build'): void }>()
 
-// Logos are the ones on the current envisystech.com (Clientele), converted to white on transparent.
+// Logos are the customers Envisys listed for the CII National Shining MSME Awards 2026 (white on transparent).
 // Sector copy is placeholder.
 const sectors = [
   { name: 'Automotive', line: 'Powertrain, electronics and cabin components, proven long before they reach the road.' },
   { name: 'Electronics', line: 'Boards, networking and silicon held through thermal and humidity cycling.' },
   { name: 'Defence', line: 'Qualification runs that meet the standard, fully logged from start to finish.' },
-  { name: 'Aerospace', line: 'From −70°C to +180°C, and altitude chambers down to 1 mbar.' }
+  { name: 'Aerospace', line: 'Altitude, thermal shock and climatic runs for flight hardware.' }
 ]
 const clients = [
-  { n: 'Bosch', f: 'bosch' }, { n: 'Mahindra', f: 'mahindra' }, { n: 'TATA', f: 'tata' }, { n: 'Hyundai', f: 'hyundai' },
-  { n: 'nVidia', f: 'nvidia' }, { n: 'GE', f: 'ge' }, { n: 'Wipro', f: 'wipro' }, { n: 'Danfoss', f: 'danfoss' },
-  { n: 'TVS', f: 'tvs' }, { n: 'Delphi', f: 'delphi' }, { n: 'Commscope', f: 'commscope' }, { n: 'Titan', f: 'titan' }
+  { n: 'TVS', f: 'tvs' }, { n: 'Tata Motors', f: 'tatamotors' }, { n: 'Mahindra', f: 'mahindra' }, { n: 'Royal Enfield', f: 'royalenfield' }, { n: 'Kia', f: 'kia' }, { n: 'Ather', f: 'ather' },
+  { n: 'Ola Electric', f: 'ola' }, { n: 'Bosch', f: 'bosch' }, { n: 'Schneider Electric', f: 'schneider' }, { n: 'Tejas Networks', f: 'tejas' }, { n: 'SEG Automotive', f: 'seg' }, { n: 'APAR', f: 'apar' },
+  { n: 'Honeywell Aerospace', f: 'honeywell' }, { n: 'GE Aerospace', f: 'geaero' }, { n: 'CSIR-NAL', f: 'csirnal' }, { n: 'Tata Power SED', f: 'tatapower' }, { n: 'Bharat Electronics', f: 'bel' }, { n: 'HAL', f: 'hal' }
 ]
 
 const rootRef = ref<HTMLElement | null>(null)

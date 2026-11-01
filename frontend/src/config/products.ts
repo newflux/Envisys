@@ -283,6 +283,24 @@ export const groups: Group[] = ['Climatic & thermal', 'Shock, altitude & vacuum'
 export const bySlug = (s: string) => products.find((p) => p.slug === s)
 export const img = (p: Product, f: 'hero' | 'lines' | `g${number}`) => `/p/${p.slug}/${f}.webp`
 
+// the 3D model for each main chamber (phones load the `_m.glb` cut), dressed in Blender (tools/step_to_obj.py + tools/dress_step.py) and Draco-compressed.
+// Only series with their own model are listed; the others show their photograph in the same place, so no page ever
+// shows another product. Add each series here as its STEP file is converted.
+export const models: Record<string, string> = { et: '/models/et950.glb' }
+// photographs of individual models, by family (a model code without its variant suffix: EM64-30T → EM64).
+// Families without one show 'Photograph to follow'.
+export const modelShots: Record<string, string> = { ET300: '/p/et/m-et300.webp', EM30: '/p/mini/m-em30.webp', EM64: '/p/mini/m-em64.webp', EM100: '/p/mini/m-em100.webp' }
+export const family = (item: string) => item.replace(/-\d+[TH](-D)?$/, '')
+// short lines from real Google reviews (the full ones are in TestimonialsSection); they are about Envisys, not one chamber
+const quotes = [
+  { q: 'Innovation every time we procure a new product', who: 'Prakash Rathod' },
+  { q: 'Quality wise, very good', who: 'VR Prabu' },
+  { q: 'Their service support is excellent', who: 'Venu Gopal' },
+  { q: 'Clear, reliable reports', who: 'Baikunthanath Khuntia' },
+  { q: 'There has not been a single issue', who: 'Sunil Nambiar' }
+]
+export const quotesFor = (i: number) => [quotes[i % quotes.length], quotes[(i + 1) % quotes.length]]
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9.]+/g, '')
 
 export interface Hit { product: Product; score: number; models: string[] }

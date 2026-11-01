@@ -1,93 +1,45 @@
 <template>
   <PageShell title="Products" blue v-slot="{ contact }">
     <!-- on arrival: the landing page's smoke fills the screen, then sinks away to reveal the scene -->
-    <Teleport to="body"><canvas v-if="!plDone" class="pl" ref="plRef" aria-hidden="true"></canvas></Teleport>
-    <!-- 1 · the flagships, one scene each, each in its own empty room (a gradient drawn from a reference space). Light first; for a couple of them the landing page's smoke rolls in and the light falls. -->
+    <Teleport to="body"><Preloader v-if="!plDone" smoke-only @complete="onLoaded" /></Teleport>
+    <!-- 1 · the flagships as 3D models, standing in a row; the camera glides along it with the scroll, pulling back between two -->
     <section class="hx" ref="showRef" :style="{ height: (mainProducts.length + 1) * 100 + 'vh' }">
-      <div class="hx-pin" ref="pinRef" :class="{ dk }">
-        <!-- a dark frame cut into panels by slanted gaps; the main panel holds the room, the rest hold the controls -->
-        <div class="fx" aria-hidden="true">
-          <div class="fx-sk">
-            <div class="pn p1">
-              <!-- light rooms sit under the smoke, dark rooms above it -->
-              <div v-for="(p, i) in mainProducts" :key="p.slug" class="hx-bg" :class="[`g-${p.slug}`, darkScenes.has(p.slug) ? 'd' : 'l', { on: i === cur }]"></div>
-              <canvas class="hx-smoke" ref="smokeRef"></canvas>
-            </div>
-            <div class="pn p2"></div>
-            <div class="pn p3"></div>
-            <div class="pn p4"></div>
-          </div>
-          <div class="hx-spot"></div>
-        </div>
-
-        <!-- the chambers: all front-on, each rising from the floor -->
-        <div class="hx-stage" ref="stageRef">
-          <div class="hx-shadow"></div>
-          <img v-for="(p, i) in mainProducts" :key="p.slug" class="hx-img" :class="i === cur ? 'on' : i < cur ? 'past' : 'next'" :style="{ '--s': scale[p.slug] ?? 0.8 }" :src="img(p, 'hero')" :alt="p.name" draggable="false" />
-          <button class="hx-hit" data-cursor="SPECS" aria-label="View specification" @click="sheet = active"></button>
-        </div>
+      <div class="hx-pin">
+        <img class="hx-poster" :class="{ gone: loaded }" :src="img(active, 'hero')" alt="" aria-hidden="true" />
+        <canvas class="hx-gl" ref="glRef" :class="{ hov }" :data-cursor="hov ? (hov === 1 ? 'OPEN' : 'NEXT') : undefined"
+          @pointerdown="onDown" @pointermove="onDrag" @pointerup="onUp" @pointercancel="onUp" @pointerleave="onLeave"></canvas>
         <div class="hx-grain" aria-hidden="true"></div>
 
-        <nav class="hx-side" aria-label="Chamber tools">
-          <button data-cursor="" @click="toBento"><i><svg viewBox="0 0 12 12"><path d="M8 2L4 6l4 4" fill="none" stroke="currentColor" stroke-width="1.2" /></svg></i><span>All chambers</span></button>
-          <button data-cursor="" @click="sheet = active"><i><svg viewBox="0 0 12 12"><rect x="1.5" y="2.5" width="9" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.1" /><path d="M1.5 8l3-3 2.5 2.5L8.5 6l2 2" fill="none" stroke="currentColor" stroke-width="1.1" /></svg></i><span>Gallery</span></button>
-          <a v-if="active.brochure" :href="active.brochure" target="_blank" rel="noopener" data-cursor=""><i><svg viewBox="0 0 12 12"><path d="M6 1.5v6.5M3.2 5.5L6 8.2l2.8-2.7M2 10.5h8" fill="none" stroke="currentColor" stroke-width="1.1" /></svg></i><span>Brochure</span></a>
-        </nav>
-
+        <!-- top left: the chamber's credits, set like a catalogue entry -->
         <Transition name="roll" mode="out-in">
-          <div class="hx-name" :key="active.slug">
-            <span>0{{ cur + 1 }} / 0{{ mainProducts.length }}</span>
+          <div class="hx-card" :key="active.slug">
             <h1>{{ active.name }}</h1>
-            <p>{{ active.tagline }}</p>
-          </div>
-        </Transition>
-
-        <!-- top right: a test cycle, running live, drawn from this chamber's own range -->
-        <div class="hx-md">
-          <header><span><u class="live"></u>Example cycle</span><small>time-lapse</small></header>
-          <div class="cy-r"><b ref="cyTxt">—</b><i>°C</i><em ref="cyState">—</em></div>
-          <canvas class="cy" ref="cyRef" aria-hidden="true"></canvas>
-          <footer><span>{{ cyLo }}</span><span>{{ cy.note }}</span><span>{{ cyHi }}</span></footer>
-        </div>
-
-        <Transition name="roll" mode="out-in">
-          <div class="hx-ex" :key="active.slug" :style="{ pointerEvents: undefined }">
-            <header><span>{{ active.models[0].label }}</span><b>{{ active.models[0].items.length }}</b></header>
-            <div class="ch" style="pointer-events: auto">
-              <a v-for="m in active.models[0].items.slice(0, 6)" :key="m" :href="`/products/${active.slug}?m=${encodeURIComponent(m)}`" data-cursor="">{{ m }}</a>
-            </div>
-            <p v-if="active.features[0]">{{ active.features[0] }}</p>
-          </div>
-        </Transition>
-
-        <ul class="hx-rule" aria-label="Range">
-          <li v-for="(p, i) in mainProducts" :key="p.slug" :class="{ on: i === cur }" data-cursor="" @click="jump(i)"><span>{{ p.code }}</span><i></i></li>
-          <u :style="{ top: (prog * 100).toFixed(2) + '%' }"></u>
-        </ul>
-
-        <div class="hx-read">
-          <Transition name="roll" mode="out-in">
-            <dl :key="active.slug">
+            <dl>
+              <div><dt>Series</dt><dd>{{ active.code }}</dd></div>
               <div v-for="h in active.hud" :key="h[0]"><dt>{{ h[0] }}</dt><dd>{{ h[1] }}<small>{{ h[2] }}</small></dd></div>
             </dl>
-          </Transition>
-        </div>
+          </div>
+        </Transition>
 
+        <!-- bottom: what clients say, two at a time -->
+        <Transition name="roll" mode="out-in">
+          <div class="hx-q" :key="active.slug">
+            <figure v-for="q in quotesFor(cur)" :key="q.who">
+              <figcaption>{{ q.who }} · Google review</figcaption>
+              <blockquote>“{{ q.q }}”</blockquote>
+            </figure>
+          </div>
+        </Transition>
+
+        <ul class="hx-ix" aria-label="Chambers">
+          <li v-for="(p, i) in mainProducts" :key="p.slug" :class="{ on: i === cur }" data-cursor="" @click="jump(i)"><span>0{{ i + 1 }}</span>{{ p.name }}</li>
+        </ul>
+
+        <p class="hx-hint" :class="{ gone: dragged || !models[active.slug] }">Drag to turn</p>
         <div class="hx-act">
-          <div class="hx-menu">
-            <button class="hi" data-cursor="" @click="sheet = active">View specification</button>
-            <button data-cursor="" @click="contact()">Get a quote</button>
-            <a v-if="active.brochure" :href="active.brochure" target="_blank" rel="noopener" data-cursor="">Download brochure</a>
-            <button data-cursor="" @click="cur < mainProducts.length - 1 ? jump(cur + 1) : toBento()">{{ cur < mainProducts.length - 1 ? `Next · ${mainProducts[cur + 1].name}` : 'The rest of the range' }}</button>
-          </div>
-          <div class="hx-dial" aria-hidden="true">
-            <svg viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="52" class="d-tr" />
-              <circle cx="60" cy="60" r="52" class="d-arc" :style="{ strokeDashoffset: (1 - prog) * 327 }" />
-              <g class="d-tk"><line v-for="k in 40" :key="k" x1="60" y1="2" x2="60" :y2="k % 8 === 1 ? 9 : 5" :transform="`rotate(${k * 9} 60 60)`" /></g>
-            </svg>
-            <b>0{{ cur + 1 }}</b><small>of 0{{ mainProducts.length }}</small>
-          </div>
+          <a class="ps-pill" :href="`/products/${active.slug}`" data-cursor=""><span>View chamber</span><svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.3" /></svg></a>
+          <button data-cursor="" @click="contact()">Get a quote</button>
+          <a v-if="active.brochure" :href="active.brochure" target="_blank" rel="noopener" data-cursor="">Brochure</a>
         </div>
       </div>
     </section>
@@ -143,22 +95,19 @@
         </div>
       </section>
 
-      <!-- the rest of the range, as a bento -->
-      <section class="bt" ref="bentoRef">
-        <i class="bt-orb a"></i><i class="bt-orb b"></i>
+      <!-- the rest of the range: a card each, the chamber on a soft floor; on hover its name rises behind it -->
+      <section class="bx">
         <div class="ty-top rv"><span>(03)</span><span>The rest of the range</span><button data-cursor="" @click="openSearch">Search by model or test</button></div>
-        <div class="bt-frame">
-          <div class="bt-grid">
-            <button v-for="(p, i) in catalogue" :key="p.slug" class="bt-tile" :class="`s${i % 8}`" data-cursor="SPECS" @click="sheet = p">
-              <div class="bt-un">
-                <div class="bt-in rv" :style="{ '--d': (i % 4) * 0.05 + 's' }">
-                  <div class="bt-img" :class="{ photo: p.photo }"><i class="bt-glow"></i><img :src="img(p, 'hero')" :alt="p.name" loading="lazy" /></div>
-                  <div class="bt-tx"><b>{{ p.name }}</b><small>{{ p.group }}</small></div>
-                  <i class="bt-plus"><svg viewBox="0 0 10 10"><path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.1" /></svg></i>
-                </div>
-              </div>
-            </button>
-          </div>
+        <div class="ix-tabs rv" role="tablist">
+          <button v-for="g in ['All', ...groups]" :key="g" role="tab" :aria-selected="grp === g" :class="{ on: grp === g }" data-cursor="" @click="setGroup(g)">{{ g }}<sup>{{ g === 'All' ? catalogue.length : catalogue.filter((p) => p.group === g).length }}</sup></button>
+        </div>
+        <div class="bx-grid" ref="ixList">
+          <a v-for="p in catalogue" v-show="grp === 'All' || p.group === grp" :key="p.slug" class="bx-card" :class="{ photo: p.photo }" :href="`/products/${p.slug}`" data-cursor="OPEN">
+            <b class="bx-name" aria-hidden="true">{{ p.name }}</b>
+            <div class="bx-img"><img :src="img(p, 'hero')" :alt="p.name" loading="lazy" /></div>
+            <span class="bx-cap"><b>{{ p.name }}</b><small>{{ p.group }}</small></span>
+            <i class="bx-plus"><svg viewBox="0 0 10 10"><path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.1" /></svg></i>
+          </a>
         </div>
       </section>
 
@@ -174,41 +123,23 @@
       <NextUp label="Next" title="How we work with you" text="Design and build, testing services, rentals, refurbishment, after-sales and express delivery." href="/verticals" />
     </div>
 
-    <SpecSheet :product="sheet" @close="sheet = null" @quote="sheet = null; contact()" />
   </PageShell>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
+import { Flip } from 'gsap/Flip'
 import PageShell from '../components/PageShell.vue'
+import Preloader from '../components/Preloader.vue'
 import NextUp from '../components/NextUp.vue'
-import SpecSheet from '../components/SpecSheet.vue'
+import { createChamberScene } from '../utils/chamberScene'
 import { createSmoke } from '../utils/smokeWave'
-import { products, mainProducts, catalogue, img, type Product } from '../config/products'
+import { products, mainProducts, catalogue, img, models, quotesFor } from '../config/products'
 
 // how tall each chamber stands, relative to the others, so a bench model reads smaller than a walk-in room
 const scale: Record<string, number> = { et: 0.9, ets: 0.9, eta: 0.8, mini: 0.74, 'walk-in': 0.7 }
-// the scenes where the light falls
-const darkScenes = new Set(['ets', 'eta'])
 
-// the cut of the frame for each chamber: width of the main panel (vw), where the right column splits (%, 100 = no split), the slant (deg), where the far strip starts (vw)
-const layout = [
-  { w: 77, sp: 56, sk: 10, st: 105 }, // ET: the standard cut
-  { w: 66, sp: 100, sk: 14, st: 107 }, // ETS: tall and narrow, the right column becomes one tall panel
-  { w: 80, sp: 52, sk: 6, st: 105 }, // ETA: almost upright, a wide stage
-  { w: 72, sp: 70, sk: 12, st: 106 }, // Mini: small, a larger panel above
-  { w: 78, sp: 100, sk: 13, st: 107 } // Walk-in: wide, one tall panel again
-]
-// the example cycle: each chamber's real range (from its specification) and what is special about it
-type Cy = { lo: number | null; hi: number | null; kind: 'ramp' | 'shock' | 'alt' | 'slow'; note: string }
-const cycles: Record<string, Cy> = {
-  et: { lo: -70, hi: 180, kind: 'ramp', note: '3–20 °C/min' },
-  ets: { lo: -70, hi: 200, kind: 'shock', note: 'transfer < 10 s' },
-  eta: { lo: -70, hi: 180, kind: 'alt', note: 'down to 10 mbar' },
-  mini: { lo: null, hi: null, kind: 'ramp', note: 'range per model' },
-  'walk-in': { lo: -65, hi: 180, kind: 'slow', note: '10k–22k L' }
-}
 const stages = [
   { t: 'Design and build', d: 'Standard chambers, or built to your specification by a dedicated design and development team.' },
   { t: 'Test', d: 'Vistara, our NABL-accredited lab in Peenya, runs qualification and reliability tests, by the people who build the chambers.' },
@@ -222,30 +153,38 @@ const numbers = [
 ]
 
 const showRef = ref<HTMLElement | null>(null)
-const bentoRef = ref<HTMLElement | null>(null)
-const smokeRef = ref<HTMLCanvasElement | null>(null)
+const glRef = ref<HTMLCanvasElement | null>(null)
 const cloudRef = ref<HTMLElement | null>(null)
 const cloudSmokeRef = ref<HTMLCanvasElement | null>(null)
-const plRef = ref<HTMLCanvasElement | null>(null)
 const plDone = ref(false)
-const pinRef = ref<HTMLElement | null>(null)
-const cyRef = ref<HTMLCanvasElement | null>(null)
-const cyTxt = ref<HTMLElement | null>(null)
-const cyState = ref<HTMLElement | null>(null)
-const stageRef = ref<HTMLElement | null>(null)
+// the landing page's preloader smoke, without the logo, plays on arrival
+const onLoaded = () => { plDone.value = true; (window as any).lenisInstance?.start(); greet() }
+// once the smoke has gone and the model is in, the chamber swings round to face you
+const greet = () => { if (plDone.value && loaded.value) chambers?.intro(cur.value) }
 const phRef = ref<HTMLElement | null>(null)
 const phImg = ref<HTMLImageElement | null>(null)
 const cur = ref(0)
 const prog = ref(0)
-const dk = ref(false)
 const cloudLit = ref(false)
-const sheet = ref<Product | null>(null)
+const hov = ref(0) // 1 = over the current chamber, 2 = over another
+const dragged = ref(false)
+const loaded = ref(false)
 const active = computed(() => mainProducts[cur.value])
-const cy = computed(() => cycles[active.value.slug])
-const fmtT = (n: number) => `${n < 0 ? '−' : '+'}${Math.abs(n)}°`
-const cyLo = computed(() => (cy.value.lo === null ? '—' : fmtT(cy.value.lo)))
-const cyHi = computed(() => (cy.value.hi === null ? '—' : fmtT(cy.value.hi)))
 const openSearch = () => window.dispatchEvent(new Event('envisys:search'))
+
+// the rest of the range: filter by group, and the cards re-flow with Flip
+gsap.registerPlugin(Flip)
+const groups = [...new Set(catalogue.map((p) => p.group))]
+const grp = ref('All')
+const ixList = ref<HTMLElement | null>(null)
+async function setGroup(g: string) {
+  if (g === grp.value) return
+  const rows = ixList.value!.querySelectorAll('.bx-card')
+  const state = Flip.getState(rows)
+  grp.value = g
+  await nextTick()
+  Flip.from(state, { duration: 0.7, ease: 'power3.inOut', absolute: true, onEnter: (els: Element[]) => gsap.fromTo(els, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.03, ease: 'power3.out' }) })
+}
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const smooth = (a: number) => a * a * (3 - 2 * a)
@@ -253,135 +192,62 @@ const scroller = () => document.querySelector('#scroller') as HTMLElement
 const topOf = (el: HTMLElement) => el.getBoundingClientRect().top + scroller().scrollTop
 function jump(i: number) {
   const r = showRef.value!
-  ;(window as any).lenisInstance?.scrollTo(topOf(r) + ((i + 0.08) / mainProducts.length) * (r.offsetHeight - window.innerHeight), { duration: 1.4 })
+  ;(window as any).lenisInstance?.scrollTo(topOf(r) + ((i + 0.2) / mainProducts.length) * (r.offsetHeight - window.innerHeight), { duration: 1.4 })
 }
-const toBento = () => (window as any).lenisInstance?.scrollTo(topOf(bentoRef.value!) - 40, { duration: 1.6 })
 
-// scene smoke: 0 = light room, 1 = the light has fallen. It rises when a dark scene arrives and sinks again after.
-const fall = { v: 0 }
-let smoke: ReturnType<typeof createSmoke> | null = null
 let cloud: ReturnType<typeof createSmoke> | null = null
-let lean = 0, leanT = 0
-watch(cur, () => {
-  dk.value = darkScenes.has(active.value.slug)
-  gsap.to(fall, { v: dk.value ? 1 : 0, duration: 1.8, ease: 'power2.inOut', overwrite: true })
-})
-let tx = 0, ty = 0, txT = 0, tyT = 0, mx = 0, my = 0, mxT = 0, myT = 0
-const onMove = (e: PointerEvent) => {
-  leanT = e.clientX / window.innerWidth - 0.5
-  txT = leanT * 2; tyT = (e.clientY / window.innerHeight - 0.5) * 2
-  mxT = e.clientX; myT = e.clientY
+let chambers: ReturnType<typeof createChamberScene> | null = null
+let lean = 0, leanT = 0, px = 0, py = 0
+const onMove = (e: PointerEvent) => { leanT = e.clientX / window.innerWidth - 0.5; py = (e.clientY / window.innerHeight - 0.5) * 2 }
+// on the chambers: a drag turns the current one like a turntable, a click opens its page or brings another forward
+let down: { x: number; moved: boolean } | null = null, lastPick = 0
+function onDown(e: PointerEvent) {
+  down = { x: e.clientX, moved: false }
+  ;(e.target as HTMLElement).setPointerCapture(e.pointerId) // keep turning even when the pointer leaves the canvas
 }
-
-// the cycle: 0 = cold, 1 = hot, over one period u (0..1)
-const sstep = (a: number, b: number, x: number) => smooth(clamp01((x - a) / (b - a)))
-function shape(kind: Cy['kind'], u: number) {
-  if (kind === 'shock') return sstep(0.22, 0.25, u) - sstep(0.5, 0.53, u) + sstep(0.72, 0.75, u) - sstep(0.97, 1, u)
-  if (kind === 'slow') return sstep(0.1, 0.5, u) - sstep(0.6, 1, u)
-  return sstep(0.15, 0.45, u) - sstep(0.6, 0.9, u)
-}
-const pressure = (u: number) => 1 - 0.93 * (sstep(0.1, 0.3, u) - sstep(0.7, 0.9, u))
-const view = { lo: -70, hi: 180, has: 1 }
-// what the chamber is doing at this point of the cycle
-function phase(kind: Cy['kind'], u: number) {
-  if (kind === 'shock') return (u < 0.22 || (u >= 0.53 && u < 0.72)) ? 'Cold zone' : ((u >= 0.25 && u < 0.5) || (u >= 0.75 && u < 0.97)) ? 'Hot zone' : 'Transfer'
-  if (kind === 'slow') return u < 0.1 ? 'Cold dwell' : u < 0.5 ? 'Heating' : u < 0.6 ? 'Hot dwell' : 'Cooling'
-  return u < 0.15 || u >= 0.9 ? 'Cold dwell' : u < 0.45 ? 'Heating' : u < 0.6 ? 'Hot dwell' : 'Cooling'
-}
-let lastPhase = ''
-function drawCycle(now: number) {
-  const c = cyRef.value
-  if (!c || !c.clientWidth) return
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.5), W = c.clientWidth, H = c.clientHeight
-  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr) }
-  const g = c.getContext('2d')!
-  g.setTransform(dpr, 0, 0, dpr, 0, 0)
-  g.clearRect(0, 0, W, H)
-  const T = cy.value
-  view.lo += ((T.lo ?? 0) - view.lo) * 0.08; view.hi += ((T.hi ?? 1) - view.hi) * 0.08; view.has += ((T.lo === null ? 0 : 1) - view.has) * 0.08
-  const ink = dk.value ? '238,241,246' : '13,35,64'
-  const P = 14, headX = W * 0.8, pps = headX / 12, yBase = H * 0.86
-  const yOf = (v: number) => H * 0.14 + (1 - v) * H * 0.7
-  const at = (t: number) => ((t / P) % 1 + 1) % 1
-  const timeAt = (x: number) => now - (headX - x) / pps
-  g.lineJoin = 'round'; g.lineCap = 'round'
-
-  // grid: dotted lines, the 0 °C line when the range crosses it, and ticks that slide past like a chart recorder
-  g.lineWidth = 1; g.strokeStyle = `rgba(${ink},0.16)`; g.setLineDash([1, 5])
-  for (let k = 0; k <= 4; k++) { const y = Math.round(H * 0.14 + (k / 4) * H * 0.7) + 0.5; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke() }
-  if (view.has > 0.5 && view.lo < 0 && view.hi > 0) { const y = yOf((0 - view.lo) / (view.hi - view.lo)); g.setLineDash([3, 4]); g.strokeStyle = `rgba(${ink},0.4)`; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke() }
-  g.setLineDash([])
-  g.strokeStyle = `rgba(${ink},0.28)`
-  for (let k = Math.ceil(timeAt(0)); k <= Math.floor(timeAt(W)); k++) { const x = Math.round(headX - (now - k) * pps) + 0.5; g.beginPath(); g.moveTo(x, H - (k % 5 === 0 ? 8 : 4)); g.lineTo(x, H); g.stroke() }
-
-  const path = (fn: (u: number) => number, x0: number, x1: number) => { g.beginPath(); for (let x = x0; x <= x1; x += 2) { const y = yOf(fn(at(timeAt(x)))); x === x0 ? g.moveTo(x, y) : g.lineTo(x, y) } }
-  const sh = (u: number) => shape(T.kind, u)
-  // the soft area under the line, brighter toward the probe
-  path(sh, 0, headX); g.lineTo(headX, yBase); g.lineTo(0, yBase); g.closePath()
-  const fill = g.createLinearGradient(0, 0, headX, 0)
-  fill.addColorStop(0, `rgba(${ink},0)`); fill.addColorStop(1, `rgba(${ink},0.14)`)
-  g.fillStyle = fill; g.fill()
-  // the line itself, fading in toward the probe
-  const gr = g.createLinearGradient(0, 0, headX, 0)
-  gr.addColorStop(0, `rgba(${ink},0)`); gr.addColorStop(0.55, `rgba(${ink},0.55)`); gr.addColorStop(1, `rgba(${ink},1)`)
-  g.lineWidth = 2; g.strokeStyle = gr; g.shadowColor = `rgba(${ink},0.35)`; g.shadowBlur = 6
-  path(sh, 0, headX); g.stroke(); g.shadowBlur = 0
-  if (T.kind === 'alt') { g.setLineDash([3, 4]); g.lineWidth = 1.2; g.strokeStyle = `rgba(${ink},0.6)`; path(pressure, 0, headX); g.stroke(); g.setLineDash([]) }
-  // what is still to come
-  g.lineWidth = 1.2; g.setLineDash([2, 4]); g.strokeStyle = `rgba(${ink},0.3)`; path(sh, headX, W); g.stroke(); g.setLineDash([])
-
-  // the probe
-  const u = at(now), v = sh(u), yh = yOf(v)
-  const vl = g.createLinearGradient(0, 0, 0, H)
-  vl.addColorStop(0, `rgba(${ink},0)`); vl.addColorStop(0.5, `rgba(${ink},0.22)`); vl.addColorStop(1, `rgba(${ink},0)`)
-  g.strokeStyle = vl; g.lineWidth = 1; g.beginPath(); g.moveTo(headX + 0.5, 0); g.lineTo(headX + 0.5, H); g.stroke()
-  g.fillStyle = 'rgba(255,106,26,0.2)'; g.beginPath(); g.arc(headX, yh, 8 + 3 * Math.sin(now * 3), 0, 7); g.fill()
-  g.shadowColor = 'rgba(255,106,26,0.9)'; g.shadowBlur = 12
-  g.fillStyle = '#ff6a1a'; g.beginPath(); g.arc(headX, yh, 3.6, 0, 7); g.fill(); g.shadowBlur = 0
-
-  if (cyTxt.value) {
-    const val = view.lo + (view.hi - view.lo) * v
-    cyTxt.value.textContent = T.lo === null ? '—' : `${val < 0 ? '−' : '+'}${Math.abs(val).toFixed(1)}`
+function onDrag(e: PointerEvent) {
+  if (down) {
+    const dx = e.clientX - down.x
+    if (down.moved || Math.abs(dx) > 4) { down.moved = true; dragged.value = true; chambers?.spin(cur.value, dx); down.x = e.clientX }
+    return
   }
-  const ph = T.lo === null ? 'Per model' : phase(T.kind, u)
-  if (cyState.value && ph !== lastPhase) { lastPhase = ph; cyState.value.textContent = ph }
+  const now = performance.now()
+  if (now - lastPick < 90 || !chambers) return // raycasting the full mesh is not free
+  lastPick = now
+  const i = chambers.pick(e.clientX, e.clientY)
+  hov.value = i < 0 ? 0 : i === cur.value ? 1 : 2
+  chambers.hover(hov.value === 1 ? i : -1) // the orbit ring circles the chamber under the pointer
+}
+const onLeave = () => { if (!down) { hov.value = 0; chambers?.hover(-1) } }
+function onUp(e: PointerEvent) {
+  const d = down
+  down = null
+  chambers?.release(cur.value)
+  if (!d || d.moved || e.type !== 'pointerup' || !chambers) return
+  const i = chambers.pick(e.clientX, e.clientY)
+  if (i === cur.value) location.href = `/products/${active.value.slug}`
+  else if (i >= 0) jump(i)
 }
 
 let small = false // phones get plain veils instead of WebGL smoke, and fewer effects
 let navDark = false
+let fs = 0 // the chambers' position, eased
 function tick() {
   const H = window.innerHeight
   lean += (leanT - lean) * 0.06
+  px += (leanT * 2 - px) * 0.06
 
   const r = showRef.value!.getBoundingClientRect()
   if (r.bottom > 0 && r.top < H) {
     const p = clamp01(-r.top / (r.height - H))
     prog.value = p
-    const i = Math.min(mainProducts.length - 1, Math.floor(p * mainProducts.length))
+    // each chamber holds for a while, then the next one glides in
+    const n = mainProducts.length, u = p * n, k = Math.min(n - 1, Math.floor(u))
+    const f = k < n - 1 ? k + smooth(clamp01((u - k - 0.5) / 0.5)) : k
+    fs += (f - fs) * 0.12
+    const i = Math.round(fs)
     if (i !== cur.value) cur.value = i
-    smoke?.draw(fall.v, lean)
-    if (!small) drawCycle(performance.now() / 1000)
-
-    // the frame re-cuts itself with the scroll: it settles for each chamber, and eases toward the next one as you leave
-    const f = p * mainProducts.length, k = Math.min(mainProducts.length - 1, Math.floor(f))
-    const e = k < mainProducts.length - 1 ? smooth(clamp01((f - k - 0.55) / 0.45)) : 0
-    const a = layout[k], b = layout[Math.min(layout.length - 1, k + 1)]
-    const m = (x: number, y: number) => x + (y - x) * e
-    const pin = pinRef.value
-    if (pin) {
-      pin.style.setProperty('--w1', `${m(a.w, b.w).toFixed(2)}vw`)
-      pin.style.setProperty('--cx', `${((m(a.w, b.w) - 15) / 2).toFixed(2)}vw`)
-      pin.style.setProperty('--sp', `${m(a.sp, b.sp).toFixed(2)}%`)
-      pin.style.setProperty('--sk', `${(-m(a.sk, b.sk)).toFixed(2)}deg`)
-      pin.style.setProperty('--st', `${m(a.st, b.st).toFixed(2)}vw`)
-      pin.style.setProperty('--k', (0.9 + (m(a.w, b.w) - 72) * 0.012).toFixed(3)) // the chamber grows with its panel
-      pin.style.setProperty('--ex', clamp01((m(a.sp, b.sp) - 70) / 25).toFixed(3)) // more information appears when the right column becomes one tall panel
-      // the chamber leans toward the cursor; a soft light follows it across the panels
-      tx += (txT - tx) * 0.07; ty += (tyT - ty) * 0.07; mx += (mxT - mx) * 0.14; my += (myT - my) * 0.14
-      if (stageRef.value) stageRef.value.style.transform = `perspective(1600px) rotateY(${(tx * 2.4).toFixed(2)}deg) rotateX(${(-ty * 1.8).toFixed(2)}deg)`
-      pin.style.setProperty('--mx', `${mx.toFixed(0)}px`)
-      pin.style.setProperty('--my', `${my.toFixed(0)}px`)
-    }
+    chambers?.update(fs, px, py, performance.now() / 1000)
   }
 
   // the page-wide smoke: scroll-driven, and it ends black
@@ -408,7 +274,7 @@ function tick() {
   if (pr.bottom > 0 && pr.top < H && phImg.value) phImg.value.style.transform = `translate3d(0, ${(((H - pr.top) / (H + pr.height) - 0.5) * -12).toFixed(2)}vh, 0)`
 
   // the header turns light wherever the page behind it is dark
-  const d = (r.top <= 0 && r.bottom > 44 && dk.value) || wp > 0.55
+  const d = wp > 0.55
   if (d !== navDark) { navDark = d; document.documentElement.classList.toggle('hx-dark', d) }
 }
 const reveal: { el: HTMLElement; words: HTMLElement[] }[] = []
@@ -434,131 +300,62 @@ function splitWords(el: HTMLElement) {
 }
 onMounted(() => {
   small = window.matchMedia('(max-width: 800px)').matches
-  if (plRef.value) {
-    const pl = createSmoke(plRef.value, true, small), v = { p: 1 }
-    const lenis = () => (window as any).lenisInstance
-    pl.draw(1, 0)
-    setTimeout(() => lenis()?.stop(), 0) // the page shell creates its scroller just after this runs
-    gsap.to(v, { p: 0, duration: 1.7, delay: 0.35, ease: 'power2.inOut', onUpdate: () => pl.draw(v.p, 0), onComplete: () => { plDone.value = true; lenis()?.start() } })
-  }
+  setTimeout(() => (window as any).lenisInstance?.stop(), 0) // held while the smoke plays; the page shell creates its scroller just after this runs
   document.querySelectorAll<HTMLElement>('[data-words]').forEach(splitWords)
   lines = [...document.querySelectorAll<HTMLElement>('.ty-top, .st li > i')]
-  if (smokeRef.value) smoke = createSmoke(smokeRef.value, false, small)
+  if (glRef.value) {
+    // phones load a lighter cut of each model (tools/dress_step.py with CH_TRIS=80000)
+    chambers = createChamberScene(glRef.value, mainProducts.map((p) => {
+      const m = models[p.slug]
+      return m ? { url: small ? m.replace('.glb', '_m.glb') : m, scale: scale[p.slug] ?? 0.8 } : { image: img(p, 'hero'), scale: scale[p.slug] ?? 0.8 }
+    }), small)
+    chambers.ready.then(() => { loaded.value = true; greet() })
+  }
   if (cloudSmokeRef.value) cloud = createSmoke(cloudSmokeRef.value, false, small)
   window.addEventListener('pointermove', onMove, { passive: true })
   gsap.ticker.add(tick)
 })
-onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.ticker.remove(tick); window.removeEventListener('pointermove', onMove); gsap.killTweensOf(fall) })
+onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.ticker.remove(tick); window.removeEventListener('pointermove', onMove); chambers?.dispose() })
 </script>
 
 <style scoped>
-.pl { position: fixed; inset: 0; z-index: 9990; width: 100%; height: 100%; pointer-events: none; }
-/* ───────── the scene: a dark frame, cut into panels by slanted gaps ───────── */
-.hx-pin { --tx: #0d2340; --pn: #d7d8db; --sh: rgba(20, 28, 44, 0.34); --hl: rgba(13, 35, 64, 0.2); --hi: #0d2340; --hi-t: #fff;
-  position: sticky; top: 0; height: 100vh; overflow: hidden; background: #0b0c0e; color: var(--tx); transition: color 0.8s ease; }
-.hx-pin.dk { --tx: #eef1f6; --pn: #16171b; --sh: rgba(0, 0, 0, 0.8); --hl: rgba(255, 255, 255, 0.18); --hi: #fff; --hi-t: #0d2340; }
+/* ───────── the scene: the chambers in a row on the page's light blue, the camera gliding along them ───────── */
+.hx-pin { position: sticky; top: 0; height: 100vh; overflow: hidden; color: #0d2340; }
+.hx-gl { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+.hx-gl:active { cursor: grabbing; }
+.hx-poster { position: absolute; left: 50%; bottom: 17vh; z-index: 0; height: 60vh; translate: -50% 0; object-fit: contain; pointer-events: none; transition: opacity 0.8s ease; }
+.hx-poster.gone { opacity: 0; }
+.hx-grain { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0.35; mix-blend-mode: multiply; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .52  0 0 0 0 .56  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.hx-card, .hx-q, .hx-ix, .hx-act, .hx-hint { position: absolute; z-index: 3; }
 
-.fx { position: absolute; inset: 10px; z-index: 1; border-radius: 26px; overflow: hidden; background: #0b0c0e; }
-.fx-sk { position: absolute; top: 0; bottom: 0; left: -15vw; width: 130vw; transform: skewX(var(--sk, -10deg)); }
-.pn { position: absolute; overflow: hidden; border-radius: 26px; background: var(--pn); transition: background 0.8s ease; }
-.p1 { left: 0; width: var(--w1, 77vw); top: 0; bottom: 0; background: #cfd0d4; }
-.p2 { left: calc(var(--w1, 77vw) + 0.7vw); width: calc(var(--st, 105vw) - 1vw - var(--w1, 77vw) - 0.7vw); top: 0; height: calc(var(--sp, 56%) - 5px); }
-.p3 { left: calc(var(--w1, 77vw) + 0.7vw); width: calc(var(--st, 105vw) - 1vw - var(--w1, 77vw) - 0.7vw); bottom: 0; height: max(0px, calc(100% - var(--sp, 56%) - 5px)); }
-.p4 { left: var(--st, 105vw); width: calc(130vw - var(--st, 105vw)); top: 0; bottom: 0; }
+/* top left: the name, then hairline rows like film credits */
+.hx-card { left: 2.2vw; top: 12vh; width: min(320px, 22vw); pointer-events: none; }
+.hx-card h1 { margin: 0 0 1.4vh; font-weight: 400; font-family: var(--font-display); font-size: clamp(22px, 2.3vw, 40px); line-height: 0.98; letter-spacing: -0.05em; text-transform: uppercase; }
+.hx-card dl { margin: 0; }
+.hx-card dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0 8px; border-top: 1px solid currentColor; }
+.hx-card dt { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; }
+.hx-card dd { margin: 0; font-family: var(--font-display); font-size: clamp(13px, 1vw, 16px); letter-spacing: -0.03em; white-space: nowrap; }
+.hx-card dd small { margin-left: 4px; font-family: var(--font-body); font-size: 9px; opacity: 0.6; }
 
-.hx-bg { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease; pointer-events: none; }
-.hx-bg.on { opacity: 1; }
-.hx-bg.l { z-index: 1; } .hx-bg.d { z-index: 3; }
-.hx-smoke { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; }
-/* the light in each room: one soft source low in the panel, falling away to the edges */
-.g-et { background: radial-gradient(70% 90% at 32% 112%, #fff 0%, #e6e7ea 40%, #c4c6cb 100%); }
-.g-mini { background: radial-gradient(62% 85% at 62% 108%, #fff 0%, #dedfe3 46%, #bcbfc6 100%); }
-.g-walk-in { background: radial-gradient(85% 75% at 48% 118%, #fff 0%, #e1e2e6 44%, #b6b9c1 100%); }
-.g-ets { background: radial-gradient(58% 82% at 24% 106%, #dadadc 0%, #6c6d72 30%, #18191c 62%, #050506 100%); }
-.g-eta { background: radial-gradient(56% 78% at 66% 108%, #d0d1d4 0%, #5e5f64 30%, #151618 62%, #040405 100%); }
+.hx-q { right: 2.2vw; bottom: calc(6vh + 150px); display: flex; flex-direction: column; align-items: flex-end; gap: 4vh; pointer-events: none; } /* in the right column, clear of the chamber and its floor */
+.hx-q figure { margin: 0; width: min(250px, 18vw); text-align: right; }
+.hx-q figcaption { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; }
+.hx-q blockquote { margin: 8px 0 0; font-family: var(--font-display); font-size: clamp(14px, 1.15vw, 20px); line-height: 1.02; letter-spacing: -0.04em; text-transform: uppercase; }
 
-.hx-grain { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0.16; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+/* bottom left: the five, by name */
+.hx-ix { left: 2.2vw; bottom: 6vh; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.hx-ix li { display: flex; gap: 12px; padding: 3px 0; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; opacity: 0.4; transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.hx-ix li span { opacity: 0.6; }
+.hx-ix li:hover { opacity: 0.8; }
+.hx-ix li.on { opacity: 1; transform: translateX(6px); }
 
-/* the chamber stands in the main panel */
-.hx-stage { position: absolute; inset: 0; z-index: 4; will-change: transform; }
-/* a soft light under the cursor; on the near-black gaps it barely shows */
-.hx-spot { position: absolute; inset: 0; z-index: 5; pointer-events: none; mix-blend-mode: soft-light; opacity: 0.8; background: radial-gradient(380px circle at calc(var(--mx, 50vw) - 10px) calc(var(--my, 50vh) - 10px), rgba(255, 255, 255, 0.6), transparent 70%); }
-.hx-shadow { position: absolute; left: var(--cx, 31vw); bottom: 12vh; width: 36vw; height: 5vh; translate: -50% 50%; border-radius: 50%; background: radial-gradient(closest-side, var(--sh), transparent); filter: blur(10px); }
-.hx-img { position: absolute; left: var(--cx, 31vw); bottom: 12vh; height: calc(84vh * var(--s) * var(--k, 1)); max-width: 44vw; object-fit: contain; object-position: bottom center; translate: -50% 0; user-select: none; pointer-events: none; transition: opacity 1s ease, transform 1.3s cubic-bezier(0.16, 0.9, 0.2, 1), filter 1s ease; }
-.hx-img.on { opacity: 1; transform: none; filter: drop-shadow(0 30px 40px var(--sh)); -webkit-box-reflect: below 0 linear-gradient(transparent 68%, rgba(255, 255, 255, 0.18)); }
-.hx-img.past, .hx-img.next { opacity: 0; transform: translateY(16vh) scale(0.95); filter: blur(12px); }
-.hx-hit { position: absolute; left: var(--cx, 31vw); bottom: 12vh; width: 26vw; height: 62vh; translate: -50% 0; border: 0; background: transparent; cursor: pointer; }
-
-.hx-side, .hx-name, .hx-md, .hx-rule, .hx-read, .hx-act { z-index: 6; }
-
-/* main panel: the name at the top, a column of small tools, the readouts at the foot */
-.hx-name { position: absolute; left: 2.6vw; top: 13vh; max-width: 17vw; pointer-events: none; }
-.hx-name span { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.14em; opacity: 0.55; }
-.hx-name h1 { margin: 1.2vh 0 0.8vh; font-weight: 400; font-family: var(--font-display); font-size: clamp(18px, 1.7vw, 30px); line-height: 1.04; letter-spacing: -0.045em; }
-.hx-name p { margin: 0; font-family: var(--font-body); font-size: 11px; line-height: 1.55; opacity: 0.66; }
-
-.hx-side { position: absolute; left: 2.6vw; top: 44vh; display: flex; flex-direction: column; gap: 10px; }
-.hx-side button, .hx-side a { position: relative; display: flex; align-items: center; padding: 0; height: 34px; border: 0; background: transparent; color: inherit; text-decoration: none; cursor: pointer; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
-.hx-side i { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.35); border: 1px solid var(--hl); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: background 0.3s ease, color 0.3s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1); }
-.dk .hx-side i { background: rgba(255, 255, 255, 0.06); }
-.hx-side i svg { width: 12px; height: 12px; }
-.hx-side span { position: absolute; left: 44px; white-space: nowrap; opacity: 0; transform: translateX(-6px); pointer-events: none; transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1); }
-.hx-side button:hover i, .hx-side a:hover i { background: var(--hi); color: var(--hi-t); transform: scale(1.06); }
-.hx-side button:hover span, .hx-side a:hover span { opacity: 1; transform: none; }
-
-.hx-read { position: absolute; left: 2.6vw; bottom: 4.6vh; }
-.hx-read dl { margin: 0; display: flex; gap: 2.4vw; }
-.hx-read dt { font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; margin-bottom: 6px; }
-.hx-read dd { margin: 0; font-family: var(--font-display); font-size: clamp(14px, 1.25vw, 22px); letter-spacing: -0.04em; white-space: nowrap; }
-.hx-read dd small { margin-left: 5px; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.06em; opacity: 0.6; }
-
-/* top-right panel: a live example cycle */
-.hx-md { position: absolute; right: calc(119vw - var(--st, 105vw)); top: 16vh; width: min(260px, 17.5vw); }
-.hx-md header { display: flex; justify-content: space-between; align-items: center; padding: 0 2px 8px; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; }
-.hx-md header span { display: flex; align-items: center; gap: 8px; opacity: 0.75; }
-.hx-md header small { font-size: 8.5px; opacity: 0.4; }
-.live { width: 6px; height: 6px; border-radius: 50%; background: #ff6a1a; text-decoration: none; animation: livepulse 1.8s ease-out infinite; }
-@keyframes livepulse { 0% { box-shadow: 0 0 0 0 rgba(255, 106, 26, 0.5); } 70% { box-shadow: 0 0 0 7px rgba(255, 106, 26, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 106, 26, 0); } }
-.cy-r { display: flex; align-items: baseline; gap: 6px; padding: 2px 2px 12px; }
-.cy-r b { min-width: 5.6ch; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 2.3vw, 42px); line-height: 1; letter-spacing: -0.055em; font-variant-numeric: tabular-nums; }
-.cy-r i { font-style: normal; font-family: var(--font-body); font-size: 11px; opacity: 0.5; }
-.cy-r em { margin-left: auto; align-self: center; font-style: normal; font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 9px; border: 1px solid var(--hl); border-radius: 20px; white-space: nowrap; }
-.cy { display: block; width: 100%; height: 120px; border-top: 1px solid var(--hl); border-bottom: 1px solid var(--hl); }
-.hx-md footer { display: flex; justify-content: space-between; padding: 10px 2px 0; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
-
-/* shown only when the right column is one tall panel: the same panel, with more in it */
-.hx-ex { position: absolute; z-index: 6; right: calc(119vw - var(--st, 105vw)); top: 50vh; width: min(260px, 17.5vw); opacity: var(--ex, 0); pointer-events: none; }
-.hx-ex header { display: flex; justify-content: space-between; align-items: baseline; padding: 0 2px 10px; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; }
-.hx-ex header span { opacity: 0.6; }
-.hx-ex header b { font-weight: 400; font-family: var(--font-display); font-size: 15px; letter-spacing: -0.04em; }
-.hx-ex .ch { display: flex; flex-wrap: wrap; gap: 6px; }
-.hx-ex .ch a { padding: 5px 10px; border: 1px solid var(--hl); border-radius: 30px; color: inherit; text-decoration: none; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.06em; transition: background 0.3s ease, color 0.3s ease; }
-.hx-ex .ch a:hover { background: var(--hi); color: var(--hi-t); }
-.hx-ex p { margin: 12px 2px 0; font-family: var(--font-body); font-size: 11px; line-height: 1.55; opacity: 0.7; }
-
-/* right strip: where you are in the range */
-.hx-rule { position: absolute; right: 1.7vw; top: 40vh; height: 22vh; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; }
-.hx-rule::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 1px; background: currentColor; opacity: 0.3; }
-.hx-rule li { position: relative; display: flex; align-items: center; gap: 10px; padding-right: 14px; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.12em; cursor: pointer; opacity: 0.45; transition: opacity 0.3s ease; }
-.hx-rule li:hover, .hx-rule li.on { opacity: 1; }
-.hx-rule li i { position: absolute; right: 0; top: 50%; width: 8px; height: 1px; background: currentColor; }
-.hx-rule u { position: absolute; right: -3px; width: 7px; height: 7px; margin-top: -3px; background: #ff6a1a; clip-path: polygon(0 50%, 100% 0, 100% 100%); transition: top 0.2s linear; pointer-events: none; }
-
-/* bottom-right panel: what to do with this one */
-.hx-act { position: absolute; right: 2vw; bottom: 4.6vh; display: flex; align-items: flex-end; }
-.hx-menu { position: absolute; right: calc(120vw - var(--st, 105vw)); bottom: 0; width: min(220px, 15vw); display: flex; flex-direction: column; }
-.hx-menu button, .hx-menu a { display: block; width: 100%; padding: 13px 2px; border: 0; border-bottom: 1px solid var(--hl); background: transparent; color: inherit; text-align: left; text-decoration: none; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: padding 0.5s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.3s ease; }
-.hx-menu button:last-child, .hx-menu a:last-child { border-bottom: 0; }
-.hx-menu button:hover, .hx-menu a:hover { padding-left: 8px; }
-.hx-menu .hi { margin-bottom: 8px; padding: 13px 16px; border: 0; border-radius: 40px; background: var(--hi); color: var(--hi-t); }
-.hx-menu .hi:hover { padding-left: 22px; background: #ff6a1a; color: #fff; }
-.hx-dial { position: relative; width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center; align-content: center; }
-.hx-dial svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-.d-tr { fill: none; stroke: currentColor; stroke-opacity: 0.16; stroke-width: 1; }
-.d-arc { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-dasharray: 327; }
-.d-tk line { stroke: currentColor; stroke-opacity: 0.35; stroke-width: 0.8; }
-.hx-dial b { position: relative; font-weight: 400; font-family: var(--font-display); font-size: 20px; letter-spacing: -0.04em; line-height: 1; }
-.hx-dial small { position: relative; display: block; margin-top: 4px; text-align: center; font-family: var(--font-body); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; }
+/* bottom right: what to do with this one */
+.hx-act { right: 2.2vw; bottom: 6vh; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.hx-act > button:not(.ps-pill), .hx-act > a:not(.ps-pill) { padding: 0 0 2px; border: 0; border-bottom: 1px solid currentColor; background: none; color: inherit; text-decoration: none; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; opacity: 0.7; transition: opacity 0.3s ease; }
+.hx-act > button:not(.ps-pill):hover, .hx-act > a:not(.ps-pill):hover { opacity: 1; }
+.hx-act .ps-pill:hover { background: #ff6a1a; }
+.hx-hint { left: 50%; top: 13vh; translate: -50% 0; margin: 0; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.45; pointer-events: none; transition: opacity 0.6s ease; }
+.hx-hint.gone { opacity: 0; }
 
 .roll-enter-active, .roll-leave-active { transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1), filter 0.5s ease; }
 .roll-enter-from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
@@ -614,35 +411,32 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .nm-two span { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; opacity: 0.55; }
 .nm-two p { margin: 0; font-size: clamp(15px, 1.5vw, 26px); line-height: 1.14; letter-spacing: -0.05em; }
 
-/* the bento: dark glass over deep blue light */
-.bt { position: relative; padding: 4vh 2.2vw 30vh; overflow: hidden; }
-.bt-orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
-.bt-orb.a { left: -6vw; top: 14%; width: 36vw; height: 36vw; background: rgba(40, 90, 170, 0.4); }
-.bt-orb.b { right: -8vw; top: 52%; width: 34vw; height: 34vw; background: rgba(20, 70, 120, 0.4); }
-.bt .ty-top { position: relative; margin-bottom: 5vh; }
-.bt-frame { position: relative; border-radius: 26px; overflow: hidden; background: #0b0c0e; }
-.bt-grid { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: clamp(200px, 17vw, 320px); grid-auto-flow: dense; gap: 10px; }
-.bt-tile { position: relative; padding: 0; border: 0; border-radius: 26px; overflow: hidden; background: linear-gradient(160deg, #1b1c21, #101114); color: inherit; text-align: left; cursor: pointer; transform: skewX(-10deg); transition: background 0.5s ease, color 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.9, 0.2, 1); }
-.bt-tile:hover { background: #d7d8db; color: #0d2340; transform: skewX(-10deg) translateY(-3px); }
-.bt-tile.s0 { grid-column: span 6; grid-row: span 2; }
-.bt-tile.s1, .bt-tile.s2, .bt-tile.s3, .bt-tile.s4 { grid-column: span 3; }
-.bt-tile.s5, .bt-tile.s6, .bt-tile.s7 { grid-column: span 4; }
-.bt-un { position: absolute; inset: 0; transform: skewX(10deg); }
-.bt-in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 16px clamp(26px, 2.6vw, 44px); }
-.bt-img { position: relative; flex: 1; min-height: 0; }
-.bt-glow { position: absolute; left: 50%; top: 56%; width: 80%; height: 80%; translate: -50% -50%; background: radial-gradient(closest-side, rgba(190, 215, 245, 0.2), transparent); pointer-events: none; transition: opacity 0.5s ease; }
-.bt-tile:hover .bt-glow { opacity: 0; }
-.bt-img img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 4% 6% 2%; box-sizing: border-box; object-fit: contain; filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.55)); transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.2, 1), filter 0.5s ease; }
-.bt-tile:hover .bt-img img { transform: translateY(-4px) scale(1.03); filter: drop-shadow(0 18px 20px rgba(20, 28, 44, 0.3)); }
-.bt-img.photo img { padding: 0; object-fit: cover; border-radius: 12px; filter: none; }
-.bt-img.photo .bt-glow { display: none; }
-.bt-tx { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 8px 0 4px; }
-.bt-tx b { font-weight: 400; font-family: var(--font-display); font-size: clamp(12px, 1vw, 17px); letter-spacing: -0.035em; line-height: 1.15; }
-.bt-tile.s0 .bt-tx b { font-size: clamp(16px, 1.5vw, 26px); }
-.bt-tx small { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; }
-.bt-plus { position: absolute; right: clamp(28px, 2.8vw, 46px); top: 16px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(128, 128, 140, 0.4); transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1), background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-.bt-plus svg { width: 9px; height: 9px; }
-.bt-tile:hover .bt-plus { transform: rotate(90deg); background: #0d2340; color: #fff; border-color: #0d2340; }
+/* the rest of the range: light cards on the black, after intrepidautomation.com */
+.bx { position: relative; padding: 4vh 2.2vw 26vh; }
+.ix-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 6vh 0 4vh; }
+.ix-tabs button { padding: 8px 14px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 40px; background: transparent; color: inherit; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+.ix-tabs button sup { margin-left: 6px; font-size: 8px; opacity: 0.55; }
+.ix-tabs button:hover { border-color: rgba(255, 255, 255, 0.6); }
+.ix-tabs button.on { background: #eef3fa; color: #000; border-color: #eef3fa; }
+.bx-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.bx-card { position: relative; display: block; aspect-ratio: 4 / 4.3; border-radius: 22px; overflow: hidden; background: linear-gradient(180deg, #e9f0f8, #dde8f4); color: #0d2340; text-decoration: none; isolation: isolate; }
+/* the name: big, behind the chamber, up from below on hover */
+.bx-name { position: absolute; left: 7%; right: 7%; top: 11%; z-index: 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 3vw, 54px); line-height: 0.96; letter-spacing: -0.055em; text-align: center; opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.bx-img { position: absolute; left: 22%; right: 22%; top: 38%; bottom: 17%; z-index: 1; }
+.bx-img::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4%; height: 10%; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, rgba(13, 35, 64, 0.32), transparent); filter: blur(4px); transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.5s ease; }
+.bx-img img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.bx-card.photo .bx-img img { object-fit: cover; border-radius: 12px; }
+.bx-card.photo .bx-img::after { display: none; }
+.bx-cap { position: absolute; left: 22px; right: 70px; bottom: 20px; z-index: 2; display: flex; flex-direction: column; gap: 4px; transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.bx-cap b { font-weight: 400; font-family: var(--font-display); font-size: 15px; letter-spacing: -0.035em; line-height: 1.1; }
+.bx-cap small { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.55; }
+.bx-plus { position: absolute; right: 18px; top: 18px; z-index: 2; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: #0d2340; color: #fff; transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1), background 0.3s ease; }
+.bx-plus svg { width: 11px; height: 11px; }
+.bx-card:hover .bx-name { opacity: 1; transform: none; }
+.bx-card:hover .bx-img img { transform: translateY(-2%) scale(1.03); }
+.bx-card:hover .bx-img::after { transform: scaleX(0.9); opacity: 0.7; }
+.bx-card:hover .bx-cap { opacity: 0; transform: translateY(8px); }
+.bx-card:hover .bx-plus { background: #ff6a1a; transform: rotate(90deg); }
 
 .en { padding: 10vh 2.2vw 30vh; }
 .en .ty-h { margin-top: 8vh; max-width: 14em; }
@@ -651,56 +445,38 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .en-cta a:hover { opacity: 1; }
 
 @media (max-width: 1000px) {
-  .fx-sk { left: 0; width: 100%; transform: none; } .p1 { width: 100%; } .p2, .p3, .p4 { display: none; }
-  .hx-img, .hx-hit, .hx-shadow { left: 50%; } .hx-img { max-width: 86vw; }
-  .hx-md { display: none; } .hx-menu { right: 0; } .hx-act { right: 4vw; }
-  .hx-name, .hx-rule { display: none; }
-  .hx-read dl { flex-wrap: wrap; gap: 14px 20px; max-width: 50vw; }
+  .hx-q figure + figure { display: none; } .hx-card { width: min(320px, 40vw); }
   .ty-row h3, .ty-body { grid-column: 1 / -1; } .ty-body { margin-top: 6vh; }
   .st ol { grid-template-columns: 1fr; } .nm ul { grid-template-columns: 1fr 1fr; }
   .nm-two { grid-template-columns: 1fr; } .nm-two > div + div { border-left: 0; padding-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.25); }
-  .bt-tile, .bt-tile:hover { transform: none; } .bt-un { transform: none; } .bt-grid { margin: 0; }
-  .bt-tile.s0 { grid-column: span 12; } .bt-tile.s1, .bt-tile.s2, .bt-tile.s3, .bt-tile.s4, .bt-tile.s5, .bt-tile.s6, .bt-tile.s7 { grid-column: span 6; }
+  .bx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 640px) { .hx-act .hx-dial { display: none; } .hx-menu { width: 180px; } }
 
 /* ───────── phones: one stage, a bottom panel, no heavy effects ───────── */
 @media (max-width: 800px) {
   .hx-pin { height: 100svh; }
-  .fx { inset: 8px; border-radius: 22px; }
-  .fx-sk { left: 0; width: 100%; transform: none; }
-  .pn { border-radius: 22px; }
-  .p1 { left: 0; width: 100%; top: 0; bottom: auto; height: calc(62% - 4px); clip-path: polygon(0 0, 100% 0, 100% 93%, 0 100%); }
-  .p2, .p4 { display: none; }
-  .p3 { display: block; left: 0; width: 100%; top: calc(62% + 4px); bottom: 0; height: auto; }
-  .hx-grain, .hx-spot, .hx-side, .hx-md, .hx-ex, .hx-dial, .hx-shadow { display: none; }
-  .hx-stage { transform: none !important; }
-  .hx-img, .hx-hit { left: 50%; }
-  .hx-img { bottom: calc(38svh + 5svh); height: calc(42svh * var(--s)); max-width: 78vw; }
-  .hx-img.on { -webkit-box-reflect: none; filter: drop-shadow(0 18px 22px var(--sh)); }
-  .hx-hit { bottom: calc(38svh + 5svh); width: 60vw; height: 34svh; }
-  .hx-name { display: block; left: 6vw; top: 13svh; max-width: 62vw; }
-  .hx-name h1 { font-size: clamp(18px, 6vw, 26px); }
-  .hx-rule { display: flex; flex-direction: row; justify-content: space-between; align-items: center; left: 6vw; right: 6vw; top: calc(62svh + 16px); height: auto; }
-  .hx-rule::before, .hx-rule li i, .hx-rule u { display: none; }
-  .hx-rule li { padding: 6px 0; font-size: 10px; border-bottom: 1px solid transparent; }
-  .hx-rule li.on { border-bottom-color: currentColor; }
-  .hx-read { left: 6vw; right: 6vw; top: calc(62svh + 50px); bottom: auto; }
-  .hx-read dl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
-  .hx-read dd { font-size: 12.5px; white-space: nowrap; }
-  .hx-act { left: 6vw; right: 6vw; bottom: 3svh; display: block; }
-  .hx-menu { position: static; width: 100%; flex-direction: row; flex-wrap: wrap; gap: 4px 18px; }
-  .hx-menu .hi { flex: 1 1 100%; margin: 0 0 4px; }
-  .hx-menu button, .hx-menu a { width: auto; padding: 8px 0; border: 0; font-size: 9px; }
-  .hx-menu button:hover, .hx-menu a:hover { padding-left: 0; }
-  .hx-bg { transition-duration: 0.6s; }
+  .hx-card { left: 5vw; right: 5vw; top: 11svh; width: auto; }
+  .hx-card h1 { font-size: 26px; }
+  .hx-card dl { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
+  .hx-card dd { font-size: 12.5px; }
+  .hx-ix, .hx-hint, .hx-grain { display: none; }
+  .hx-poster { bottom: 30svh; height: 36svh; }
+  .hx-q { left: 5vw; right: 5vw; bottom: 13svh; translate: none; }
+  .hx-q figure { width: 100%; text-align: center; }
+  .hx-q blockquote { font-size: 16px; }
+  .hx-act { left: 5vw; right: 5vw; bottom: 4svh; flex-direction: row; align-items: center; justify-content: space-between; }
 
   .ph { height: 80vh; } .ph img { top: 0; height: 100%; }
   .cl { height: 170vh; }
   .ty { padding: 18vh 5vw 10vh; } .ty-row { margin-top: 18vh; }
   .ty-top { grid-template-columns: 14vw 1fr auto; }
   .st { padding: 18vh 5vw 6vh; } .nm { padding: 6vh 5vw 18vh; }
-  .bt { padding: 4vh 4vw 18vh; } .bt-grid { grid-auto-rows: 190px; } .bt-in { padding: 12px 14px; } .bt-plus { right: 14px; top: 12px; }
+  .bx { padding: 4vh 4vw 18vh; }
+  .bx-grid { gap: 10px; }
+  .bx-card { border-radius: 16px; }
+  .bx-cap { left: 12px; right: 12px; bottom: 12px; }
+  .bx-cap b { font-size: 12.5px; }
+  .bx-plus { width: 30px; height: 30px; right: 10px; top: 10px; }
   .en { padding: 8vh 5vw 18vh; }
 }
 </style>

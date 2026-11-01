@@ -27,3 +27,6 @@ dist-ssr
 .agents/
 tools/
 
+
+# CAD sources for tools/step_to_obj.py: large, never deployed
+/cad/

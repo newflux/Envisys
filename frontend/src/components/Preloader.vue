@@ -11,7 +11,7 @@
     <canvas ref="smokeCanvasRef" class="preloader-smoke-canvas"></canvas>
 
     <!-- 3. Exact Icomat Alternating SVG clipPath Canvas Logo Mark (small size) -->
-    <div class="preloader-logo-stage">
+    <div v-if="!smokeOnly" class="preloader-logo-stage">
       <div class="preloader-canvas-box">
         <canvas ref="canvasRef"></canvas>
       </div>
@@ -33,6 +33,8 @@ const props = withDefaults(
     arcDuration?: number
     /** Stagger delay between arcs in seconds */
     arcStagger?: number
+    /** Inner pages: the smoke alone, no logo, so it starts straight away */
+    smokeOnly?: boolean
   }>(),
   {
     lightModeLogoColor: '#0e0f12',
@@ -293,7 +295,7 @@ function startAnimation() {
   })
 
   // 2. Exact Icomat Smoke Wave: rises organically from left & right towards center
-  const smokeStartTime = 1.05
+  const smokeStartTime = props.smokeOnly ? 0.25 : 1.05
 
   masterTl.fromTo(
     waveState,

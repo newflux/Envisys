@@ -26,6 +26,12 @@
         <span>The sites</span>
         <p>Built here. Tested one street away.</p>
       </div>
+      <!-- all four units: the two in this picture light up on hover; the 1st Cross pair are outside it, so they open on Google Maps -->
+      <ul class="ab2-units">
+        <li v-for="u in units" :key="u.code" :class="{ on: u.site !== undefined && hot === u.site }" @pointerenter="u.site !== undefined && (hot = u.site)" @pointerleave="hot = -1">
+          <a :href="maps(u.addr)" target="_blank" rel="noopener" data-cursor="MAP"><em>{{ u.code }}</em><span>{{ u.what }}</span><i>{{ u.site === undefined ? 'Map ↗' : '' }}</i></a>
+        </li>
+      </ul>
       <p class="ab2-credit">Satellite imagery · Google</p>
     </div>
   </section>
@@ -42,6 +48,13 @@ const sites: { name: string; role: string; addr: string; poly: P[] }[] = [
   { name: 'Envisys', role: 'Manufacturing unit · SB-58', addr: 'SB-58, 2nd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058', poly: [[944, 262], [978, 268], [940, 346], [922, 376], [910, 368], [903, 322]] },
   { name: 'Vistara', role: 'Testing service unit · SB-118', addr: 'SB-118, 3rd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058', poly: [[770, 586], [800, 582], [806, 625], [790, 648], [748, 640], [752, 598]] }
 ]
+const units: { code: string; what: string; addr: string; site?: number }[] = [
+  { code: 'SB-58', what: 'Manufacturing · Environmental testing · Head office', addr: 'SB-58, 2nd Cross, 1st Stage, Peenya Industrial Estate', site: 0 },
+  { code: 'SB-118', what: 'Environmental test lab · Testing services', addr: 'SB-118, 3rd Cross, 1st Stage, Peenya Industrial Estate', site: 1 },
+  { code: 'SB-37', what: 'Manufacturing · Mechanical testing', addr: 'SB-37, 1st Cross, Peenya Industrial Estate' },
+  { code: 'C-426', what: 'Rentals & refurbishment', addr: 'C-426, 1st Cross, Peenya Industrial Estate' }
+]
+const maps = (a: string) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`Envisys Technologies ${a}, Bengaluru 560058`)
 const hot = ref(-1)
 const pts = (p: P[]) => p.map((q) => q.join(',')).join(' ')
 const clip = (p: P[]) => `polygon(${p.map(([x, y]) => `${((x / W) * 100).toFixed(2)}% ${((y / H) * 100).toFixed(2)}%`).join(',')})`
@@ -107,9 +120,18 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .ab2-head { position: absolute; left: 50%; top: 13vh; translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: 1.4vh; text-align: center; pointer-events: none; }
 .ab2-head span { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.6; }
 .ab2-head p { margin: 0; font-family: var(--font-display); font-size: clamp(18px, 1.7vw, 30px); line-height: 1.2; letter-spacing: -0.045em; }
+.ab2-units { position: absolute; right: 2vw; bottom: 8vh; z-index: 3; width: min(460px, 40vw); margin: 0; padding: 0; list-style: none; }
+.ab2-units li { border-top: 1px solid rgba(255, 255, 255, 0.25); }
+.ab2-units a { display: grid; grid-template-columns: 4.6em 1fr auto; gap: 12px; align-items: baseline; padding: 9px 0; color: inherit; text-decoration: none; transition: padding 0.5s var(--ease, ease); }
+.ab2-units li.on a { padding-left: 8px; }
+.ab2-units em { font-style: normal; font-family: var(--font-display); font-size: 13px; letter-spacing: -0.02em; white-space: nowrap; }
+.ab2-units li.on em { color: #ff8a5a; }
+.ab2-units span { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.04em; opacity: 0.7; }
+.ab2-units i { font-style: normal; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.55; }
 .ab2-credit { position: absolute; right: 2vw; bottom: 3vh; margin: 0; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.35; pointer-events: none; }
 
 @media (max-width: 800px) {
   .ab2-chip small { display: none; }
+  .ab2-units { width: auto; right: 5vw; left: 5vw; bottom: 8vh; } .ab2-units span { display: none; }
 }
 </style>

@@ -281,6 +281,8 @@ export const mainProducts = products.filter((p) => p.tier === 'main')
 export const catalogue = products.filter((p) => p.tier === 'catalog')
 export const groups: Group[] = ['Climatic & thermal', 'Shock, altitude & vacuum', 'Vibration & mechanical', 'Ingress, corrosion & light', 'Energy & mobility']
 export const bySlug = (s: string) => products.find((p) => p.slug === s)
+// the few gallery pictures that are real scenes (not cut-outs): shown as photographs in a rounded frame, the rest stand free
+export const scenePhotos = new Set(['/p/eta/g3.webp', '/p/rain/g1.webp', '/p/temperature-forcing/g2.webp', '/p/temperature-forcing/g3.webp'])
 export const img = (p: Product, f: 'hero' | 'lines' | `g${number}`) => `/p/${p.slug}/${f}.webp`
 
 // the 3D model for each main chamber (phones load the `_m.glb` cut), dressed in Blender (tools/step_to_obj.py + tools/dress_step.py) and Draco-compressed.
@@ -289,7 +291,15 @@ export const img = (p: Product, f: 'hero' | 'lines' | `g${number}`) => `/p/${p.s
 export const models: Record<string, string> = { et: '/models/et950.glb' }
 // photographs of individual models, by family (a model code without its variant suffix: EM64-30T → EM64).
 // Families without one show 'Photograph to follow'.
-export const modelShots: Record<string, string> = { ET300: '/p/et/m-et300.webp', EM30: '/p/mini/m-em30.webp', EM64: '/p/mini/m-em64.webp', EM100: '/p/mini/m-em100.webp' }
+// a model's own photograph (cut out, from the product shoots in public/pics), keyed by the name its card shows
+export const modelShots: Record<string, string> = {
+  ET300: '/p/et/m-et300.webp', EM30: '/p/mini/m-em30.webp', EM64: '/p/mini/m-em64.webp', EM100: '/p/mini/m-em100.webp',
+  'ETS-150': '/p/ets/m-ets-150.webp', 'ETS-900': '/p/ets/m-ets-900.webp', EO150: '/p/ovens-dryers/m-eo150.webp', EO300: '/p/ovens-dryers/m-eo300.webp',
+  ETB950: '/p/battery/m-etb950.webp', 'EDC 1500': '/p/dust/m-edc-1500.webp', ETE300: '/p/e-motor/m-ete300.webp',
+  'EMS-100': '/p/salt-spray/m-ems-100.webp', 'EBS/ECS 300': '/p/salt-spray/m-ebs-ecs-300.webp',
+  'Thermomechanical chamber': '/p/thermomechanical/m-thermomechanical-chamber.webp', 'Vacuum de-gassing chamber': '/p/vacuum/m-vacuum-de-gassing-chamber.webp',
+  'Solar radiation chamber': '/p/solar-radiation/m-solar-radiation-chamber.webp', 'Drop test machine': '/p/drop-test/m-drop-test-machine.webp', 'ET series': '/p/solar-pv/m-et-series.webp'
+}
 export const family = (item: string) => item.replace(/-\d+[TH](-D)?$/, '')
 // short lines from real Google reviews (the full ones are in TestimonialsSection); they are about Envisys, not one chamber
 const quotes = [
@@ -299,7 +309,8 @@ const quotes = [
   { q: 'Clear, reliable reports', who: 'Baikunthanath Khuntia' },
   { q: 'There has not been a single issue', who: 'Sunil Nambiar' }
 ]
-export const quotesFor = (i: number) => [quotes[i % quotes.length], quotes[(i + 1) % quotes.length]]
+// one distinct review per flagship; the rest get none, because five real reviews repeated over 24 pages would read as stock
+export const quotesFor = (i: number) => (i < quotes.length ? [quotes[i]] : [])
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9.]+/g, '')
 

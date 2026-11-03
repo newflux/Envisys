@@ -1,0 +1,6 @@
+Sector photographs on /industries, from Wikimedia Commons (products being built or tested).
+automotive.jpg  Calspan Corporation, National Highway Traffic Safe, Public domain  https://commons.wikimedia.org/wiki/File:IMPACT_EVENT.jpg
+aerospace.jpg  NASA Jet Propulsion Laboratory, Public domain  https://commons.wikimedia.org/wiki/File:NISAR_Science_Payload_Gets_Packaged_for_Shipment_to_India_(PIA25567).jpg
+electronics.jpg  Retired electrician, CC0  https://commons.wikimedia.org/wiki/File:Revox_B215_-_IO_board_-_as-is_-_head_amp_section.jpg
+defence.jpg  Rahuldevnath, CC BY 3.0  https://commons.wikimedia.org/wiki/File:HAL_Tejas.jpg
+ev.jpg  Bill Abbott, CC BY-SA 2.0  https://commons.wikimedia.org/wiki/File:Volkswagen_ID.3_electric_car_chassis_DSC_0062_(1)_(52148440365).jpg

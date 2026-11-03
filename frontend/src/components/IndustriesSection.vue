@@ -35,12 +35,12 @@ import gsap from 'gsap'
 import { vMagnetic } from '../utils/magnetic'
 
 const INTERVAL = 3400 // ms per slide
-// Photos from the shoot stand in until industry-specific photography exists (public/media/industry-<id>.jpg).
+// Sector photographs: public domain / CC0, from Wikimedia Commons (public/media/industries/SOURCES.txt).
 const slides = reactive([
-  { id: 'automotive', tab: 'Automotive', title: 'Automotive.', line: 'Powertrain, electronics and cabin components, proven long before they reach the road.', href: '/industries', src: '/media/industry-automotive.jpg', missing: false, bg: 'radial-gradient(ellipse 70% 60% at 70% 70%, #1d5a6e 0%, #0d2733 45%, #05090c 100%)' },
-  { id: 'electronics', tab: 'Electronics', title: 'Electronics.', line: 'Boards, networking and silicon held through thermal and humidity cycling.', href: '/industries', src: '/media/industry-electronics.jpg', missing: false, bg: 'radial-gradient(ellipse 70% 60% at 30% 60%, #24468f 0%, #0e1a3d 48%, #04060d 100%)' },
-  { id: 'defence', tab: 'Defence', title: 'Defence.', line: 'Qualification runs that meet the standard, fully logged from start to finish.', href: '/industries', src: '/media/industry-defence.jpg', missing: false, bg: 'radial-gradient(ellipse 80% 60% at 60% 100%, #8a5a3c 0%, #2a2a33 45%, #06070a 100%)' },
-  { id: 'aerospace', tab: 'Aerospace', title: 'Aerospace.', line: 'From −70°C to +180°C, and altitude chambers down to 1 mbar.', href: '/industries', src: '/media/industry-aerospace.jpg', missing: false, bg: 'radial-gradient(ellipse 75% 65% at 50% 105%, #d4733a 0%, #5a2c24 38%, #0a0b13 80%)' }
+  { id: 'automotive', tab: 'Automotive', title: 'Automotive.', line: 'Powertrain, electronics and cabin components, proven long before they reach the road.', href: '/industries', src: '/media/industries/automotive.jpg', missing: false, bg: 'radial-gradient(ellipse 70% 60% at 70% 70%, #1d5a6e 0%, #0d2733 45%, #05090c 100%)' },
+  { id: 'electronics', tab: 'Electronics', title: 'Electronics.', line: 'Boards, networking and silicon held through thermal and humidity cycling.', href: '/industries', src: '/media/industries/electronics.jpg', missing: false, bg: 'radial-gradient(ellipse 70% 60% at 30% 60%, #24468f 0%, #0e1a3d 48%, #04060d 100%)' },
+  { id: 'defence', tab: 'Defence', title: 'Defence.', line: 'Qualification runs that meet the standard, fully logged from start to finish.', href: '/industries', src: '/media/industries/defence.jpg', missing: false, bg: 'radial-gradient(ellipse 80% 60% at 60% 100%, #8a5a3c 0%, #2a2a33 45%, #06070a 100%)' },
+  { id: 'aerospace', tab: 'Aerospace', title: 'Aerospace.', line: 'From −70°C to +180°C, and altitude chambers down to 1 mbar.', href: '/industries', src: '/media/industries/aerospace.jpg', missing: false, bg: 'radial-gradient(ellipse 75% 65% at 50% 105%, #d4733a 0%, #5a2c24 38%, #0a0b13 80%)' }
 ])
 
 const rootRef = ref<HTMLElement | null>(null)

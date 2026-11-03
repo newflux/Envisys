@@ -24,12 +24,12 @@ import gsap from 'gsap'
 const steps = [
   { n: '01', src: '/media/step-1.jpg', cap: 'Fabrication · brazing and joining' },
   { n: '02', src: '/media/step-2.jpg', cap: 'Refrigeration circuits' },
-  { n: '03', src: '/media/step-6.jpg', cap: 'Pneumatics and air lines' },
+  { n: '03', src: '/media/step-6.jpg', cap: 'Wiring the test rack' },
   { n: '04', src: '/media/step-3.jpg', cap: 'Control panel wiring' },
-  { n: '05', src: '/media/step-7.jpg', cap: 'Assembly on the floor' },
+  { n: '05', src: '/media/step-7.jpg', cap: 'Finished units, ready for test' },
   { n: '06', src: '/media/step-4.jpg', cap: 'Pressure and calibration' },
   { n: '07', src: '/media/step-5.jpg', cap: 'Operator controls' },
-  { n: '08', src: '/media/step-8.jpg', cap: 'Final checks' }
+  { n: '08', src: '/media/step-8.jpg', cap: 'The test floor, final checks' }
 ]
 
 const headWords = 'End-to-end production'.split(' ')

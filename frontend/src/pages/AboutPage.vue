@@ -9,7 +9,7 @@
           <!-- 1 · the hero holds still while the black slides up over it -->
           <div class="ab-intro">
             <section class="ab-hero">
-              <img class="ab-hero-img" src="/media/step-8.jpg" alt="" />
+              <VideoSlot class="ab-hero-img" src="/media/film-aesthetics.mp4" poster="/media/hollow.jpg" label="aesthetics film" />
               <div class="ab-hero-shade"></div>
               <h1 class="ab-h1">
                 <span v-for="(l, i) in heroLines" :key="i" class="ab-mask"><i :style="{ '--d': 0.5 + i * 0.12 + 's' }">{{ l }}</i></span>
@@ -80,7 +80,7 @@
           <!-- 6 · the floor -->
           <figure class="ab-fig" ref="figRef">
             <div class="ab-fig-in" ref="figInRef">
-              <img src="/media/step-7.jpg" alt="Assembly on the Envisys factory floor" ref="figImgRef" />
+              <img src="/media/step-7.jpg" alt="Finished Envisys units" ref="figImgRef" />
               <div class="ab-cap"><span>Manufacturing unit</span><span>Peenya Industrial Estate, Bengaluru</span></div>
             </div>
           </figure>
@@ -117,15 +117,7 @@
           <!-- 10 · the map: Peenya, Bengaluru, India, the world -->
           <AboutMap />
 
-          <!-- 11 · the two units, as doors -->
-          <section class="ab-units dk">
-            <a v-for="u in units" :key="u.t" class="ab-utile ab-clip" data-cursor="" href="/contact">
-              <img :src="u.img" :alt="u.t" loading="lazy" />
-              <span class="ab-glass">{{ u.t }} <i>→</i></span>
-              <address>{{ u.addr }}</address>
-            </a>
-          </section>
-          <NextUp label="Next up" title="What we build" text="Five flagship ranges and a catalogue of everything else, with the search to find any of it." href="/products" />
+          <NextUp solid label="Next up" title="What we build" text="Five flagship ranges and a catalogue of everything else, with the search to find any of it." href="/products" />
         </div>
 
         <SiteFooter @build="contactOpen = true" />
@@ -152,13 +144,14 @@ import NextUp from '../components/NextUp.vue'
 import AboutBuilding from '../components/AboutBuilding.vue'
 import AboutDirectors from '../components/AboutDirectors.vue'
 import AboutMap from '../components/AboutMap.vue'
+import VideoSlot from '../components/VideoSlot.vue'
 import { vMagnetic } from '../utils/magnetic'
 
 const heroLines = ['Test chambers, built', 'end to end in Bengaluru.']
 const beats = [
   { t: 'Envisys is run by engineers and managers with over forty years of combined experience in environmental test chambers.' },
   { t: 'Our mission: to design, manufacture and supply reliable test chambers, together with our clients.' },
-  { t: 'So we build every one end to end, in Bengaluru. Our own R&D centre. Our own test lab.', img: '/media/step-2.jpg' }
+  { t: 'So we build every one end to end, in Bengaluru. Our own R&D centre. Our own test lab.', img: '/media/assembly.jpg' }
 ]
 const slogan = ['Integrity, first.', 'Clients, always.', 'Results, together.']
 const visionWords = '“Our vision is to be the most preferred brand, and the supplier of choice, in every industry we serve.”'.split(' ')
@@ -166,10 +159,10 @@ const visionWords = '“Our vision is to be the most preferred brand, and the su
 // A bento on a 12-column grid: c/r are the start column and row, w/h the spans. Captions say only what the photo shows.
 const tiles = [
   { img: '/media/step-1.jpg', cap: 'Brazing', c: 1, w: 5, r: 1, h: 4 }, { img: '/media/step-3.jpg', cap: 'Control panel', c: 6, w: 3, r: 1, h: 2 },
-  { img: '/media/industry-aerospace.jpg', cap: 'Aerospace', c: 9, w: 4, r: 1, h: 3 }, { img: '/media/step-6.jpg', cap: 'Air line', c: 6, w: 3, r: 3, h: 2 },
+  { img: '/media/shackle.jpg', cap: 'Shackle', c: 9, w: 4, r: 1, h: 3 }, { img: '/media/step-6.jpg', cap: 'Rack wiring', c: 6, w: 3, r: 3, h: 2 },
   { img: '/media/eye.jpg', cap: 'Detail', c: 9, w: 4, r: 4, h: 2 }, { img: '/media/step-2.jpg', cap: 'Refrigeration', c: 1, w: 3, r: 5, h: 4 },
   { img: '/media/floor.jpg', cap: 'Test floor', c: 4, w: 5, r: 5, h: 2 }, { img: '/media/step-5.jpg', cap: 'Controls', c: 9, w: 4, r: 6, h: 3 },
-  { img: '/media/step-4.jpg', cap: 'Gauge', c: 4, w: 3, r: 7, h: 2 }, { img: '/media/industry-automotive.jpg', cap: 'Automotive', c: 7, w: 2, r: 7, h: 2 }
+  { img: '/media/step-4.jpg', cap: 'Gauge', c: 4, w: 3, r: 7, h: 2 }, { img: '/media/readout.jpg', cap: 'Readout', c: 7, w: 2, r: 7, h: 2 }
 ]
 
 // Every figure is from envisystech.com. "40+" is the founders' combined experience, not the company's age.
@@ -181,10 +174,6 @@ const stats: { to?: number; suffix?: string; text?: string; label: string }[] = 
 ]
 const nums = reactive(stats.map(() => 0))
 
-const units = [
-  { t: 'Manufacturing unit', img: '/media/step-1.jpg', addr: 'SB-58, 2nd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058' },
-  { t: 'Testing service unit', img: '/media/step-8.jpg', addr: 'SB-118, 3rd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058' }
-]
 
 const certs = [
   { n: 'ISO 9001:2015', d: 'Quality management' },
@@ -539,23 +528,12 @@ onUnmounted(() => {
 .ab-certs b { display: block; font-family: var(--font-display); font-weight: 400; font-size: clamp(14px, 1.3vw, 22px); letter-spacing: -0.04em; }
 .ab-certs span { display: block; margin-top: 1.4vh; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.55; }
 
-/* 9 · the two units, as doors */
-.ab-units { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 5vw 8vh; }
-.ab-utile { position: relative; display: block; overflow: hidden; border-radius: 10px; aspect-ratio: 1.62; background: #0b1b33; color: #fff; text-decoration: none; }
-.ab-utile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.ab-utile:hover img { filter: brightness(1.1); }
-.ab-glass { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; padding: 26px 48px; border-radius: 34px; background: rgba(40, 46, 56, 0.34); border: 1px solid rgba(255, 255, 255, 0.22); backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); font-family: var(--font-body); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; transition: padding 0.5s var(--ease); }
-.ab-glass i { font-style: normal; max-width: 0; opacity: 0; overflow: hidden; transition: max-width 0.5s var(--ease), opacity 0.4s ease, margin 0.5s ease; }
-.ab-utile:hover .ab-glass { padding: 26px 40px 26px 48px; }
-.ab-utile:hover .ab-glass i { max-width: 24px; opacity: 1; margin-left: 16px; }
-.ab-utile address { position: absolute; left: 20px; right: 20px; bottom: 16px; font-style: normal; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.6; color: rgba(255, 255, 255, 0.75); }
-
 @media (max-width: 900px) {
   .ab-split, .ab-two { grid-template-columns: 1fr; gap: 3vh; }
   .ab-bento { grid-auto-rows: 30vw; grid-template-columns: repeat(2, 1fr); gap: 2vw; }
   .ab-bt { grid-column: auto !important; grid-row: auto !important; }
   .ab-ruler { display: none; }
-  .ab-statgrid, .ab-units { grid-template-columns: 1fr; }
+  .ab-statgrid { grid-template-columns: 1fr; }
   .ab-certs { grid-template-columns: 1fr 1fr; }
   .ab-frame { width: 80vw; }
 }

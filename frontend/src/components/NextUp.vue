@@ -1,6 +1,6 @@
 <template>
   <!-- The link to the next page: a hairline that fills on hover, a small label, the title, and a round arrow. Quiet until touched. -->
-  <div class="nu-sec">
+  <div class="nu-sec" :class="{ solid }">
   <a class="nu" :href="href" data-cursor="" @click="click">
     <i class="nu-line"><u></u></i>
     <span class="nu-l">{{ label }}</span>
@@ -14,7 +14,8 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ label: string; title: string; text: string; href: string }>()
+// solid: the page above is already dark, so start from black instead of fading up from the light page colour
+const props = defineProps<{ label: string; title: string; text: string; href: string; solid?: boolean }>()
 const emit = defineEmits<{ (e: 'go'): void }>()
 // href="#" means the link opens something on the page instead of navigating
 const click = (e: MouseEvent) => { if (props.href === '#') e.preventDefault(); emit('go') }
@@ -22,6 +23,7 @@ const click = (e: MouseEvent) => { if (props.href === '#') e.preventDefault(); e
 
 <style scoped>
 /* the page dissolves into the footer's dark, like smoke rising from below */
+.nu-sec.solid { background: #04060a; }
 .nu-sec { position: relative; padding-top: 22vh; color: #eef3fa; background: linear-gradient(180deg, rgba(4, 6, 10, 0) 0%, rgba(4, 6, 10, 0.55) 26%, rgba(4, 6, 10, 0.92) 52%, #04060a 70%); }
 .nu { position: relative; display: grid; grid-template-columns: 9vw 1fr auto; align-items: center; gap: 2vw; margin: 0 5vw; padding: 10vh 0 12vh; color: inherit; text-decoration: none; }
 .nu-line { position: absolute; left: 0; right: 0; top: 10vh; height: 1px; margin-top: -4.5vh; background: currentColor; opacity: 0.16; }

@@ -73,8 +73,8 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
     group.position.x = i * GAP
     group.visible = false
     scene.add(group)
-    // a model starts turned away and held there until intro() swings it round (touched far in the future = no settling yet)
-    return { ...it, group, spin, blob, model: null as any, h: H * it.scale, rot: it.url ? 1.05 : 0, vel: 0, held: false, touched: it.url ? 1e9 : 0 }
+    // a model waits facing straight at you (0.54 cancels the resting angle) until intro() turns it into its resting angle (touched far in the future = no settling yet)
+    return { ...it, group, spin, blob, model: null as any, h: H * it.scale, rot: it.url ? 0.54 : 0, goal: 0, vel: 0, held: false, touched: it.url ? 1e9 : 0 }
   })
 
   const draco = new DRACOLoader()
@@ -159,11 +159,12 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
   }
 
   const smooth = (a: number) => a * a * (3 - 2 * a)
-  let cx = 0, cy = 0, now = 0, cur = 0
+  let cx = 0, cy = 0, now = 0, cur = 0, dt = 1 / 60
   const hmi = screenUI()
   // f: scroll position in chambers; px, py: pointer, -1..1; t: seconds
   function update(f: number, px: number, py: number, t: number) {
     resize()
+    dt = Math.min(0.05, Math.max(0.001, t - now || 1 / 60))
     const tall = w / Math.max(1, h) < 1
     // between two chambers the camera pulls back and rises a little, then settles in front of the next
     const mid = Math.sin(Math.PI * (f - Math.floor(f)))
@@ -183,11 +184,21 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
       // the one in front turns a little toward the camera. A drag turns it like a turntable: it carries on with the
       // throw and slows down; a second after it was last touched (or once it is no longer in front) it comes back
       // round, the short way, to its resting pose.
+      // All of it runs on elapsed time (rad, rad/s), so it feels the same at 60 and 120 Hz.
       const near = 1 - smooth(Math.min(1, Math.abs(d)))
-      if (!s.held) { s.rot += s.vel; s.vel *= 0.93 }
-      if (!s.held && (t - s.touched > 1 || Math.abs(d) > 0.6)) {
+      if (s.held) {
+        // the drag sets a goal; the chamber follows it closely, so uneven pointer events never show as jitter
+        const r = s.rot
+        s.rot += (s.goal - s.rot) * (1 - Math.exp(-dt * 22))
+        s.vel += ((s.rot - r) / dt - s.vel) * (1 - Math.exp(-dt * 12)) // the throw is the recent average, not the last event
+      } else if (t - s.touched < 1 && Math.abs(d) < 0.6) {
+        s.vel *= Math.exp(-dt * 2.6) // coasting on the throw
+        s.rot += s.vel * dt
+      } else {
+        // home, the short way, on a spring that overshoots a touch and settles
         const home = Math.round(s.rot / (Math.PI * 2)) * Math.PI * 2
-        s.rot += (home - s.rot) * 0.06; s.vel *= 0.8
+        s.vel += (-38 * (s.rot - home) - 2 * 0.78 * Math.sqrt(38) * s.vel) * dt
+        s.rot += s.vel * dt
       }
       s.spin.rotation.y = s.url ? -0.42 - 0.12 * near + s.rot + Math.sin(t * 0.3 + i) * 0.01 * near : 0 // a photograph only faces front
     })
@@ -223,10 +234,10 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
     return best
   }
   // a horizontal drag of dx pixels turns the chamber at index i; release lets it run on with the last movement
-  const spin = (i: number, dx: number) => { const s = slots[i]; if (!s?.url) return; const a = dx * 0.008; s.held = true; s.rot += a; s.vel = a; s.touched = now }
-  const release = (i: number) => { const s = slots[i]; if (s && s.held) { s.held = false; s.touched = now } }
-  // the first look: the chamber starts turned away and swings round to face you, so it reads as 3D straight away
-  const intro = (i: number) => { const s = slots[i]; if (s?.url) { s.vel = 0; s.touched = now - 0.75 } }
+  const spin = (i: number, dx: number) => { const s = slots[i]; if (!s?.url) return; if (!s.held) { s.held = true; s.goal = s.rot } s.goal += dx * 0.009; s.touched = now }
+  const release = (i: number) => { const s = slots[i]; if (s && s.held) { s.held = false; s.touched = now; s.vel = Math.max(-9, Math.min(9, s.vel)) } }
+  // the first look: straight on, then it turns into its three-quarter pose, so it reads as 3D straight away
+  const intro = (i: number) => { const s = slots[i]; if (s?.url) { s.vel = 0; s.touched = now - 1 } } // from facing you, one easy turn to its usual three-quarter pose
 
   function dispose() {
     renderer.dispose(); pmrem.dispose(); blobTex.dispose(); draco.dispose(); hmi.tex.dispose()

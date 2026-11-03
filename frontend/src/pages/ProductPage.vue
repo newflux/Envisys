@@ -38,8 +38,8 @@
       </section>
 
       <!-- 2 · what it is -->
-      <section class="pd-sec pd-about">
-        <div class="pd-top rv"><span>(01)</span><span>About</span><span>{{ p.group }}</span></div>
+      <section id="overview" class="pd-sec pd-about">
+        <div class="pd-top rv hl"><span>(01)</span><span>About</span><span>{{ p.group }}</span></div>
         <div class="pd-about-row">
           <h2 class="rv">{{ p.tagline }}</h2>
           <p class="rv" style="--d: 0.08s">{{ p.intro }}</p>
@@ -48,41 +48,29 @@
 
       <!-- 3 · the photographs: the section pins and slides them sideways as you scroll, each moving a little inside its
            frame; phones swipe a plain strip -->
-      <section v-if="shots.length > 1" class="pd-gal" ref="galRef" :style="{ height: galH }">
+      <section v-if="shots.length > 1" id="photographs" class="pd-gal" ref="galRef" :style="{ height: galH }">
         <div class="pd-gal-pin">
           <div class="pd-top"><span>(02)</span><span>Photographs</span><span class="pd-count">{{ String(shotAt + 1).padStart(2, '0') }} / {{ String(shots.length).padStart(2, '0') }}</span></div>
           <div class="pd-track" ref="trackRef">
-            <figure v-for="(s, k) in shots" :key="s" :class="{ photo: k > 0 || p.photo }"><img :src="s" :alt="`${p.name}, view ${k + 1}`" loading="lazy" draggable="false" /></figure>
+            <figure v-for="(s, k) in shots" :key="s" :class="{ photo: scenePhotos.has(s) || (k === 0 && p.photo) }"><img :src="s" :alt="`${p.name}, view ${k + 1}`" loading="lazy" draggable="false" /></figure>
           </div>
         </div>
       </section>
 
       <!-- 4 · the specification -->
-      <section class="pd-sec pd-spec">
-        <div class="pd-top rv"><span>(03)</span><span>Specification</span><span></span></div>
+      <section id="specification" class="pd-sec pd-spec">
+        <div class="pd-top rv hl"><span>(03)</span><span>Specification</span><span></span></div>
         <div class="pd-spec-row">
-          <dl v-if="p.specs.length" class="rv">
-            <div v-for="s in p.specs" :key="s[0]"><dt>{{ s[0] }}</dt><dd>{{ s[1] }}</dd></div>
+          <dl v-if="p.specs.length">
+            <div v-for="(s, k) in p.specs" :key="s[0]" class="rv hl" :style="{ '--d': k * 0.06 + 's' }"><dt>{{ s[0] }}</dt><dd>{{ s[1] }}</dd></div>
           </dl>
           <p v-else class="pd-note rv">The full specification for this series is sent on request.</p>
           <ul v-if="p.features.length" class="rv" style="--d: 0.08s">
             <li v-for="f in p.features" :key="f">{{ f }}</li>
           </ul>
         </div>
-      </section>
-
-      <!-- 5 · the models in the series: a card each, with its own photograph where we have one; pick one and the quote
-           asks about it. Variants (temperature / humidity) stay as chips. -->
-      <section class="pd-sec pd-models">
-        <div class="pd-top rv"><span>(04)</span><span>Models</span><span>{{ count }} in the series</span></div>
-        <div class="pd-range">
-          <button v-for="([fam, its], k) in families" :key="fam" class="pd-mc rv" :class="{ on: sel === fam }" :style="{ '--d': (k % 4) * 0.05 + 's' }" data-cursor="" @click="sel = sel === fam ? '' : fam">
-            <span class="pd-mc-img"><img v-if="modelShots[fam]" :src="modelShots[fam]" :alt="fam" loading="lazy" /><small v-else>Photograph to follow</small></span>
-            <b>{{ fam }}</b>
-            <small v-if="its.length > 1">{{ its.map((it) => it.slice(fam.length + 1)).join(' · ') }}</small>
-          </button>
-        </div>
-        <div v-for="m in p.models.filter((m) => m.label === 'Variants')" :key="m.label" class="pd-mrow rv">
+        <!-- the models are a line here, not a gallery; pick one and the quote asks about it -->
+        <div v-for="m in p.models" :key="m.label" class="pd-mrow rv hl">
           <span>{{ m.label }}</span>
           <div class="pd-chips">
             <button v-for="it in m.items" :key="it" :class="{ on: sel === it }" data-cursor="" @click="sel = sel === it ? '' : it">{{ it }}</button>
@@ -91,6 +79,12 @@
       </section>
 
       <NextUp label="Next chamber" :title="next.name" :text="next.tagline" :href="`/products/${next.slug}`" />
+
+      <!-- the sections, a pill at the foot of the screen once the hero has gone (after the "Explore" bar on nvidia.com) -->
+      <nav class="pd-nav" :class="{ on: navOn }" aria-label="On this page">
+        <button v-for="n in navs" :key="n.id" :class="{ on: navAt === n.id }" data-cursor="" @click="goTo(n.id)">{{ n.t }}</button>
+        <button class="pd-nav-q" data-cursor="" @click="contact()">{{ sel ? `Ask about ${sel}` : 'Quote' }}</button>
+      </nav>
 
       <!-- phones: the quote stays in reach -->
       <button class="ps-pill pd-sticky" data-cursor="" @click="contact()"><span>{{ sel ? `Ask about ${sel}` : 'Request a quote' }}</span></button>
@@ -103,7 +97,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import PageShell from '../components/PageShell.vue'
 import NextUp from '../components/NextUp.vue'
-import { products, bySlug, img, quotesFor, modelShots, family } from '../config/products'
+import { products, bySlug, img, quotesFor, scenePhotos } from '../config/products'
 
 const slug = decodeURIComponent(location.pathname.replace(/\/+$/, '').split('/').pop() ?? '')
 const p = bySlug(slug)
@@ -112,15 +106,20 @@ const next = products[(i + 1) % products.length]
 // the credits: a main chamber's headline figures, otherwise the first lines of its specification
 const credits = computed(() => (p?.hud ?? (p?.specs ?? []).slice(0, 4).map(([k, v]) => [k, v, ''])) as string[][])
 const shots = p ? [img(p, 'hero'), ...Array.from({ length: p.gallery }, (_, k) => img(p, `g${k + 1}`))] : []
-// every model outside the variants, grouped by family (EM64-30T and EM64-60H are both the EM64)
-const families = p ? [...p.models.filter((m) => m.label !== 'Variants').flatMap((m) => m.items)
-  .reduce((acc, it) => acc.set(family(it), [...(acc.get(family(it)) ?? []), it]), new Map<string, string[]>())] : []
-const count = families.reduce((n, [, its]) => n + its.length, 0)
 // a model picked from the list, or named in the link (?m=ET950)
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
 const asked = norm(new URLSearchParams(location.search).get('m') ?? '')
 const hitItem = p?.models.flatMap((m) => m.items).find((it) => asked && norm(it) === asked)
-const sel = ref(hitItem ? (p!.models.some((m) => m.label === 'Variants' && m.items.includes(hitItem)) ? hitItem : family(hitItem)) : '')
+const sel = ref(hitItem ?? '')
+
+// the explore bar: which sections exist, which one is being read, and whether the bar shows at all
+const navs = [{ id: 'overview', t: 'Overview' }, ...(shots.length > 1 ? [{ id: 'photographs', t: 'Photographs' }] : []), { id: 'specification', t: 'Specification' }]
+const navAt = ref('')
+const navOn = ref(false)
+const goTo = (id: string) => {
+  const el = document.getElementById(id)!, sc = document.querySelector('#scroller') as HTMLElement
+  ;(window as any).lenisInstance?.scrollTo(el.getBoundingClientRect().top + sc.scrollTop + (id === 'photographs' ? 0 : -60), { duration: 1.2 })
+}
 
 const heroRef = ref<HTMLElement | null>(null)
 const giantRef = ref<HTMLElement | null>(null)
@@ -143,6 +142,13 @@ function tick() {
     if (giantRef.value) giantRef.value.style.transform = `translate3d(-50%, ${(-u * 22).toFixed(2)}vh, 0)`
     if (shotRef.value) shotRef.value.style.transform = `translate3d(-50%, ${(u * 8).toFixed(2)}vh, 0) scale(${(1 - u * 0.06).toFixed(4)})`
   }
+  // the explore bar shows between the hero and the next-chamber teaser, and lights the section in view
+  const hb = heroRef.value?.getBoundingClientRect().bottom ?? 0
+  const end = document.querySelector('.nu-sec')?.getBoundingClientRect().top ?? Infinity
+  navOn.value = hb < H * 0.4 && end > H * 0.85
+  let at = ''
+  for (const n of navs) if ((document.getElementById(n.id)?.getBoundingClientRect().top ?? H) < H * 0.5) at = n.id
+  navAt.value = at
   // gallery: progress through the pinned stretch moves the track sideways; each photograph pans inside its frame
   const g = galRef.value, t = trackRef.value
   if (!small && g && t) {
@@ -155,7 +161,7 @@ function tick() {
       for (let k = 0; k < figs.length; k++) {
         const f = figs[k] as HTMLElement, fr = f.getBoundingClientRect()
         const c = (fr.left + fr.width / 2 - window.innerWidth / 2) / window.innerWidth // -0.5 … 0.5 across the screen
-        ;(f.firstElementChild as HTMLElement).style.transform = `translate3d(${(-c * 8).toFixed(2)}%, 0, 0) scale(1.12)`
+        ;(f.firstElementChild as HTMLElement).style.transform = `translate3d(${(-c * 2.5).toFixed(2)}%, 0, 0)` // a small drift only: the picture stays whole inside its mat
       }
       shotAt.value = Math.min(shots.length - 1, Math.round(u * (shots.length - 1)))
     }
@@ -212,7 +218,7 @@ onUnmounted(() => gsap.ticker.remove(tick))
 
 /* ───────── the sections below: hairline headers, big type, a strip of photographs ───────── */
 .pd-sec { padding: 14vh 2.2vw 0; }
-.pd-top { position: relative; display: grid; grid-template-columns: 8.333vw 1fr auto; gap: 2vw; padding-top: 14px; border-top: 1px solid rgba(13, 35, 64, 0.35); font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; }
+.pd-top { position: relative; display: grid; grid-template-columns: 8.333vw 1fr auto; gap: 2vw; padding-top: 14px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; }
 .pd-top > span { opacity: 0.6; }
 .pd-about-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 1vw; margin-top: 6vh; align-items: start; }
 .pd-about h2 { grid-column: 1 / span 7; margin: 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 3.6vw, 66px); line-height: 1.02; letter-spacing: -0.055em; }
@@ -221,15 +227,17 @@ onUnmounted(() => gsap.ticker.remove(tick))
 /* the pinned gallery */
 .pd-gal { position: relative; margin-top: 14vh; }
 .pd-gal-pin { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; gap: 4vh; padding: 12vh 2.2vw 0; } /* clear of the header */
+.pd-gal-pin .pd-top { border-top: 1px solid rgba(13, 35, 64, 0.35); } /* pinned, so it has no reveal */
 .pd-count { opacity: 1 !important; font-variant-numeric: tabular-nums; }
 .pd-track { display: flex; gap: 2vw; will-change: transform; }
-.pd-track figure { flex: none; height: min(64vh, 46vw); aspect-ratio: 4 / 4.2; margin: 0; border-radius: 22px; overflow: hidden; background: linear-gradient(180deg, #e9f0f8, #dde8f4); display: grid; place-items: center; }
-.pd-track img { width: 74%; height: 78%; object-fit: contain; filter: drop-shadow(0 22px 22px rgba(13, 35, 64, 0.22)); user-select: none; transform: scale(1.12); will-change: transform; }
-.pd-track figure.photo img { width: 100%; height: 100%; object-fit: cover; filter: none; }
+.pd-track figure { flex: none; height: min(62vh, 42vw); margin: 0; display: flex; align-items: flex-end; } /* the cut-outs stand free on the page, all the same height */
+.pd-track img { display: block; height: 100%; width: auto; max-width: 40vw; object-fit: contain; filter: drop-shadow(0 30px 24px rgba(13, 35, 64, 0.28)); user-select: none; will-change: transform; }
+.pd-track figure.photo img { aspect-ratio: 5 / 4; object-fit: cover; border-radius: 18px; filter: none; box-shadow: 0 30px 50px -26px rgba(13, 35, 64, 0.5); }
 
 .pd-spec-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 1vw; margin-top: 4vh; }
 .pd-spec dl { grid-column: 1 / span 7; margin: 0; }
-.pd-spec dl div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 2vw; padding: 1.7vh 0; border-bottom: 1px solid rgba(13, 35, 64, 0.18); transition: padding 0.5s var(--ease); }
+.pd-spec dl div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 2vw; padding: 1.7vh 0; }
+.pd-spec dl div:last-child { border-bottom: 1px solid rgba(13, 35, 64, 0.18); }
 .pd-spec dl div:hover { padding-left: 0.6vw; }
 .pd-spec dt { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; align-self: center; }
 .pd-spec dd { margin: 0; font-family: var(--font-display); font-size: clamp(14px, 1.2vw, 20px); letter-spacing: -0.035em; overflow-wrap: anywhere; }
@@ -238,16 +246,7 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .pd-spec li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; }
 .pd-note { grid-column: 1 / span 7; margin: 0; font-family: var(--font-body); font-size: 13px; opacity: 0.6; }
 
-.pd-models { padding-bottom: 10vh; }
-.pd-range { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 44vw), 1fr)); gap: 12px; margin: 4vh 0 2vh; }
-.pd-mc { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 14px 14px 16px; border: 1px solid transparent; border-radius: 18px; background: linear-gradient(180deg, #e9f0f8, #dde8f4); color: inherit; text-align: left; cursor: pointer; transition: border-color 0.3s ease, transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1); }
-.pd-mc:hover { transform: translateY(-3px); }
-.pd-mc.on { border-color: #ff6a1a; }
-.pd-mc-img { position: relative; display: grid; place-items: center; height: 220px; margin-bottom: 6px; }
-.pd-mc-img img { position: absolute; inset: 4% 10%; width: 80%; height: 92%; object-fit: contain; filter: drop-shadow(0 16px 16px rgba(13, 35, 64, 0.22)); }
-.pd-mc-img small { font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; }
-.pd-mc b { font-weight: 400; font-family: var(--font-display); font-size: 20px; letter-spacing: -0.04em; }
-.pd-mc > small { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.06em; opacity: 0.6; }
+.pd-spec { padding-bottom: 14vh; }
 .pd-mrow { display: grid; grid-template-columns: 8.333vw 1fr; gap: 2vw; padding: 3vh 0; border-bottom: 1px solid rgba(13, 35, 64, 0.18); }
 .pd-mrow > span { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; padding-top: 9px; }
 .pd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -256,6 +255,12 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .pd-chips button.on { background: #ff6a1a; border-color: #ff6a1a; color: #fff; }
 
 .pd-sticky { display: none; }
+.pd-nav { position: fixed; left: 50%; bottom: 22px; z-index: 40; display: flex; align-items: center; gap: 2px; padding: 5px; border-radius: 40px; background: rgba(13, 35, 64, 0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 14px 40px rgba(13, 35, 64, 0.25); translate: -50% 0; opacity: 0; transform: translateY(24px); pointer-events: none; transition: opacity 0.5s ease, transform 0.7s var(--ease); }
+.pd-nav.on { opacity: 1; transform: none; pointer-events: auto; }
+.pd-nav button { padding: 9px 14px; border: 0; border-radius: 40px; background: transparent; color: rgba(255, 255, 255, 0.6); font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color 0.3s ease, background 0.3s ease; }
+.pd-nav button:hover { color: #fff; }
+.pd-nav button.on { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.pd-nav .pd-nav-q { margin-left: 6px; background: #ff6a1a; color: #fff; }
 
 @media (max-width: 900px) {
   .pd-hero { height: 100svh; min-height: 0; }
@@ -281,10 +286,10 @@ onUnmounted(() => gsap.ticker.remove(tick))
   .pd-gal-pin { position: static; height: auto; padding: 0 5vw; }
   .pd-track { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; transform: none !important; }
   .pd-track figure { height: auto; width: 78vw; scroll-snap-align: start; }
+  .pd-track img { height: auto; width: 100%; max-width: none; }
   .pd-mrow { grid-template-columns: 1fr; gap: 12px; }
-  .pd-mc-img { height: 150px; }
-  .pd-models { padding-bottom: 16vh; }
   /* the quote button rides along at the foot of the screen */
+  .pd-nav { display: none; }
   .pd-sticky { display: inline-flex; position: fixed; left: 5vw; right: 5vw; bottom: 14px; z-index: 40; justify-content: center; padding: 15px 18px; box-shadow: 0 10px 30px rgba(13, 35, 64, 0.25); }
 }
 </style>

@@ -60,7 +60,7 @@
 
     <!-- a photograph, as it is -->
     <section class="ph" ref="phRef" aria-hidden="true">
-      <img ref="phImg" src="/media/step-1.jpg" alt="" loading="lazy" />
+      <VideoSlot ref="phImg" class="ph-media" src="/media/film-workings.mp4" poster="/media/step-1.jpg" label="workings film" />
       <p data-words>Built in Peenya,<br />Bengaluru.</p>
     </section>
 
@@ -133,6 +133,7 @@ import { Flip } from 'gsap/Flip'
 import PageShell from '../components/PageShell.vue'
 import Preloader from '../components/Preloader.vue'
 import NextUp from '../components/NextUp.vue'
+import VideoSlot from '../components/VideoSlot.vue'
 import { createChamberScene } from '../utils/chamberScene'
 import { createSmoke } from '../utils/smokeWave'
 import { products, mainProducts, catalogue, img, models, quotesFor } from '../config/products'
@@ -162,7 +163,7 @@ const onLoaded = () => { plDone.value = true; (window as any).lenisInstance?.sta
 // once the smoke has gone and the model is in, the chamber swings round to face you
 const greet = () => { if (plDone.value && loaded.value) chambers?.intro(cur.value) }
 const phRef = ref<HTMLElement | null>(null)
-const phImg = ref<HTMLImageElement | null>(null)
+const phImg = ref<{ $el: HTMLElement } | null>(null)
 const cur = ref(0)
 const prog = ref(0)
 const cloudLit = ref(false)
@@ -271,7 +272,7 @@ function tick() {
 
   // photograph parallax
   const pr = phRef.value!.getBoundingClientRect()
-  if (pr.bottom > 0 && pr.top < H && phImg.value) phImg.value.style.transform = `translate3d(0, ${(((H - pr.top) / (H + pr.height) - 0.5) * -12).toFixed(2)}vh, 0)`
+  if (pr.bottom > 0 && pr.top < H && phImg.value) phImg.value.$el.style.transform = `translate3d(0, ${(((H - pr.top) / (H + pr.height) - 0.5) * -12).toFixed(2)}vh, 0)`
 
   // the header turns light wherever the page behind it is dark
   const d = wp > 0.55
@@ -368,15 +369,15 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .ty-top span { opacity: 0.6; }
 .ty-top button { padding: 0 0 2px; border: 0; border-bottom: 1px solid currentColor; background: none; color: inherit; font: inherit; opacity: 0.7; cursor: pointer; }
 
-.ty { padding: 24vh 2.2vw 14vh; }
-.ty-h { margin: 6vh 0 0; max-width: 16em; font-weight: 400; font-size: clamp(28px, 4.8vw, 92px); line-height: 1.04; letter-spacing: -0.055em; }
+.ty { padding: 26vh 2.2vw 32vh; } /* room to breathe before the photograph */
+.ty-h { margin: 11vh 0 0; max-width: 15em; font-weight: 400; font-size: clamp(28px, 4.6vw, 88px); line-height: 1.08; letter-spacing: -0.045em; }
 .ty-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 1vw; margin-top: 34vh; align-items: start; }
-.ty-row h3 { grid-column: 1 / span 6; margin: 0; font-weight: 400; font-size: clamp(22px, 2.5vw, 46px); line-height: 1.06; letter-spacing: -0.05em; }
-.ty-body { grid-column: 8 / span 4; display: flex; flex-direction: column; gap: 1.5em; }
-.ty-body p { margin: 0; font-family: var(--font-body); font-size: clamp(13px, 1.05vw, 17px); line-height: 1.5; letter-spacing: -0.01em; }
+.ty-row h3 { grid-column: 1 / span 6; margin: 0; font-weight: 400; font-size: clamp(22px, 2.5vw, 46px); line-height: 1.14; letter-spacing: -0.04em; }
+.ty-body { grid-column: 8 / span 4; display: flex; flex-direction: column; gap: 2em; }
+.ty-body p { margin: 0; font-family: var(--font-body); font-size: clamp(13px, 1.05vw, 17px); line-height: 1.7; letter-spacing: -0.01em; }
 
 .ph { position: relative; height: 100vh; overflow: hidden; background: #0b0f16; }
-.ph img { position: absolute; left: 0; top: -9vh; width: 100%; height: 118vh; object-fit: cover; will-change: transform; }
+.ph-media { position: absolute; left: 0; top: -9vh; width: 100%; height: 118vh; will-change: transform; }
 .ph::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.55)); }
 .ph p { position: absolute; left: 2.2vw; bottom: 8vh; z-index: 1; margin: 0; color: #fff; font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 4.6vw, 88px); line-height: 1.02; letter-spacing: -0.055em; }
 
@@ -398,18 +399,18 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .st li > i::before { content: ''; position: absolute; inset: 0; background: rgba(255, 255, 255, 0.3); transform: scaleX(var(--p, 0)); transform-origin: 0 0; }
 .st li > i u { position: absolute; left: 0; top: -3px; width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; }
 .st h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(17px, 1.7vw, 30px); letter-spacing: -0.05em; line-height: 1.08; }
-.st p { margin: 0; max-width: 24em; font-family: var(--font-body); font-size: 13px; line-height: 1.6; opacity: 0.65; }
+.st p { margin: 0; max-width: 24em; font-family: var(--font-body); font-size: 13px; line-height: 1.75; opacity: 0.65; }
 
 .nm { padding: 6vh 2.2vw 30vh; }
 .nm ul { list-style: none; margin: 6vh 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4vw; }
 .nm li { display: flex; flex-direction: column; gap: 16px; }
-.nm li b { font-weight: 400; font-size: clamp(28px, 4.2vw, 80px); line-height: 0.95; letter-spacing: -0.06em; white-space: nowrap; }
+.nm li b { font-weight: 400; font-size: clamp(28px, 4.2vw, 80px); line-height: 0.95; letter-spacing: -0.05em; white-space: nowrap; }
 .nm li span { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; opacity: 0.55; }
 .nm-two { display: grid; grid-template-columns: 1fr 1fr; margin-top: 10vh; border-top: 1px solid rgba(255, 255, 255, 0.25); border-bottom: 1px solid rgba(255, 255, 255, 0.25); }
-.nm-two > div { display: grid; grid-template-columns: 9vw 1fr; gap: 0 2vw; padding: 6vh 2vw 8vh 0; }
+.nm-two > div { display: grid; grid-template-columns: 9vw 1fr; gap: 0 2vw; padding: 7vh 3vw 10vh 0; }
 .nm-two > div + div { padding-left: 2vw; border-left: 1px solid rgba(255, 255, 255, 0.25); }
 .nm-two span { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; opacity: 0.55; }
-.nm-two p { margin: 0; font-size: clamp(15px, 1.5vw, 26px); line-height: 1.14; letter-spacing: -0.05em; }
+.nm-two p { margin: 0; max-width: 20em; font-size: clamp(15px, 1.4vw, 24px); line-height: 1.3; letter-spacing: -0.035em; }
 
 /* the rest of the range: light cards on the black, after intrepidautomation.com */
 .bx { position: relative; padding: 4vh 2.2vw 26vh; }
@@ -425,7 +426,8 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .bx-img { position: absolute; left: 22%; right: 22%; top: 38%; bottom: 17%; z-index: 1; }
 .bx-img::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4%; height: 10%; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, rgba(13, 35, 64, 0.32), transparent); filter: blur(4px); transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.5s ease; }
 .bx-img img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.2, 1); }
-.bx-card.photo .bx-img img { object-fit: cover; border-radius: 12px; }
+.bx-card.photo .bx-img { left: 8%; right: 8%; top: 30%; } /* a photograph is shown whole, never cropped */
+.bx-card.photo .bx-img img { object-fit: contain; object-position: center; border-radius: 12px; }
 .bx-card.photo .bx-img::after { display: none; }
 .bx-cap { position: absolute; left: 22px; right: 70px; bottom: 20px; z-index: 2; display: flex; flex-direction: column; gap: 4px; transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1); }
 .bx-cap b { font-weight: 400; font-family: var(--font-display); font-size: 15px; letter-spacing: -0.035em; line-height: 1.1; }
@@ -439,7 +441,7 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .bx-card:hover .bx-plus { background: #ff6a1a; transform: rotate(90deg); }
 
 .en { padding: 10vh 2.2vw 30vh; }
-.en .ty-h { margin-top: 8vh; max-width: 14em; }
+.en .ty-h { margin-top: 11vh; max-width: 14em; }
 .en-cta { display: flex; align-items: center; gap: 28px; margin-top: 8vh; }
 .en-cta a { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: inherit; text-decoration: none; opacity: 0.65; border-bottom: 1px solid currentColor; padding-bottom: 3px; transition: opacity 0.3s ease; }
 .en-cta a:hover { opacity: 1; }
@@ -466,9 +468,9 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
   .hx-q blockquote { font-size: 16px; }
   .hx-act { left: 5vw; right: 5vw; bottom: 4svh; flex-direction: row; align-items: center; justify-content: space-between; }
 
-  .ph { height: 80vh; } .ph img { top: 0; height: 100%; }
+  .ph { height: 80vh; } .ph-media { top: 0; height: 100%; }
   .cl { height: 170vh; }
-  .ty { padding: 18vh 5vw 10vh; } .ty-row { margin-top: 18vh; }
+  .ty { padding: 18vh 5vw 18vh; } .ty-row { margin-top: 18vh; } .ty-h { margin-top: 7vh; }
   .ty-top { grid-template-columns: 14vw 1fr auto; }
   .st { padding: 18vh 5vw 6vh; } .nm { padding: 6vh 5vw 18vh; }
   .bx { padding: 4vh 4vw 18vh; }

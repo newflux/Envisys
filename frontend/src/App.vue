@@ -1886,7 +1886,19 @@ function buildScrollTimeline() {
       192
     )
     tl.to({}, { duration: 1 }, 772) // pins timeline end at 773
-    ;(window as any).__envTl = { start: 192, dur: 581, end: 773 } // read by utils/columnScroll
+    // Phones: no spec pan, telemetry or fleet. The hero leads straight into the dive: 10..104 is cut, everything after moves up 94 units,
+    // and the page gets shorter to match (same vh per unit, so the pace is unchanged).
+    const phone = window.matchMedia('(max-width: 800px)').matches, CUT = 94
+    if (phone) {
+      for (const c of tl.getChildren(false, true, true)) {
+        const st = c.startTime(), en = st + c.totalDuration(), v = (c as any).vars ?? {}
+        if ((st >= 0.5 && st < 104) || (st < 0.5 && en > 20) || 'cloneAx' in v || 'cloneFade' in v) tl.remove(c)
+        else if (st >= 104) c.startTime(st - CUT)
+      }
+      ;(document.querySelector('.layout__page') as HTMLElement).style.minHeight = `${100 + (773 - CUT) * 3.9007}vh`
+      ScrollTrigger.refresh()
+    }
+    ;(window as any).__envTl = phone ? { start: 192 - CUT, dur: 581, end: 773 - CUT } : { start: 192, dur: 581, end: 773 } // read by utils/columnScroll
     ;(window as any).__envMainTl = tl // read by utils/scrollTop
     if (import.meta.env.DEV) (window as any).__tresCtx = tresCanvasRef.value?.context // dev: renderer stats for perf checks
 

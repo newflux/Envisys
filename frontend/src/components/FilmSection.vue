@@ -6,7 +6,8 @@
       <div class="fm-frame" ref="frameRef">
         <div class="fm-vid" ref="vidRef">
           <video v-if="!missing" :key="cur" class="fm-video" :src="cur" muted loop playsinline autoplay preload="metadata" @error="onError"></video>
-          <div v-else class="fm-placeholder">
+          <span v-if="dev && !missing && cur === fallback" class="fm-tag">Video placeholder · Blender product film → public{{ src }}</span>
+          <div v-else-if="missing" class="fm-placeholder">
             <span>Film</span>
             <small>Drop the file at public{{ src }}</small>
           </div>
@@ -21,10 +22,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 
-// shortcut: the fallback is a stand-in clip from the hero composites, until the real film is at public/media/film.mp4
+// shortcut: the fallback is a stand-in clip from the hero composites, until the real film (the black, Blender-rendered product film) is at public/media/film.mp4
 const props = withDefaults(defineProps<{ src?: string; fallback?: string; caption?: string }>(), { src: '/media/film.mp4', fallback: '/videos/composites/A02.mp4', caption: 'In the lab' })
 const cur = ref(props.src)
 const missing = ref(false)
+const dev = import.meta.env.DEV
 function onError() {
   if (props.fallback && cur.value !== props.fallback) cur.value = props.fallback
   else missing.value = true
@@ -70,6 +72,7 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .fm-frame { position: absolute; inset: 0; overflow: hidden; background: #050506; will-change: clip-path; clip-path: inset(17% round 18px); }
 .fm-vid { position: absolute; inset: 0; will-change: transform; }
 .fm-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fm-tag { position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 2; padding: 8px 14px; border: 1px dashed rgba(255, 255, 255, 0.6); border-radius: 30px; background: rgba(0, 0, 0, 0.45); color: #fff; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
 .fm-placeholder {
   position: absolute;
   inset: 0;

@@ -22,7 +22,7 @@ const words = copy.split(' ')
 // Photos from the Envisys shoot (public/images/imgs), resized to public/media
 const images = [
   { src: '/media/floor.jpg', pos: '50% 50%', caption: 'The test floor' },
-  { src: '/media/eye.jpg', pos: '60% 45%', caption: 'Every detail watched' }
+  { src: '/media/eye.jpg', pos: '42% 52%', caption: 'Every detail watched' }
 ]
 
 const figEls: HTMLElement[] = []

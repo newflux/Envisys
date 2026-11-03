@@ -1,91 +1,108 @@
 <template>
-  <!-- PLACEHOLDER: names, roles and portraits are not on the company site. Replace the `directors` array and the portrait <img>s. -->
+  <!-- The founders, after pragmatica.ru's team page: one person fills the screen, a row of round thumbnails along the bottom, and a
+       hairline bar with name, role and since. Scrolling moves from one to the next. PLACEHOLDER: the portraits are blank until the
+       professional photographs arrive (drop them in `founders[].img`); only Ramesh is named.
+       Then the team: one word, centred, and the photograph edge to edge. -->
   <section class="ad lt">
-    <div class="ad-head">
-      <div>
-        <span class="ad-label rv"><i>+</i> Leadership</span>
-        <h2 class="ad-h rv" style="--d: 0.06s">Directors</h2>
-      </div>
-      <div class="ad-arrows rv" style="--d: 0.12s">
-        <button aria-label="Previous" data-cursor="" @click="go(-1)"><svg viewBox="0 0 8 12"><path d="M7 1L2 6l5 5" fill="none" stroke="currentColor" stroke-width="1.2" /></svg></button>
-        <button aria-label="Next" data-cursor="" @click="go(1)"><svg viewBox="0 0 8 12"><path d="M1 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.2" /></svg></button>
-      </div>
-    </div>
-
-    <div class="ad-track" ref="trackRef" @pointerdown="down" @pointermove="move" @pointerup="up" @pointerleave="up">
-      <article v-for="(d, i) in directors" :key="i" class="ad-card rv" :style="{ '--d': i * 0.1 + 's' }">
-        <div class="ad-name"><span>{{ d.name }}</span><em>{{ d.role }}</em></div>
-        <div class="ad-photo" data-cursor="">
-          <svg viewBox="0 0 100 125" aria-hidden="true"><circle cx="50" cy="44" r="17" /><path d="M10 125c0-30 18-46 40-46s40 16 40 46z" /></svg>
-          <span>Portrait to come</span>
+    <div class="af" ref="pinRef" :style="{ height: 100 + (founders.length - 1) * 80 + 'vh' }">
+      <div class="af-stage">
+        <div v-for="(f, i) in founders" :key="i" class="af-shot" :class="{ on: i === at }">
+          <img v-if="f.img" :src="f.img" :alt="f.name" />
+          <span v-else>Portrait to come</span>
         </div>
-      </article>
+        <p class="af-lead">The people<br />behind Envisys.</p>
+        <div class="af-thumbs">
+          <button v-for="(f, i) in founders" :key="i" :class="{ on: i === at }" :aria-label="`Show ${f.name}`" data-cursor="" @click="go(i)">
+            <img v-if="f.img" :src="f.img" alt="" /><i v-else>0{{ i + 1 }}</i>
+          </button>
+        </div>
+        <Transition name="af" mode="out-in">
+          <div :key="at" class="af-bar"><span>{{ founders[at].name }}</span><span>{{ founders[at].role }}</span><span>Founder</span></div>
+        </Transition>
+      </div>
     </div>
 
-    <!-- the team photo is the one on envisystech.com (about-us) -->
-    <div class="ad-head ad-team">
-      <span class="ad-label rv"><i>+</i> The team</span>
-    </div>
-    <figure class="ad-group rv">
-      <img src="/media/team.jpg" alt="The Envisys team" loading="lazy" />
-      <figcaption>The Envisys team · Bengaluru</figcaption>
+    <h2 class="at-h rv">Team</h2>
+    <figure class="at-band" ref="bandRef">
+      <img ref="bandImg" src="/media/about/team-group.jpg" alt="The Envisys team" />
     </figure>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import gsap from 'gsap'
 
-const directors = [
-  { name: 'Director name', role: 'Role to be added' },
-  { name: 'Director name', role: 'Role to be added' },
-  { name: 'Director name', role: 'Role to be added' }
+const founders: { name: string; role: string; img?: string }[] = [
+  { name: 'Ramesh', role: 'Director' },
+  { name: 'Name to be added', role: 'Director' },
+  { name: 'Name to be added', role: 'Director' }
 ]
-
-const trackRef = ref<HTMLElement | null>(null)
-const go = (d: number) => {
-  const t = trackRef.value!
-  t.scrollBy({ left: d * (t.querySelector('.ad-card') as HTMLElement).offsetWidth, behavior: 'smooth' })
+const pinRef = ref<HTMLElement | null>(null)
+const bandRef = ref<HTMLElement | null>(null)
+const bandImg = ref<HTMLImageElement | null>(null)
+const at = ref(0)
+const go = (i: number) => {
+  if (small) { at.value = i; return } // phones: no pin, the thumbnails just switch
+  const el = pinRef.value!, sc = document.querySelector('#scroller') as HTMLElement
+  ;(window as any).lenisInstance?.scrollTo(el.getBoundingClientRect().top + sc.scrollTop + (i / (founders.length - 1)) * (el.offsetHeight - window.innerHeight), { duration: 1.2 })
 }
-
-// drag the row with the mouse; touch already scrolls it natively
-let drag = false, sx = 0, sl = 0
-const down = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; drag = true; sx = e.clientX; sl = trackRef.value!.scrollLeft }
-const move = (e: PointerEvent) => { if (drag) trackRef.value!.scrollLeft = sl - (e.clientX - sx) }
-const up = () => { drag = false }
+let small = false
+function tick() {
+  const H = window.innerHeight
+  const pin = pinRef.value
+  if (pin && !small) {
+    const q = pin.getBoundingClientRect()
+    if (q.bottom > 0 && q.top < H) at.value = Math.round(Math.min(1, Math.max(0, -q.top / (q.height - H))) * (founders.length - 1))
+  }
+  // the team photograph settles from a slight zoom as it crosses the screen
+  const bd = bandRef.value, bi = bandImg.value
+  if (bd && bi) {
+    const r = bd.getBoundingClientRect()
+    if (r.bottom > 0 && r.top < H) bi.style.transform = `scale(${(1.12 - 0.12 * Math.min(1, Math.max(0, (H - r.top) / (H + r.height)) * 1.4)).toFixed(4)})`
+  }
+}
+onMounted(() => { small = window.matchMedia('(max-width: 800px)').matches; gsap.ticker.add(tick) })
+onUnmounted(() => gsap.ticker.remove(tick))
 </script>
 
 <style scoped>
-.ad { padding: 22vh 0 24vh; background: var(--lt, #f4f4f2); color: var(--ink, #0a0a0c); overflow: hidden; }
+.ad { background: var(--lt, #f4f4f2); color: var(--ink, #0a0a0c); overflow: clip; } /* clip, not hidden: hidden would stop the stage pinning */
 .rv { opacity: 0; transform: translateY(24px); transition: opacity 1s ease var(--d, 0s), transform 1.2s var(--ease, cubic-bezier(0.2, 0.9, 0.2, 1)) var(--d, 0s); }
 .rv.in { opacity: 1; transform: none; }
-.ad-head { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 5vw; }
-.ad-label { display: flex; gap: 10px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
-.ad-label i { font-style: normal; }
-.ad-h { margin: 2.4vh 0 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 3.6vw, 66px); line-height: 1; letter-spacing: -0.05em; }
-.ad-arrows { display: flex; gap: 6px; }
-.ad-arrows button { width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 6px; background: rgba(10, 10, 12, 0.07); color: inherit; cursor: pointer; transition: background 0.4s ease, color 0.4s ease; }
-.ad-arrows button:hover { background: var(--ink, #0a0a0c); color: #fff; }
-.ad-arrows svg { width: 8px; height: 12px; }
 
-.ad-track { display: flex; gap: 1.2vw; margin-top: 8vh; padding: 0 5vw; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; cursor: grab; }
-.ad-track::-webkit-scrollbar { display: none; }
-.ad-card { flex: 0 0 31vw; scroll-snap-align: start; user-select: none; }
-.ad-name { display: flex; flex-direction: column; gap: 4px; padding: 3px 0 3px 12px; margin-bottom: 3vh; border-left: 1px solid rgba(10, 10, 12, 0.3); font-family: var(--font-body); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; transition: border-color 0.4s ease, padding 0.5s var(--ease, ease); }
-.ad-name em { font-style: normal; opacity: 0.45; font-size: 10px; }
-.ad-card:hover .ad-name { border-color: #ff6a1a; padding-left: 18px; }
-.ad-photo { position: relative; aspect-ratio: 4 / 5; border-radius: 4px; overflow: hidden; background: linear-gradient(180deg, #f1f1ef 0%, #cfcfcd 100%); display: grid; place-items: end start; padding: 14px; }
-.ad-photo svg { position: absolute; inset: 14% 12% 0; width: 76%; height: auto; fill: rgba(10, 10, 12, 0.09); transition: fill 0.6s ease, transform 1s var(--ease, ease); }
-.ad-card:hover .ad-photo svg { fill: rgba(10, 10, 12, 0.16); transform: translateY(-2%) scale(1.02); }
-.ad-photo span { position: relative; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; }
+/* the founders: a grey studio backdrop, the portrait filling it */
+.af-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: linear-gradient(180deg, #c9ccd1, #b9bdc3); color: #fff; }
+.af-shot { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity 0.8s ease; }
+.af-shot.on { opacity: 1; }
+.af-shot img { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; translate: -50% 0; object-fit: contain; object-position: bottom; }
+.af-shot span { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.6; }
+.af-lead { position: absolute; left: 2.2vw; top: 12vh; margin: 0; font-family: var(--font-display); font-size: clamp(20px, 2.1vw, 38px); line-height: 1.1; letter-spacing: -0.045em; }
+.af-thumbs { position: absolute; left: 2.2vw; bottom: 12vh; display: flex; gap: 10px; }
+.af-thumbs button { width: 56px; height: 56px; padding: 0; border: 0; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.35); color: #fff; cursor: pointer; opacity: 0.6; outline: 1px solid transparent; outline-offset: 3px; transition: opacity 0.3s ease, outline-color 0.3s ease; }
+.af-thumbs button.on, .af-thumbs button:hover { opacity: 1; }
+.af-thumbs button.on { outline-color: #fff; }
+.af-thumbs img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
+.af-thumbs i { font-style: normal; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; }
+.af-bar { position: absolute; left: 2.2vw; right: 2.2vw; bottom: 4vh; display: grid; grid-template-columns: 1fr 1fr 1fr; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.6); font-family: var(--font-body); font-size: 12px; letter-spacing: 0.06em; }
+.af-bar span:nth-child(2) { text-align: center; }
+.af-bar span:last-child { text-align: right; }
+.af-enter-active, .af-leave-active { transition: opacity 0.35s ease, transform 0.5s var(--ease, ease); }
+.af-enter-from { opacity: 0; transform: translateY(8px); }
+.af-leave-to { opacity: 0; transform: translateY(-6px); }
 
-.ad-team { margin-top: 24vh; }
-.ad-group { position: relative; margin: 6vh 5vw 0; border-radius: 12px; overflow: hidden; }
-.ad-group img { display: block; width: 100%; height: auto; transition: transform 1.6s var(--ease, ease), filter 0.8s ease; filter: saturate(0.9); }
-.ad-group:hover img { transform: scale(1.025); filter: none; }
-.ad-group figcaption { position: absolute; left: 20px; bottom: 16px; padding: 8px 14px; border-radius: 30px; background: rgba(10, 10, 14, 0.55); backdrop-filter: blur(8px); color: #fff; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+/* the team: one word, centred */
+.at-h { margin: 0; padding: 22vh 5vw 8vh; text-align: center; font-weight: 400; font-family: var(--font-display); font-size: clamp(44px, 8vw, 150px); line-height: 1; letter-spacing: -0.06em; }
+.at-band { margin: 0 0 22vh; overflow: hidden; }
+.at-band img { display: block; width: 100%; height: auto; transform-origin: 50% 60%; will-change: transform; }
 
 @media (max-width: 800px) {
-  .ad-card { flex-basis: 74vw; }
+  .af { height: auto !important; }
+  .af-stage { position: relative; height: 100svh; }
+  .af-lead { left: 5vw; right: 5vw; font-size: 20px; }
+  .af-thumbs { left: 5vw; }
+  .af-bar { left: 5vw; right: 5vw; font-size: 10px; }
+  .at-h { padding: 14vh 5vw 5vh; }
+  .at-band { margin-bottom: 14vh; }
 }
 </style>

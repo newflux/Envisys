@@ -47,7 +47,7 @@ onMounted(async () => {
   ;(window as any).lenisInstance = lenis
   gsap.ticker.add(lenisTick)
   if (props.blue) gsap.ticker.add(toneTick)
-  io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); io!.unobserve(e.target) } }, { threshold: 0.12 })
+  io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); e.target.setAttribute('data-in', ''); io!.unobserve(e.target) } }, { threshold: 0.12 })
   await nextTick()
   pageRef.value!.querySelectorAll('.rv').forEach((el) => io!.observe(el))
   ready.value = true
@@ -70,7 +70,12 @@ html[data-mnav] .ps-root .Header_brandLogo__AXo7t { filter: none !important; mix
 .ps-cover.blue { --lt: #d6e4f3; --ink: #0d2340; background: linear-gradient(180deg, #e4eef9, #d3e3f4 60%, #c9dcf0); }
 .ps-cover.dark { background: #040508; color: #f3f6fa; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.07), 0 40px 80px rgba(0, 0, 0, 0.55); }
 .ps-root .rv { opacity: 0; transform: translateY(24px); transition: opacity 1s ease var(--d, 0s), transform 1.2s var(--ease) var(--d, 0s); }
-.ps-root .rv.in { opacity: 1; transform: none; }
+/* data-in as well: a :class binding on the same element rewrites its classes and would drop .in */
+.ps-root .rv.in, .ps-root .rv[data-in] { opacity: 1; transform: none; }
+/* a hairline that draws itself left to right as its row comes into view (after intrepidautomation.com): add `hl` next to `rv` */
+.ps-root .hl { position: relative; }
+.ps-root .hl::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: currentColor; opacity: 0.32; transform: scaleX(0); transform-origin: 0 0; transition: transform 1.6s cubic-bezier(0.7, 0, 0.2, 1) var(--d, 0s); pointer-events: none; }
+.ps-root .hl[data-in]::before { transform: none; }
 .ps-label { display: flex; gap: 10px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.65; }
 .ps-pill { display: inline-flex; align-items: center; gap: 10px; padding: 11px 18px; border: 0; border-radius: 40px; background: var(--ink); color: #fff; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: background 0.4s ease, gap 0.4s ease; }
 .ps-pill:hover { background: #2a2c31; gap: 14px; }

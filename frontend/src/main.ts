@@ -2,19 +2,22 @@ import { createApp } from 'vue'
 import './assets/icomat.css'
 import './assets/style.css'
 import './assets/tokens.css'
-import Tres from '@tresjs/core'
 
 // One page per path (no router: the nav links are plain hrefs). Anything unknown falls back to the landing page.
 const pages: Record<string, () => Promise<typeof import('./App.vue')>> = {
   '/about': () => import('./pages/AboutPage.vue'),
   '/products': () => import('./pages/ProductsPage.vue'),
   '/verticals': () => import('./pages/VerticalsPage.vue'),
+  '/industries': () => import('./pages/IndustriesPage.vue'),
   '/resources': () => import('./pages/ResourcesPage.vue')
 }
 const path = location.pathname.replace(/\/+$/, '') || '/'
-;(pages[path] ?? (path.startsWith('/products/') ? () => import('./pages/ProductPage.vue') : () => import('./App.vue')))().then(({ default: Root }) => {
+const product = path.startsWith('/products/')
+const landing = !pages[path] && !product
+;(pages[path] ?? (product ? () => import('./pages/ProductPage.vue') : () => import('./App.vue')))().then(async ({ default: Root }) => {
   const app = createApp(Root)
-  app.use(Tres)
+  // only the landing page draws with TresJS; importing it here keeps three.js out of every other page
+  if (landing) app.use((await import('@tresjs/core')).default)
   app.mount('#app')
 })
 

@@ -63,7 +63,7 @@
       </section>
     </div>
 
-    <NextUp label="Next up" title="Guides and brochures" text="How to choose, rent and run environmental test equipment, from the engineers who build it." href="/resources" />
+    <NextUp solid label="Next up" title="Guides and brochures" text="How to choose, rent and run environmental test equipment, from the engineers who build it." href="/resources" />
   </PageShell>
 </template>
 

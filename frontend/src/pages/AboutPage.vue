@@ -211,7 +211,16 @@ let darkEl: HTMLElement | null = null
 let clips: { el: HTMLElement; last: number }[] = []
 
 // Everything here is tied to the scroll position, so it moves with the wheel instead of firing once.
+// the logo's white lettering turns navy while a light section is behind it (the blue SYS never changes)
+let logoLight = false
+function logoTone() {
+  const hit = document.elementsFromPoint(72, 48).find((e) => !e.closest('.navbar-root') && e.closest('.lt, .dk'))
+  const light = !!hit?.closest('.lt')
+  if (light !== logoLight) { logoLight = light; document.documentElement.style.setProperty('--logo-ink', light ? '#0d2340' : '#fff') }
+}
+
 function tick() {
+  logoTone()
   const H = window.innerHeight
   const visible = (r: DOMRect) => r.bottom > -H * 0.2 && r.top < H * 1.2
 
@@ -399,6 +408,7 @@ onMounted(() => {
 onUnmounted(() => {
   gsap.ticker.remove(lenisTick)
   gsap.ticker.remove(tick)
+  document.documentElement.style.removeProperty('--logo-ink')
   window.removeEventListener('pointermove', onMove)
   io?.disconnect()
   lenis?.destroy()
@@ -408,8 +418,8 @@ onUnmounted(() => {
 <style scoped>
 .ab-root { --lt: #f4f4f2; --ink: #0a0a0c; --ease: cubic-bezier(0.2, 0.9, 0.2, 1); position: fixed; inset: 0; background: #000; color: #f3f6fa; }
 #scroller { background: #000 !important; }
-/* the logo stays legible over the white sections */
-.ab-root :deep(.Header_brandLogo__AXo7t) { mix-blend-mode: difference; }
+/* the logo stays legible over the white sections (its lettering is switched to navy there, see logoTone) */
+.ab-root :deep(.Header_brandLogo__AXo7t .lg-ink) { transition: fill 0.4s ease; }
 .layout__page { position: relative; }
 
 /* the cover lifts off the footer (see SiteFooter); clip, not hidden, so sticky children still stick */
@@ -452,7 +462,7 @@ onUnmounted(() => {
 .ab-beat { position: relative; z-index: 1; min-height: 80vh; display: grid; place-items: center; padding: 0 5vw; overflow: hidden; }
 .ab-beat.dk { min-height: 105vh; }
 .ab-beat-img { min-height: 140vh; }
-.ab-beat-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; filter: grayscale(1) contrast(1.15); will-change: transform, opacity; mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); }
+.ab-beat-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; filter: saturate(0.85) contrast(1.1) brightness(0.72); /* its own colours, darkened under the type: the blue floor carries the brand blue */ will-change: transform, opacity; mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); }
 .ab-say { position: relative; margin: 0; max-width: 23em; text-align: center; font-family: var(--font-display); font-weight: 400; font-size: clamp(18px, 1.9vw, 34px); line-height: 1.22; letter-spacing: -0.045em; }
 .ab-w { opacity: 0.18; }
 

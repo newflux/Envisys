@@ -120,7 +120,7 @@
         </div>
       </section>
 
-      <NextUp label="Next" title="How we work with you" text="Design and build, testing services, rentals, refurbishment, after-sales and express delivery." href="/verticals" />
+      <NextUp solid label="Next" title="How we work with you" text="Design and build, testing services, rentals, refurbishment, after-sales and express delivery." href="/verticals" />
     </div>
 
   </PageShell>
@@ -139,7 +139,7 @@ import { createSmoke } from '../utils/smokeWave'
 import { products, mainProducts, catalogue, img, models, quotesFor } from '../config/products'
 
 // how tall each chamber stands, relative to the others, so a bench model reads smaller than a walk-in room
-const scale: Record<string, number> = { et: 0.9, ets: 0.9, eta: 0.8, mini: 0.74, 'walk-in': 0.7 }
+const scale: Record<string, number> = { et: 0.9, ets: 0.9, eta: 0.84, mini: 0.74, 'walk-in': 0.7 } // eta: the EA600 is deep (2.6 m), so it stands a little smaller to clear the quotes
 
 const stages = [
   { t: 'Design and build', d: 'Standard chambers, or built to your specification by a dedicated design and development team.' },
@@ -217,7 +217,7 @@ function onDrag(e: PointerEvent) {
   lastPick = now
   const i = chambers.pick(e.clientX, e.clientY)
   hov.value = i < 0 ? 0 : i === cur.value ? 1 : 2
-  chambers.hover(hov.value === 1 ? i : -1) // the orbit ring circles the chamber under the pointer
+  chambers.hover(hov.value === 1 ? i : -1) // the chamber in front opens its door a little and breathes out cold mist
 }
 const onLeave = () => { if (!down) { hov.value = 0; chambers?.hover(-1) } }
 function onUp(e: PointerEvent) {
@@ -322,6 +322,7 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 <style scoped>
 /* ───────── the scene: the chambers in a row on the page's light blue, the camera gliding along them ───────── */
 .hx-pin { position: sticky; top: 0; height: 100vh; overflow: hidden; color: #0d2340; }
+.hx-pin::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 34% 30% at 50% 76%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 70%); } /* a soft pool of light where the chamber stands */
 .hx-gl { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
 .hx-gl:active { cursor: grabbing; }
 .hx-poster { position: absolute; left: 50%; bottom: 17vh; z-index: 0; height: 60vh; translate: -50% 0; object-fit: contain; pointer-events: none; transition: opacity 0.8s ease; }
@@ -330,32 +331,32 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .hx-card, .hx-q, .hx-ix, .hx-act, .hx-hint { position: absolute; z-index: 3; }
 
 /* top left: the name, then hairline rows like film credits */
-.hx-card { left: 2.2vw; top: 12vh; width: min(320px, 22vw); pointer-events: none; }
+.hx-card { left: 2.2vw; top: 12vh; width: min(380px, 27vw); pointer-events: none; }
 .hx-card h1 { margin: 0 0 1.4vh; font-weight: 400; font-family: var(--font-display); font-size: clamp(22px, 2.3vw, 40px); line-height: 0.98; letter-spacing: -0.05em; text-transform: uppercase; }
 .hx-card dl { margin: 0; }
 .hx-card dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0 8px; border-top: 1px solid currentColor; }
-.hx-card dt { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; }
-.hx-card dd { margin: 0; font-family: var(--font-display); font-size: clamp(13px, 1vw, 16px); letter-spacing: -0.03em; white-space: nowrap; }
-.hx-card dd small { margin-left: 4px; font-family: var(--font-body); font-size: 9px; opacity: 0.6; }
+.hx-card dt { font-family: var(--font-body); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; }
+.hx-card dd { margin: 0; font-family: var(--font-display); font-size: clamp(16px, 1.3vw, 21px); letter-spacing: -0.03em; white-space: nowrap; }
+.hx-card dd small { margin-left: 4px; font-family: var(--font-body); font-size: 12px; opacity: 0.6; }
 
 .hx-q { right: 2.2vw; bottom: calc(6vh + 150px); display: flex; flex-direction: column; align-items: flex-end; gap: 4vh; pointer-events: none; } /* in the right column, clear of the chamber and its floor */
-.hx-q figure { margin: 0; width: min(250px, 18vw); text-align: right; }
-.hx-q figcaption { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; }
-.hx-q blockquote { margin: 8px 0 0; font-family: var(--font-display); font-size: clamp(14px, 1.15vw, 20px); line-height: 1.02; letter-spacing: -0.04em; text-transform: uppercase; }
+.hx-q figure { margin: 0; width: min(290px, 21vw); text-align: right; }
+.hx-q figcaption { font-family: var(--font-body); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; }
+.hx-q blockquote { margin: 8px 0 0; font-family: var(--font-display); font-size: clamp(16px, 1.3vw, 22px); line-height: 1.02; letter-spacing: -0.04em; text-transform: uppercase; }
 
 /* bottom left: the five, by name */
 .hx-ix { left: 2.2vw; bottom: 6vh; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
-.hx-ix li { display: flex; gap: 12px; padding: 3px 0; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; opacity: 0.4; transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.hx-ix li { display: flex; gap: 12px; padding: 3px 0; font-family: var(--font-body); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; opacity: 0.4; transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1); }
 .hx-ix li span { opacity: 0.6; }
 .hx-ix li:hover { opacity: 0.8; }
 .hx-ix li.on { opacity: 1; transform: translateX(6px); }
 
 /* bottom right: what to do with this one */
 .hx-act { right: 2.2vw; bottom: 6vh; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
-.hx-act > button:not(.ps-pill), .hx-act > a:not(.ps-pill) { padding: 0 0 2px; border: 0; border-bottom: 1px solid currentColor; background: none; color: inherit; text-decoration: none; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; opacity: 0.7; transition: opacity 0.3s ease; }
+.hx-act > button:not(.ps-pill), .hx-act > a:not(.ps-pill) { padding: 0 0 2px; border: 0; border-bottom: 1px solid currentColor; background: none; color: inherit; text-decoration: none; font-family: var(--font-body); font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; opacity: 0.7; transition: opacity 0.3s ease; }
 .hx-act > button:not(.ps-pill):hover, .hx-act > a:not(.ps-pill):hover { opacity: 1; }
 .hx-act .ps-pill:hover { background: #ff6a1a; }
-.hx-hint { left: 50%; top: 13vh; translate: -50% 0; margin: 0; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.45; pointer-events: none; transition: opacity 0.6s ease; }
+.hx-hint { left: 50%; top: 13vh; translate: -50% 0; margin: 0; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.45; pointer-events: none; transition: opacity 0.6s ease; }
 .hx-hint.gone { opacity: 0; }
 
 .roll-enter-active, .roll-leave-active { transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1), filter 0.5s ease; }
@@ -364,7 +365,7 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 
 /* ───────── type: a tight grotesque, big and plain, with a narrow column of text on the right ───────── */
 .ty, .nm, .en { font-family: var(--font-display); }
-.ty-top { display: grid; grid-template-columns: 8.333vw 1fr auto; gap: 2vw; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; position: relative; padding-top: 14px; }
+.ty-top { display: grid; grid-template-columns: 8.333vw 1fr auto; gap: 2vw; font-family: var(--font-body); font-size: 13px; letter-spacing: 0.04em; position: relative; padding-top: 14px; }
 .ty-top::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: currentColor; opacity: 0.4; transform: scaleX(var(--p, 0)); transform-origin: 0 0; }
 .ty-top span { opacity: 0.6; }
 .ty-top button { padding: 0 0 2px; border: 0; border-bottom: 1px solid currentColor; background: none; color: inherit; font: inherit; opacity: 0.7; cursor: pointer; }
@@ -374,7 +375,7 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .ty-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 1vw; margin-top: 34vh; align-items: start; }
 .ty-row h3 { grid-column: 1 / span 6; margin: 0; font-weight: 400; font-size: clamp(22px, 2.5vw, 46px); line-height: 1.14; letter-spacing: -0.04em; }
 .ty-body { grid-column: 8 / span 4; display: flex; flex-direction: column; gap: 2em; }
-.ty-body p { margin: 0; font-family: var(--font-body); font-size: clamp(13px, 1.05vw, 17px); line-height: 1.7; letter-spacing: -0.01em; }
+.ty-body p { margin: 0; font-family: var(--font-body); font-size: clamp(16px, 1.2vw, 20px); line-height: 1.7; letter-spacing: -0.01em; }
 
 .ph { position: relative; height: 100vh; overflow: hidden; background: #0b0f16; }
 .ph-media { position: absolute; left: 0; top: -9vh; width: 100%; height: 118vh; will-change: transform; }
@@ -399,24 +400,24 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .st li > i::before { content: ''; position: absolute; inset: 0; background: rgba(255, 255, 255, 0.3); transform: scaleX(var(--p, 0)); transform-origin: 0 0; }
 .st li > i u { position: absolute; left: 0; top: -3px; width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; }
 .st h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(17px, 1.7vw, 30px); letter-spacing: -0.05em; line-height: 1.08; }
-.st p { margin: 0; max-width: 24em; font-family: var(--font-body); font-size: 13px; line-height: 1.75; opacity: 0.65; }
+.st p { margin: 0; max-width: 24em; font-family: var(--font-body); font-size: 16px; line-height: 1.75; opacity: 0.65; }
 
 .nm { padding: 6vh 2.2vw 30vh; }
 .nm ul { list-style: none; margin: 6vh 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4vw; }
 .nm li { display: flex; flex-direction: column; gap: 16px; }
 .nm li b { font-weight: 400; font-size: clamp(28px, 4.2vw, 80px); line-height: 0.95; letter-spacing: -0.05em; white-space: nowrap; }
-.nm li span { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; opacity: 0.55; }
+.nm li span { font-family: var(--font-body); font-size: 14px; letter-spacing: 0.04em; opacity: 0.55; }
 .nm-two { display: grid; grid-template-columns: 1fr 1fr; margin-top: 10vh; border-top: 1px solid rgba(255, 255, 255, 0.25); border-bottom: 1px solid rgba(255, 255, 255, 0.25); }
 .nm-two > div { display: grid; grid-template-columns: 9vw 1fr; gap: 0 2vw; padding: 7vh 3vw 10vh 0; }
 .nm-two > div + div { padding-left: 2vw; border-left: 1px solid rgba(255, 255, 255, 0.25); }
-.nm-two span { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; opacity: 0.55; }
-.nm-two p { margin: 0; max-width: 20em; font-size: clamp(15px, 1.4vw, 24px); line-height: 1.3; letter-spacing: -0.035em; }
+.nm-two span { font-family: var(--font-body); font-size: 13px; letter-spacing: 0.04em; opacity: 0.55; }
+.nm-two p { margin: 0; max-width: 20em; font-size: clamp(17px, 1.5vw, 26px); line-height: 1.3; letter-spacing: -0.035em; }
 
 /* the rest of the range: light cards on the black, after intrepidautomation.com */
 .bx { position: relative; padding: 4vh 2.2vw 26vh; }
 .ix-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 6vh 0 4vh; }
-.ix-tabs button { padding: 8px 14px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 40px; background: transparent; color: inherit; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-.ix-tabs button sup { margin-left: 6px; font-size: 8px; opacity: 0.55; }
+.ix-tabs button { padding: 8px 14px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 40px; background: transparent; color: inherit; font-family: var(--font-body); font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+.ix-tabs button sup { margin-left: 6px; font-size: 10px; opacity: 0.55; }
 .ix-tabs button:hover { border-color: rgba(255, 255, 255, 0.6); }
 .ix-tabs button.on { background: #eef3fa; color: #000; border-color: #eef3fa; }
 .bx-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
@@ -430,8 +431,8 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .bx-card.photo .bx-img img { object-fit: contain; object-position: center; border-radius: 12px; }
 .bx-card.photo .bx-img::after { display: none; }
 .bx-cap { position: absolute; left: 22px; right: 70px; bottom: 20px; z-index: 2; display: flex; flex-direction: column; gap: 4px; transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1); }
-.bx-cap b { font-weight: 400; font-family: var(--font-display); font-size: 15px; letter-spacing: -0.035em; line-height: 1.1; }
-.bx-cap small { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.55; }
+.bx-cap b { font-weight: 400; font-family: var(--font-display); font-size: 18px; letter-spacing: -0.035em; line-height: 1.1; }
+.bx-cap small { font-family: var(--font-body); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.55; }
 .bx-plus { position: absolute; right: 18px; top: 18px; z-index: 2; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: #0d2340; color: #fff; transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1), background 0.3s ease; }
 .bx-plus svg { width: 11px; height: 11px; }
 .bx-card:hover .bx-name { opacity: 1; transform: none; }
@@ -443,7 +444,7 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .en { padding: 10vh 2.2vw 30vh; }
 .en .ty-h { margin-top: 11vh; max-width: 14em; }
 .en-cta { display: flex; align-items: center; gap: 28px; margin-top: 8vh; }
-.en-cta a { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: inherit; text-decoration: none; opacity: 0.65; border-bottom: 1px solid currentColor; padding-bottom: 3px; transition: opacity 0.3s ease; }
+.en-cta a { font-family: var(--font-body); font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; color: inherit; text-decoration: none; opacity: 0.65; border-bottom: 1px solid currentColor; padding-bottom: 3px; transition: opacity 0.3s ease; }
 .en-cta a:hover { opacity: 1; }
 
 @media (max-width: 1000px) {
@@ -460,12 +461,12 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
   .hx-card { left: 5vw; right: 5vw; top: 11svh; width: auto; }
   .hx-card h1 { font-size: 26px; }
   .hx-card dl { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
-  .hx-card dd { font-size: 12.5px; }
+  .hx-card dd { font-size: 15px; }
   .hx-ix, .hx-hint, .hx-grain { display: none; }
   .hx-poster { bottom: 30svh; height: 36svh; }
   .hx-q { left: 5vw; right: 5vw; bottom: 13svh; translate: none; }
   .hx-q figure { width: 100%; text-align: center; }
-  .hx-q blockquote { font-size: 16px; }
+  .hx-q blockquote { font-size: 17px; }
   .hx-act { left: 5vw; right: 5vw; bottom: 4svh; flex-direction: row; align-items: center; justify-content: space-between; }
 
   .ph { height: 80vh; } .ph-media { top: 0; height: 100%; }
@@ -477,7 +478,7 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
   .bx-grid { gap: 10px; }
   .bx-card { border-radius: 16px; }
   .bx-cap { left: 12px; right: 12px; bottom: 12px; }
-  .bx-cap b { font-size: 12.5px; }
+  .bx-cap b { font-size: 15px; }
   .bx-plus { width: 30px; height: 30px; right: 10px; top: 10px; }
   .en { padding: 8vh 5vw 18vh; }
 }

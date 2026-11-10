@@ -8,16 +8,16 @@
         <img class="ab2-img" src="/media/site-aerial.jpg" alt="Aerial view of the Envisys and Vistara units in Peenya Industrial Estate, Bengaluru" />
 
         <!-- the same picture, in colour, shown only inside the building you point at -->
-        <img v-for="(s, i) in sites" :key="'c' + s.name" class="ab2-color" :class="{ on: hot === i }" src="/media/site-aerial.jpg" alt="" aria-hidden="true" :style="{ clipPath: clip(s.poly) }" />
+        <img v-for="s in sites" :key="'c' + s.name" class="ab2-color" :class="{ on: hot === s.g }" src="/media/site-aerial.jpg" alt="" aria-hidden="true" :style="{ clipPath: clip(s.poly) }" />
 
         <svg class="ab2-svg" :viewBox="`0 0 ${W} ${H}`" preserveAspectRatio="none" aria-hidden="true">
           <path :d="route" class="r-line" />
-          <polygon v-for="(s, i) in sites" :key="s.name" :points="pts(s.poly)" class="b-fill" :class="{ on: hot === i }" />
-          <polygon v-for="(s, i) in sites" :key="'o' + s.name" :points="pts(s.poly)" class="b-line" :class="{ on: hot === i }" />
+          <polygon v-for="s in sites" :key="s.name" :points="pts(s.poly)" class="b-fill" :class="{ on: hot === s.g }" />
+          <polygon v-for="s in sites" :key="'o' + s.name" :points="pts(s.poly)" class="b-line" :class="{ on: hot === s.g }" />
         </svg>
 
-        <button v-for="(s, i) in sites" :key="'b' + s.name" class="ab2-hit" :style="hitStyle(s.poly)" :aria-label="`${s.name}, ${s.role}`" data-cursor="" @pointerenter="hot = i" @pointerleave="hot = -1" @focus="hot = i" @blur="hot = -1">
-          <span class="ab2-chip" :class="{ on: hot === i }"><b>{{ s.name }}</b><em>{{ s.role }}</em><small>{{ s.addr }}</small></span>
+        <button v-for="s in sites" :key="'b' + s.name" class="ab2-hit" :style="hitStyle(s.poly)" :aria-label="`${s.name}, ${s.role}`" data-cursor="" @pointerenter="hot = s.g" @pointerleave="hot = -1" @focus="hot = s.g" @blur="hot = -1">
+          <span v-if="lead(s)" class="ab2-chip" :class="{ on: hot === s.g }"><b>{{ s.name }}</b><em>{{ s.role }}</em><small>{{ s.addr }}</small></span>
         </button>
       </div>
 
@@ -44,9 +44,11 @@ import gsap from 'gsap'
 const W = 1806, H = 720
 type P = [number, number]
 // Envisys is the building the map pin sat on; Vistara is the one the red pin marked
-const sites: { name: string; role: string; addr: string; poly: P[] }[] = [
-  { name: 'Envisys', role: 'Manufacturing unit · SB-58', addr: 'SB-58, 2nd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058', poly: [[944, 262], [978, 268], [940, 346], [922, 376], [910, 368], [903, 322]] },
-  { name: 'Vistara', role: 'Testing service unit · SB-118', addr: 'SB-118, 3rd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058', poly: [[770, 586], [800, 582], [806, 625], [790, 648], [748, 640], [752, 598]] }
+// g: the unit a building belongs to; the two Envisys blocks share it, so pointing at either lights both
+const sites: { name: string; role: string; addr: string; g: number; poly: P[] }[] = [
+  { name: 'Envisys', role: 'Manufacturing unit · SB-58', addr: 'SB-58, 2nd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058', g: 0, poly: [[947, 265], [984, 267], [977, 272], [925, 373], [905, 370], [898, 352]] },
+  { name: 'Vistara', role: 'Testing service unit · SB-118', addr: 'SB-118, 3rd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058', g: 1, poly: [[770, 527], [818, 528], [822, 560], [812, 590], [808, 625], [790, 650], [746, 641], [752, 598], [770, 588]] },
+  { name: 'Envisys block 2', role: 'Manufacturing unit · SB-58', addr: 'SB-58, 2nd Cross Road, 1st Stage, Peenya Industrial Estate, Bengaluru 560058', g: 0, poly: [[947, 199], [1013, 198], [1000, 236], [984, 266], [947, 264]] }
 ]
 const units: { code: string; what: string; addr: string; site?: number }[] = [
   { code: 'SB-58', what: 'Manufacturing · Environmental testing · Head office', addr: 'SB-58, 2nd Cross, 1st Stage, Peenya Industrial Estate', site: 0 },
@@ -56,6 +58,8 @@ const units: { code: string; what: string; addr: string; site?: number }[] = [
 ]
 const maps = (a: string) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`Envisys Technologies ${a}, Bengaluru 560058`)
 const hot = ref(-1)
+// one card per unit: the first building of each unit carries it
+const lead = (s: { g: number }) => sites.find((q) => q.g === s.g) === s
 const pts = (p: P[]) => p.map((q) => q.join(',')).join(' ')
 const clip = (p: P[]) => `polygon(${p.map(([x, y]) => `${((x / W) * 100).toFixed(2)}% ${((y / H) * 100).toFixed(2)}%`).join(',')})`
 const hitStyle = (p: P[]) => {
@@ -110,11 +114,11 @@ onUnmounted(() => gsap.ticker.remove(tick))
 
 .ab2-hit { position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .ab2-hit:focus-visible { outline: 1px dashed #fff; outline-offset: 6px; }
-.ab2-chip { position: absolute; left: 50%; bottom: calc(100% + 18px); translate: -50% 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: max-content; max-width: 280px; padding: 12px 16px; border-radius: 10px; background: rgba(12, 12, 14, 0.82); border: 1px solid rgba(255, 255, 255, 0.16); backdrop-filter: blur(10px); color: #fff; text-align: left; opacity: 0; pointer-events: none; transition: opacity 0.35s ease, translate 0.5s var(--ease, ease); }
-.ab2-chip.on { opacity: 1; translate: -50% 0; }
+.ab2-chip { position: absolute; left: calc(100% + 22px); top: 50%; translate: 8px -50%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: max-content; max-width: 280px; padding: 12px 16px; border-radius: 10px; background: rgba(12, 12, 14, 0.82); border: 1px solid rgba(255, 255, 255, 0.16); backdrop-filter: blur(10px); color: #fff; text-align: left; opacity: 0; pointer-events: none; transition: opacity 0.35s ease, translate 0.5s var(--ease, ease); }
+.ab2-chip.on { opacity: 1; translate: 0 -50%; } /* beside the building, clear of the heading above */
 .ab2-chip b { font-weight: 400; font-family: var(--font-display); font-size: 18px; letter-spacing: -0.04em; }
-.ab2-chip em { font-style: normal; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #ff8a5a; }
-.ab2-chip small { font-family: var(--font-body); font-size: 9px; line-height: 1.6; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.65; }
+.ab2-chip em { font-style: normal; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #ff8a5a; }
+.ab2-chip small { font-family: var(--font-body); font-size: 11px; line-height: 1.6; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.65; }
 
 /* small and centred, like a caption on a plate */
 .ab2-head { position: absolute; left: 50%; top: 13vh; translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: 1.4vh; text-align: center; pointer-events: none; }

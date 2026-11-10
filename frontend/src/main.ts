@@ -9,7 +9,8 @@ const pages: Record<string, () => Promise<typeof import('./App.vue')>> = {
   '/products': () => import('./pages/ProductsPage.vue'),
   '/verticals': () => import('./pages/VerticalsPage.vue'),
   '/industries': () => import('./pages/IndustriesPage.vue'),
-  '/resources': () => import('./pages/ResourcesPage.vue')
+  '/resources': () => import('./pages/ResourcesPage.vue'),
+  '/in-stock': () => import('./pages/InStockPage.vue')
 }
 const path = location.pathname.replace(/\/+$/, '') || '/'
 const product = path.startsWith('/products/')

@@ -199,9 +199,9 @@ export const products: Product[] = [
   {
     slug: 'temperature-forcing', name: 'Chip Coolers & Temperature Forcing', code: 'ETFS', tier: 'catalog', group: 'Climatic & thermal', gallery: 3,
     tagline: 'Hot and cold air straight onto the device.',
-    intro: 'Temperature forcing systems drive a controlled temperature directly onto a chip or component through a flexible hose and probe head, for fast thermal testing without a chamber.',
-    features: [],
-    specs: [['Power classes', '200, 400, 750, 1500 and 3000 W']],
+    intro: 'Temperature forcing systems drive a controlled temperature directly onto a chip or component through a flexible hose and cooling head, for GPU characterisation and workload profiling without a chamber.',
+    features: ['Closed-loop temperature mapping from the chip to the main unit', 'Two-phase cold plate heads take away extreme heat loads', 'Maintenance-free cascade refrigeration with low-GWP R-449A and R-508B', 'Removable conduction heaters in the head for positive temperatures', '2 – 2.5 m flexible thermal head, sealed against condensation', 'Built-in touchscreen controller; fits under a work table'],
+    specs: [['Temperature', '−40 °C to +125 °C'], ['Cooling capability', '1500 W at 0 °C (2800 W with the 2-phase head)'], ['Transition time', '100 – 120 s'], ['System size', '700 × 900 × 1040 mm (W × D × H)'], ['Power classes', '200, 400, 750, 1500 and 3000 W']],
     models: [{ label: 'Power', items: ['200 W', '400 W', '750 W', '1500 W', '3000 W'] }],
     keywords: ['chip', 'cooler', 'temperature forcing', 'etfs', 'probe', 'thermal head', 'semiconductor', 'ic', 'device', 'forcing'],
     brochure: B + 'temperature-forcing-chambers-brochure.pdf'
@@ -288,7 +288,7 @@ export const img = (p: Product, f: 'hero' | 'lines' | `g${number}`) => `/p/${p.s
 // the 3D model for each main chamber (phones load the `_m.glb` cut), dressed in Blender (tools/step_to_obj.py + tools/dress_step.py) and Draco-compressed.
 // Only series with their own model are listed; the others show their photograph in the same place, so no page ever
 // shows another product. Add each series here as its STEP file is converted.
-export const models: Record<string, string> = { et: '/models/et950.glb' }
+export const models: Record<string, string> = { et: '/models/et950.glb', eta: '/models/ea600.glb' }
 // photographs of individual models, by family (a model code without its variant suffix: EM64-30T → EM64).
 // Families without one show 'Photograph to follow'.
 // a model's own photograph (cut out, from the product shoots in public/pics), keyed by the name its card shows

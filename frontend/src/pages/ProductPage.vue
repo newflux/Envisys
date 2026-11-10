@@ -46,20 +46,10 @@
         </div>
       </section>
 
-      <!-- 3 · the photographs: the section pins and slides them sideways as you scroll, each moving a little inside its
-           frame; phones swipe a plain strip -->
-      <section v-if="shots.length > 1" id="photographs" class="pd-gal" ref="galRef" :style="{ height: galH }">
-        <div class="pd-gal-pin">
-          <div class="pd-top"><span>(02)</span><span>Photographs</span><span class="pd-count">{{ String(shotAt + 1).padStart(2, '0') }} / {{ String(shots.length).padStart(2, '0') }}</span></div>
-          <div class="pd-track" ref="trackRef">
-            <figure v-for="(s, k) in shots" :key="s" :class="{ photo: scenePhotos.has(s) || (k === 0 && p.photo) }"><img :src="s" :alt="`${p.name}, view ${k + 1}`" loading="lazy" draggable="false" /></figure>
-          </div>
-        </div>
-      </section>
-
-      <!-- 4 · the specification -->
-      <section id="specification" class="pd-sec pd-spec">
-        <div class="pd-top rv hl"><span>(03)</span><span>Specification</span><span></span></div>
+      <!-- 3 · the specification, straight after what it is -->
+      <SpecStudio v-if="studio" :s="studio" :lineup="detail?.lineup" :features="p.features" :group="p.group" :series="p.name" :brochure="p.brochure" :sel="sel" @pick="sel = $event" @ask="contact()" />
+      <section v-else id="specification" class="pd-sec pd-spec">
+        <div class="pd-top rv hl"><span>(02)</span><span>Specification</span><span></span></div>
         <div class="pd-spec-row">
           <dl v-if="p.specs.length">
             <div v-for="(s, k) in p.specs" :key="s[0]" class="rv hl" :style="{ '--d': k * 0.06 + 's' }"><dt>{{ s[0] }}</dt><dd>{{ s[1] }}</dd></div>
@@ -77,6 +67,20 @@
           </div>
         </div>
       </section>
+
+      <SpecDetail v-if="detail" :d="detail" :brochure="p.brochure" @ask="contact()" />
+
+      <!-- last · the photographs (after the specification, which is what buyers come for): the section pins and slides them sideways as you scroll, each moving a little inside its
+           frame; phones swipe a plain strip -->
+      <section v-if="shots.length > 1" id="photographs" class="pd-gal" ref="galRef" :style="{ height: galH }">
+        <div class="pd-gal-pin">
+          <div class="pd-top"><span>{{ photoNum }}</span><span>Photographs</span><span class="pd-count">{{ String(shotAt + 1).padStart(2, '0') }} / {{ String(shots.length).padStart(2, '0') }}</span></div>
+          <div class="pd-track" ref="trackRef">
+            <figure v-for="(s, k) in shots" :key="s" :class="{ photo: scenePhotos.has(s) || (k === 0 && p.photo) }"><img :src="s" :alt="`${p.name}, view ${k + 1}`" loading="lazy" draggable="false" /></figure>
+          </div>
+        </div>
+      </section>
+
 
       <NextUp label="Next chamber" :title="next.name" :text="next.tagline" :href="`/products/${next.slug}`" />
 
@@ -97,6 +101,9 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import PageShell from '../components/PageShell.vue'
 import NextUp from '../components/NextUp.vue'
+import SpecDetail from '../components/SpecDetail.vue'
+import SpecStudio from '../components/SpecStudio.vue'
+import { details } from '../config/details'
 import { products, bySlug, img, quotesFor, scenePhotos } from '../config/products'
 
 const slug = decodeURIComponent(location.pathname.replace(/\/+$/, '').split('/').pop() ?? '')
@@ -113,7 +120,11 @@ const hitItem = p?.models.flatMap((m) => m.items).find((it) => asked && norm(it)
 const sel = ref(hitItem ?? '')
 
 // the explore bar: which sections exist, which one is being read, and whether the bar shows at all
-const navs = [{ id: 'overview', t: 'Overview' }, ...(shots.length > 1 ? [{ id: 'photographs', t: 'Photographs' }] : []), { id: 'specification', t: 'Specification' }]
+const detail = p ? details[p.slug] : undefined // the full technical file, where the series has one
+const studio = detail?.studio // the redesigned specification (ET first); the rest still use the plain list
+const navs = [{ id: 'overview', t: 'Overview' }, { id: 'specification', t: 'Specification' }, ...(detail?.headline || detail?.chart ? [{ id: 'performance', t: 'Performance' }] : []), ...(detail?.lineup ? [{ id: 'models', t: 'Models' }] : []), ...(detail?.tables ? [{ id: 'technical', t: 'Data' }] : []), ...(detail?.build ? [{ id: 'build', t: 'Build' }] : []), ...(shots.length > 1 ? [{ id: 'photographs', t: 'Photographs' }] : [])]
+// the photographs come last, numbered after the technical sections
+const photoNum = `(${String(3 + (detail ? [detail.headline || detail.chart, detail.lineup, detail.tables, detail.build].filter(Boolean).length : 0)).padStart(2, '0')})`
 const navAt = ref('')
 const navOn = ref(false)
 const goTo = (id: string) => {
@@ -191,8 +202,8 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .pd-photo.photo { height: 80%; border-radius: 16px; object-fit: cover; filter: none; }
 .pd-card, .pd-q, .pd-act { position: absolute; z-index: 2; }
 
-.pd-card { left: 2.2vw; bottom: 6vh; width: min(340px, 24vw); } /* bottom left: the top belongs to the giant name */
-.pd-crumb { display: flex; gap: 10px; margin-bottom: 2vh; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; }
+.pd-card { left: 2.2vw; bottom: 6vh; width: min(400px, 28vw); } /* bottom left: the top belongs to the giant name */
+.pd-crumb { display: flex; gap: 10px; margin-bottom: 2vh; font-family: var(--font-body); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
 .pd-crumb a { color: inherit; opacity: 0.6; text-decoration: none; transition: opacity 0.3s ease; }
 .pd-crumb a:hover { opacity: 1; }
 .pd-crumb i { font-style: normal; opacity: 0.35; }
@@ -202,27 +213,27 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .pd-card h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .pd-card dl { margin: 0; }
 .pd-card dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0 8px; border-top: 1px solid currentColor; }
-.pd-card dt { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; }
-.pd-card dd { margin: 0; font-family: var(--font-display); font-size: clamp(13px, 1vw, 16px); letter-spacing: -0.03em; text-align: right; }
-.pd-card dd small { margin-left: 4px; font-family: var(--font-body); font-size: 9px; opacity: 0.6; }
+.pd-card dt { font-family: var(--font-body); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; }
+.pd-card dd { margin: 0; font-family: var(--font-display); font-size: clamp(16px, 1.3vw, 21px); letter-spacing: -0.03em; text-align: right; }
+.pd-card dd small { margin-left: 4px; font-family: var(--font-body); font-size: 12px; opacity: 0.6; }
 
 .pd-q { right: 2.2vw; bottom: calc(6vh + 150px); display: flex; flex-direction: column; align-items: flex-end; gap: 4vh; pointer-events: none; } /* in the right column, clear of the chamber and its floor */
-.pd-q figure { margin: 0; width: min(250px, 18vw); text-align: right; }
-.pd-q figcaption { font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; }
-.pd-q blockquote { margin: 8px 0 0; font-family: var(--font-display); font-size: clamp(14px, 1.15vw, 20px); line-height: 1.02; letter-spacing: -0.04em; text-transform: uppercase; }
+.pd-q figure { margin: 0; width: min(290px, 21vw); text-align: right; }
+.pd-q figcaption { font-family: var(--font-body); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; }
+.pd-q blockquote { margin: 8px 0 0; font-family: var(--font-display); font-size: clamp(16px, 1.3vw, 22px); line-height: 1.02; letter-spacing: -0.04em; text-transform: uppercase; }
 
 .pd-act { right: 2.2vw; bottom: 6vh; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
-.pd-act a { padding: 0 0 2px; border-bottom: 1px solid currentColor; color: inherit; text-decoration: none; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; transition: opacity 0.3s ease; }
+.pd-act a { padding: 0 0 2px; border-bottom: 1px solid currentColor; color: inherit; text-decoration: none; font-family: var(--font-body); font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; transition: opacity 0.3s ease; }
 .pd-act a:hover { opacity: 1; }
 .pd-act .ps-pill:hover { background: #ff6a1a; }
 
 /* ───────── the sections below: hairline headers, big type, a strip of photographs ───────── */
 .pd-sec { padding: 14vh 2.2vw 0; }
-.pd-top { position: relative; display: grid; grid-template-columns: 8.333vw 1fr auto; gap: 2vw; padding-top: 14px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; }
+.pd-top { position: relative; display: grid; grid-template-columns: 8.333vw 1fr auto; gap: 2vw; padding-top: 14px; font-family: var(--font-body); font-size: 13px; letter-spacing: 0.04em; }
 .pd-top > span { opacity: 0.6; }
 .pd-about-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 1vw; margin-top: 6vh; align-items: start; }
 .pd-about h2 { grid-column: 1 / span 7; margin: 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 3.6vw, 66px); line-height: 1.02; letter-spacing: -0.055em; }
-.pd-about p { grid-column: 9 / span 4; margin: 0.6em 0 0; font-family: var(--font-body); font-size: clamp(13px, 1vw, 16px); line-height: 1.6; }
+.pd-about p { grid-column: 9 / span 4; margin: 0.6em 0 0; font-family: var(--font-body); font-size: clamp(16px, 1.2vw, 20px); line-height: 1.6; }
 
 /* the pinned gallery */
 .pd-gal { position: relative; margin-top: 14vh; }
@@ -239,25 +250,25 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .pd-spec dl div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 2vw; padding: 1.7vh 0; }
 .pd-spec dl div:last-child { border-bottom: 1px solid rgba(13, 35, 64, 0.18); }
 .pd-spec dl div:hover { padding-left: 0.6vw; }
-.pd-spec dt { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; align-self: center; }
-.pd-spec dd { margin: 0; font-family: var(--font-display); font-size: clamp(14px, 1.2vw, 20px); letter-spacing: -0.035em; overflow-wrap: anywhere; }
+.pd-spec dt { font-family: var(--font-body); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; align-self: center; }
+.pd-spec dd { margin: 0; font-family: var(--font-display); font-size: clamp(18px, 1.5vw, 24px); letter-spacing: -0.035em; line-height: 1.25; overflow-wrap: anywhere; }
 .pd-spec ul { grid-column: 9 / span 4; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.6vh; }
-.pd-spec li { position: relative; padding-left: 18px; font-family: var(--font-body); font-size: 12.5px; line-height: 1.6; }
+.pd-spec li { position: relative; padding-left: 18px; font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
 .pd-spec li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; }
-.pd-note { grid-column: 1 / span 7; margin: 0; font-family: var(--font-body); font-size: 13px; opacity: 0.6; }
+.pd-note { grid-column: 1 / span 7; margin: 0; font-family: var(--font-body); font-size: 16px; opacity: 0.6; }
 
 .pd-spec { padding-bottom: 14vh; }
 .pd-mrow { display: grid; grid-template-columns: 8.333vw 1fr; gap: 2vw; padding: 3vh 0; border-bottom: 1px solid rgba(13, 35, 64, 0.18); }
-.pd-mrow > span { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; padding-top: 9px; }
+.pd-mrow > span { font-family: var(--font-body); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; padding-top: 9px; }
 .pd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.pd-chips button { padding: 9px 14px; border: 1px solid rgba(13, 35, 64, 0.25); border-radius: 40px; background: transparent; color: inherit; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; cursor: pointer; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+.pd-chips button { padding: 9px 14px; border: 1px solid rgba(13, 35, 64, 0.25); border-radius: 40px; background: transparent; color: inherit; font-family: var(--font-body); font-size: 14px; letter-spacing: 0.04em; cursor: pointer; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
 .pd-chips button:hover { border-color: #0d2340; }
 .pd-chips button.on { background: #ff6a1a; border-color: #ff6a1a; color: #fff; }
 
 .pd-sticky { display: none; }
 .pd-nav { position: fixed; left: 50%; bottom: 22px; z-index: 40; display: flex; align-items: center; gap: 2px; padding: 5px; border-radius: 40px; background: rgba(13, 35, 64, 0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 14px 40px rgba(13, 35, 64, 0.25); translate: -50% 0; opacity: 0; transform: translateY(24px); pointer-events: none; transition: opacity 0.5s ease, transform 0.7s var(--ease); }
 .pd-nav.on { opacity: 1; transform: none; pointer-events: auto; }
-.pd-nav button { padding: 9px 14px; border: 0; border-radius: 40px; background: transparent; color: rgba(255, 255, 255, 0.6); font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color 0.3s ease, background 0.3s ease; }
+.pd-nav button { padding: 9px 14px; border: 0; border-radius: 40px; background: transparent; color: rgba(255, 255, 255, 0.6); font-family: var(--font-body); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color 0.3s ease, background 0.3s ease; }
 .pd-nav button:hover { color: #fff; }
 .pd-nav button.on { background: rgba(255, 255, 255, 0.12); color: #fff; }
 .pd-nav .pd-nav-q { margin-left: 6px; background: #ff6a1a; color: #fff; }
@@ -267,7 +278,7 @@ onUnmounted(() => gsap.ticker.remove(tick))
   .pd-card { left: 5vw; right: 5vw; top: 11svh; bottom: auto; width: auto; }
   .pd-card h1 { position: static; width: auto; height: auto; overflow: visible; clip-path: none; font-size: 26px; }
   .pd-card dl { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
-  .pd-card dd { font-size: 12.5px; }
+  .pd-card dd { font-size: 15px; }
   .pd-giant { display: none; } /* the credits carry the name on phones */
   .pd-shot { bottom: 24svh; height: 36svh; }
   .pd-photo { max-width: 80vw; }
@@ -275,7 +286,7 @@ onUnmounted(() => gsap.ticker.remove(tick))
   .pd-q { left: 5vw; right: 5vw; bottom: calc(14svh + 20px); translate: none; } /* above the sticky quote button */
   .pd-q figure { width: 100%; text-align: center; }
   .pd-q figure + figure { display: none; }
-  .pd-q blockquote { font-size: 16px; }
+  .pd-q blockquote { font-size: 17px; }
   .pd-act { display: none; }
   .pd-sec { padding: 10vh 5vw 0; }
   .pd-top { grid-template-columns: 14vw 1fr auto; }

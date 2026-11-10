@@ -60,11 +60,12 @@ onUnmounted(() => { gsap.ticker.remove(lenisTick); gsap.ticker.remove(toneTick);
 .ps-root { --lt: #ececea; --ink: #0a0a0c; --ease: cubic-bezier(0.2, 0.9, 0.2, 1); position: fixed; inset: 0; background: #000; color: var(--ink); }
 .ps-root #scroller { background: #000 !important; }
 .ps-root .layout__page { position: relative; }
-.ps-root .Header_brandLogo__AXo7t { mix-blend-mode: difference; transition: filter 0.6s ease; }
-html[data-tone="light"] .ps-root .Header_brandLogo__AXo7t { mix-blend-mode: normal; filter: brightness(0) opacity(0.85); }
+/* the logo: only its white layer follows the page (it inverts over light, goes navy on the light-blue pages); the blue SYS never changes */
+.ps-root .Header_brandLogo__AXo7t .lg-ink { mix-blend-mode: difference; transition: filter 0.6s ease; }
+html[data-tone="light"] .ps-root .Header_brandLogo__AXo7t .lg-ink { mix-blend-mode: normal; --logo-ink: #0d2340; }
 html[data-tone="light"] .ps-root .hamburger-bar { background: #0d2340 !important; }
 html[data-mnav] .ps-root .hamburger-bar { background: #fff !important; }
-html[data-mnav] .ps-root .Header_brandLogo__AXo7t { filter: none !important; mix-blend-mode: normal; }
+html[data-mnav] .ps-root .Header_brandLogo__AXo7t .lg-ink { filter: none !important; mix-blend-mode: normal; --logo-ink: #fff; }
 .ps-cover { position: relative; z-index: 2; background: var(--lt); color: var(--ink); border-radius: 0; overflow: clip; }
 /* the landing page's light blue and navy ink */
 .ps-cover.blue { --lt: #d6e4f3; --ink: #0d2340; background: linear-gradient(180deg, #e4eef9, #d3e3f4 60%, #c9dcf0); }

@@ -90,6 +90,14 @@ function update(x: number, y: number, target: EventTarget | null) {
   }
 }
 const onDown = () => (isDown.value = true)
+// what the brackets hold is what a click opens: inside the sticky slack the pointer can be just off the element
+function onClick(e: MouseEvent) {
+  if (!locked || !e.isTrusted || !(e.target instanceof Node) || locked.contains(e.target)) return
+  if (!inside(locked.getBoundingClientRect(), e.clientX, e.clientY, STICKY)) return
+  if ((e.target as HTMLElement).closest?.(INTERACTIVE)) return // a real control under the pointer keeps its own click
+  e.preventDefault(); e.stopPropagation()
+  locked.click()
+}
 const onUp = () => (isDown.value = false)
 const onLeave = () => (hidden.value = true)
 
@@ -102,6 +110,7 @@ onMounted(() => {
   observer = new MutationObserver(() => { if (last) update(last.x, last.y, last.target) })
   observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
   window.addEventListener('pointerdown', onDown)
+  window.addEventListener('click', onClick, true)
   window.addEventListener('pointerup', onUp)
   document.documentElement.addEventListener('pointerleave', onLeave)
 })
@@ -110,6 +119,7 @@ onUnmounted(() => {
   observer?.disconnect()
   document.documentElement.classList.remove('has-reticle')
   window.removeEventListener('pointermove', onMove)
+  window.removeEventListener('click', onClick, true)
   window.removeEventListener('pointerdown', onDown)
   window.removeEventListener('pointerup', onUp)
   document.documentElement.removeEventListener('pointerleave', onLeave)

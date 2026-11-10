@@ -74,7 +74,8 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
     group.visible = false
     scene.add(group)
     // a model waits facing straight at you (0.54 cancels the resting angle) until intro() turns it into its resting angle (touched far in the future = no settling yet)
-    return { ...it, group, spin, blob, model: null as any, h: H * it.scale, rot: it.url ? 0.54 : 0, goal: 0, vel: 0, held: false, touched: it.url ? 1e9 : 0 }
+    return { ...it, group, spin, blob, model: null as any, h: H * it.scale, rot: it.url ? 0.54 : 0, goal: 0, vel: 0, held: false, touched: it.url ? 1e9 : 0,
+      door: null as any, doorQ: new THREE.Quaternion(), doorSign: -1, doorOpen: 0, edge: null as { x: number; z: number; y0: number; y1: number } | null }
   })
 
   const draco = new DRACOLoader()
@@ -124,29 +125,69 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
     s.spin.add(m)
     s.model = m
     s.blob.scale.set(size.x * k * 1.7, size.z * k * 1.35, 1)
+    // the door (exported as its own node, pivoting on its hinge edge): it eases open on hover
+    const door = m.getObjectByName('Door')
+    if (door) {
+      // the door node keeps a turn from the CAD import, so it swings about its parent's vertical (the chamber's own up), not its local axis
+      s.door = door; s.doorQ = door.quaternion.clone()
+      const right = door.userData?.hinge === 'right'
+      s.doorSign = right ? 1 : -1 // the free edge swings out toward the camera (the front is +Z)
+      m.updateWorldMatrix(true, true)
+      const inv = door.parent.matrixWorld.clone().invert(), bb = new THREE.Box3()
+      door.traverse((o: any) => { if (o.isMesh) { o.geometry.computeBoundingBox(); bb.union(o.geometry.boundingBox.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld))) } })
+      s.edge = { x: right ? bb.min.x : bb.max.x, z: bb.max.z, y0: bb.min.y, y1: bb.max.y }
+    }
     s.group.visible = true
   }))
 
-  // on hover: two hand-drawn loops orbiting the chamber, passing behind it (after the A24 discs)
-  const ink = new THREE.MeshBasicMaterial({ color: 0x0d2340, fog: false })
-  const ring = new THREE.Group()
-  const loops = [0, 1].map((k) => {
-    const pts: any[] = []
-    for (let j = 0; j <= 160; j++) {
-      const u = j / 160, a = -0.6 + k * 2.2 + u * Math.PI * 2 * (1.12 + k * 0.05)
-      // a pen line: the radius drifts, it rises and dips a little, and it overshoots its start
-      const r = 1 + 0.05 * Math.sin(2 * a + k * 1.3) + 0.025 * Math.sin(5 * a + 0.7) + 0.07 * u - k * 0.05
-      pts.push(new THREE.Vector3(Math.cos(a) * r, 0.07 * Math.sin(a + k * 2.1) + 0.025 * Math.sin(4 * a) + (u - 0.5) * 0.1, Math.sin(a) * r * 0.92))
+  // cold mist: on hover it spills from the gap of the opened door, falls (it is colder than the room) and spreads over the floor
+  const soft = (n: number, blobs: number, seed: number) => {
+    const c = document.createElement('canvas'); c.width = c.height = n
+    const g = c.getContext('2d')!
+    let r = seed; const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280)
+    for (let k = 0; k < blobs; k++) {
+      const x = n * (0.3 + rnd() * 0.4), y = n * (0.3 + rnd() * 0.4), rad = n * (0.18 + rnd() * 0.22)
+      const gr = g.createRadialGradient(x, y, 0, x, y, rad)
+      gr.addColorStop(0, 'rgba(255,255,255,0.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)')
+      g.fillStyle = gr; g.fillRect(0, 0, n, n)
     }
-    const mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 360, k ? 0.0016 : 0.0026, 5, false), ink)
-    mesh.rotation.set(k ? 0.5 : 0.62, k * 1.1, k ? -0.22 : 0.14) // tipped toward the camera, so each loop reads as an ellipse
-    mesh.renderOrder = 2
-    ring.add(mesh)
-    return mesh
+    return new THREE.CanvasTexture(c)
+  }
+  const puffTex = soft(128, 6, 7)
+  const puffs = small ? [] : Array.from({ length: 34 }, () => {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffTex, color: 0xffffff, transparent: true, depthWrite: false, opacity: 0, fog: false }))
+    sp.visible = false; scene.add(sp)
+    return { sp, age: 0, life: 1, v: new THREE.Vector3(), s0: 0, s1: 0 }
   })
-  ring.visible = false
-  let ringOn = -1, ringP = 0
-  const hover = (i: number) => { ringOn = i }
+  let hoverIdx = -1, emit = 0
+  const hover = (i: number) => { hoverIdx = i }
+  const tmp = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0), swing = new THREE.Quaternion()
+
+  // a faint mist lying over the floor all along the row, drifting: the pale blue reads as a cold room, not a flat colour
+  const hazeTex = (() => {
+    const c = document.createElement('canvas'); c.width = 1024; c.height = 256
+    const g = c.getContext('2d')!
+    let r = 3; const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280)
+    for (let k = 0; k < 90; k++) {
+      const x = rnd() * 1024, y = 150 + rnd() * 110, rad = 60 + rnd() * 120
+      const gr = g.createRadialGradient(x, y, 0, x, y, rad)
+      gr.addColorStop(0, 'rgba(255,255,255,0.22)'); gr.addColorStop(1, 'rgba(255,255,255,0)')
+      g.fillStyle = gr; g.fillRect(0, 0, 1024, 256)
+    }
+    // copy the left edge over the right so the strip tiles without a seam
+    g.globalCompositeOperation = 'destination-in'
+    const fade = g.createLinearGradient(0, 0, 0, 256); fade.addColorStop(0, 'rgba(0,0,0,0)'); fade.addColorStop(0.55, 'rgba(0,0,0,0.6)'); fade.addColorStop(1, 'rgba(0,0,0,1)')
+    g.fillStyle = fade; g.fillRect(0, 0, 1024, 256)
+    const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping
+    return t
+  })()
+  const hazes = small ? [] : [[-2.4, 0.5], [1.6, 0.38], [3.4, 0.26]].map(([z, o], k) => {
+    const t = hazeTex.clone(); t.needsUpdate = true; t.wrapS = THREE.RepeatWrapping; t.repeat.x = items.length + 3; t.offset.x = k * 0.37
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(GAP * (items.length + 3), H * 0.62), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, opacity: o, fog: false }))
+    pl.position.set(GAP * (items.length - 1) / 2, H * 0.24, z); pl.renderOrder = 3; scene.add(pl)
+    return { pl, t, k }
+  })
+
 
   let w = 0, h = 0
   function resize() {
@@ -159,7 +200,7 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
   }
 
   const smooth = (a: number) => a * a * (3 - 2 * a)
-  let cx = 0, cy = 0, now = 0, cur = 0, dt = 1 / 60
+  let cx = 0, cy = 0, now = 0, dt = 1 / 60
   const hmi = screenUI()
   // f: scroll position in chambers; px, py: pointer, -1..1; t: seconds
   function update(f: number, px: number, py: number, t: number) {
@@ -202,19 +243,46 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
       }
       s.spin.rotation.y = s.url ? -0.42 - 0.12 * near + s.rot + Math.sin(t * 0.3 + i) * 0.01 * near : 0 // a photograph only faces front
     })
-    // the ring draws itself in around the hovered chamber, keeps turning, and undraws when the pointer leaves
-    ringP += ((ringOn >= 0 ? 1 : 0) - ringP) * 0.06
-    const rs = slots[ringOn >= 0 ? ringOn : cur]
-    if (ringP > 0.01 && rs?.model) {
-      if (ring.parent !== rs.group) rs.group.add(ring)
-      const box = new THREE.Box3().setFromObject(rs.spin), sz = box.getSize(new THREE.Vector3())
-      ring.scale.setScalar(Math.hypot(sz.x, sz.z) * 0.46)
-      ring.position.y = sz.y * 0.46
-      ring.rotation.y = t * 0.22
-      loops.forEach((m, k) => { const n = m.geometry.index.count; m.geometry.setDrawRange(0, Math.floor(n * smooth(Math.min(1, Math.max(0, ringP * 1.15 - k * 0.15))) / 6) * 6) })
-      ring.visible = true
-    } else ring.visible = false
-    cur = Math.round(f)
+    // the door eases open while the pointer is on its chamber, and closes after
+    slots.forEach((s, i) => {
+      if (!s.door) return
+      // only while it stands still: a drag or a spin closes it again
+      const still = !s.held && Math.abs(s.vel) < 0.3
+      const want = i === hoverIdx && Math.abs(i - f) < 0.35 && still ? 1 : 0
+      s.doorOpen += (want - s.doorOpen) * (1 - Math.exp(-dt * (want ? 2.4 : 3.6)))
+      s.door.quaternion.copy(swing.setFromAxisAngle(UP, s.doorSign * 0.15 * smooth(Math.min(1, s.doorOpen)))).multiply(s.doorQ) // about 9 degrees: ajar, not open
+    })
+    // mist from the opened gap
+    const hs = slots[hoverIdx]
+    const calm = !!hs && !hs.held && Math.abs(hs.vel) < 0.3
+    if (puffs.length && hs?.door && hs.edge && hs.doorOpen > 0.35 && calm) {
+      emit += dt * 9 * Math.min(1, hs.doorOpen) // a medium breath, not a flood
+      while (emit >= 1) {
+        emit -= 1
+        const pf = puffs.find((q) => !q.sp.visible); if (!pf) break
+        const e = hs.edge, y = e.y0 + (0.12 + Math.random() * 0.8) * (e.y1 - e.y0)
+        hs.door.parent.localToWorld(tmp.set(e.x, y, e.z + 0.02))
+        pf.sp.position.copy(tmp); pf.sp.visible = true
+        pf.age = 0; pf.life = 1.8 + Math.random() * 1.0
+        pf.v.set((Math.random() - 0.5) * 0.12, -0.12 - Math.random() * 0.12, 0.12 + Math.random() * 0.14) // it slips out of the gap and falls close to the door
+        pf.s0 = hs.h * 0.04; pf.s1 = hs.h * (0.16 + Math.random() * 0.14)
+      }
+    }
+    for (const pf of puffs) {
+      if (!pf.sp.visible) continue
+      pf.age += dt * (calm ? 1 : 4) // when the chamber is turned, what is out fades away quickly
+      if (pf.age >= pf.life) { pf.sp.visible = false; continue }
+      pf.v.y -= 0.55 * dt // cold air sinks
+      pf.v.multiplyScalar(Math.exp(-dt * 0.7))
+      pf.sp.position.addScaledVector(pf.v, dt)
+      if (pf.sp.position.y < H * 0.06) { pf.sp.position.y = H * 0.06; pf.v.y = 0; pf.v.x *= 1.01; pf.v.z *= 1.01 } // and rolls over the floor
+      const u = pf.age / pf.life
+      const sz = pf.s0 + (pf.s1 - pf.s0) * smooth(Math.min(1, u * 1.4))
+      pf.sp.scale.set(sz * 1.5, sz, 1)
+      ;(pf.sp.material as any).opacity = 0.34 * Math.sin(Math.PI * Math.min(1, u * 1.15)) * (1 - u * 0.4)
+    }
+    for (const hz of hazes) hz.t.offset.x += dt * (0.003 + hz.k * 0.002)
+
     if (t - hmi.at > 0.2) hmi.draw(t)
     renderer.render(scene, camera)
     now = t
@@ -240,7 +308,7 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
   const intro = (i: number) => { const s = slots[i]; if (s?.url) { s.vel = 0; s.touched = now - 1 } } // from facing you, one easy turn to its usual three-quarter pose
 
   function dispose() {
-    renderer.dispose(); pmrem.dispose(); blobTex.dispose(); draco.dispose(); hmi.tex.dispose()
+    renderer.dispose(); pmrem.dispose(); blobTex.dispose(); draco.dispose(); hmi.tex.dispose(); puffTex.dispose(); hazeTex.dispose(); hazes.forEach((h) => h.t.dispose())
   }
   return { ready, update, pick, spin, release, hover, intro, dispose }
 }

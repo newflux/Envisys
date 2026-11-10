@@ -201,9 +201,9 @@ function tick() {
   const k = smooth(clamp01((rise - 0.35) / 0.5))
   colRef.value!.style.setProperty('--ink', `rgb(${lerp(255, 13, k)},${lerp(255, 35, k)},${lerp(255, 64, k)})`)
   colRef.value!.style.setProperty('--logo', String(1 - 0.9 * k))
-  navLogo ??= document.querySelector('.Header_brandLogo__AXo7t')
+  navLogo ??= document.querySelector('.Header_brandLogo__AXo7t .lg-ink')
   const inv = navOnDark ? 0 : k * (1 - (first.top > 0 ? dim : 0))
-  if (navLogo) navLogo.style.filter = inv > 0.01 ? `invert(${(inv * 0.92).toFixed(3)})` : ''
+  if (navLogo) navLogo.style.filter = inv > 0.01 ? `invert(${(inv * 0.92).toFixed(3)})` : '' // the white layer only; the blue SYS stays blue
 }
 
 onMounted(() => gsap.ticker.add(tick))

@@ -2,7 +2,7 @@
   <div class="navbar-root">
     <SearchOverlay :open="searchOpen" @close="searchOpen = false" />
     <!-- softens whatever is behind the open menu, so the page never fights with it -->
-    <div class="Nav_scrim" :class="{ on: isCompanyOpen }" aria-hidden="true"></div>
+    <div class="Nav_scrim" :class="{ on: isCompanyOpen || isProductsOpen }" aria-hidden="true"></div>
     <!-- Top Bar with Left Brand Logo & Mobile Trigger -->
     <div ref="topBarRef" class="Header_topBar__t3Nfy">
       <a 
@@ -11,58 +11,8 @@
         href="/"
         @click.prevent="onLogoClick"
       >
-        <!-- 7-Arc Sphere Brandmark with Animated Alternating ClipPaths -->
-        <svg 
-          class="BrandLogo_logo__q8D51" 
-          width="36" 
-          height="31.5" 
-          viewBox="0 0 24 21" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <clipPath id="nav-clip-0"><rect ref="clipRect0" x="0" y="0" width="100%" height="21"></rect></clipPath>
-            <clipPath id="nav-clip-1"><rect ref="clipRect1" x="100%" y="0" width="100%" height="21"></rect></clipPath>
-            <clipPath id="nav-clip-2"><rect ref="clipRect2" x="0" y="0" width="100%" height="21"></rect></clipPath>
-            <clipPath id="nav-clip-3"><rect ref="clipRect3" x="100%" y="0" width="100%" height="21"></rect></clipPath>
-            <clipPath id="nav-clip-4"><rect ref="clipRect4" x="0" y="0" width="100%" height="21"></rect></clipPath>
-            <clipPath id="nav-clip-5"><rect ref="clipRect5" x="100%" y="0" width="100%" height="21"></rect></clipPath>
-            <clipPath id="nav-clip-6"><rect ref="clipRect6" x="0" y="0" width="100%" height="21"></rect></clipPath>
-          </defs>
-          <path clip-path="url(#nav-clip-0)" d="M4.93561 20.277C8.90405 18.1244 14.4418 18.1244 18.4102 20.277L18.3688 20.4163C17.825 20.2601 17.2756 20.1246 16.7224 20.0098C13.4088 19.2986 9.93896 19.2986 6.62535 20.0098C6.07214 20.1246 5.52269 20.262 4.97889 20.4163L4.9375 20.277H4.93561Z" fill="#F8F8F8"></path>
-          <path clip-path="url(#nav-clip-1)" d="M2.54027 18.0303C7.96888 14.7186 15.3789 14.7186 20.8075 18.0303L20.751 18.1639C20.0322 17.8666 19.3003 17.607 18.557 17.3831C14.105 16.0245 9.24465 16.0245 4.79074 17.3831C4.04749 17.6051 3.31364 17.8666 2.59672 18.1639L2.54027 18.0303Z" fill="#F8F8F8"></path>
-          <path clip-path="url(#nav-clip-2)" d="M1.04246 15.62C7.22186 11.3844 16.1259 11.3844 22.3053 15.62L22.2394 15.7479C21.4228 15.3377 20.5817 14.9783 19.7218 14.6679C14.5792 12.7824 8.76858 12.7824 3.62599 14.6679C2.76607 14.9783 1.92684 15.3377 1.10832 15.7479L1.04246 15.62Z" fill="#F8F8F8"></path>
-          <path clip-path="url(#nav-clip-3)" d="M0.186365 12.9706C6.75903 8.12719 16.587 8.12719 23.1596 12.9706L23.0881 13.0967C22.2188 12.615 21.3194 12.1878 20.3955 11.8209C14.8671 9.58737 8.47887 9.58737 2.95053 11.8209C2.02664 12.1878 1.1272 12.6131 0.257868 13.0967L0.186365 12.9706Z" fill="#F8F8F8"></path>
-          <path clip-path="url(#nav-clip-4)" d="M0 9.96744C6.65545 4.98479 16.6904 4.98479 23.3458 9.96744L23.2743 10.0916C22.3937 9.59299 21.4811 9.1508 20.544 8.7707C14.9329 6.45813 8.41481 6.45813 2.80368 8.7707C1.86661 9.1508 0.954005 9.59111 0.073385 10.0916L0.00188167 9.96744H0Z" fill="#F8F8F8"></path>
-          <path clip-path="url(#nav-clip-5)" d="M0.811009 6.41106C7.09954 2.01548 16.2482 2.01548 22.5367 6.41106L22.469 6.53901C21.6373 6.10999 20.7793 5.73178 19.9043 5.40813C14.6563 3.43238 8.69143 3.43238 3.44346 5.40813C2.5666 5.73178 1.71045 6.10999 0.878749 6.53901L0.811009 6.41106Z" fill="#F8F8F8"></path>
-          <path clip-path="url(#nav-clip-6)" d="M4.03998 1.90448C8.56539 -0.633887 14.7805 -0.635768 19.3059 1.90448L19.2589 2.04184C18.6474 1.83862 18.0283 1.66175 17.4036 1.50933C13.6591 0.581671 9.68686 0.581671 5.94235 1.50933C5.31763 1.65987 4.69856 1.83862 4.08702 2.04184L4.03998 1.90448Z" fill="#F8F8F8"></path>
-        </svg>
-
-        <!-- Brand Text Wordmark (ENVISYS) - Big, Bold, Clean Architectural Reveal -->
-        <div class="BrandLogo_lottie__SZi57">
-          <svg 
-            class="BrandLogo_envisysLettersSvg" 
-            viewBox="0 0 160 32" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <clipPath id="envisys-wipe-clip">
-                <rect ref="wordmarkClipRef" x="0" y="0" width="100%" height="32" />
-              </clipPath>
-            </defs>
-            <text 
-              clip-path="url(#envisys-wipe-clip)" 
-              x="0" 
-              y="24" 
-              font-family="'Monument Extended', sans-serif" 
-              font-weight="800" 
-              font-size="16" 
-              fill="#F8F8F8" 
-              letter-spacing="0.03em"
-            >ENVISYS</text>
-          </svg>
-        </div>
+        <!-- the Envisys logo: its letters rise into place on load and when you click back to the top -->
+        <BrandMark ref="brandRef" mono class="nav-brand" />
       </a>
 
       <!-- Mobile Hamburger Button -->
@@ -106,7 +56,7 @@
             <li 
               class="Nav_item__uIn_C" 
               :class="{ 'is-dimmed': activeIndex !== null && activeIndex !== 1 }"
-              @mouseenter="onItemEnter(1)"
+              @mouseenter="openProductsMenu"
             >
               <a class="Nav_link__Vx_8M" href="/products">
                 <span class="Nav_label__EHdHO">
@@ -137,6 +87,19 @@
               <a class="Nav_link__Vx_8M" href="/industries">
                 <span class="Nav_label__EHdHO">
                   <div class="line-mask"><div class="line">industries</div></div>
+                </span>
+              </a>
+            </li>
+
+            <!-- 3b. The in-stock chart: standard models ready to ship -->
+            <li 
+              class="Nav_item__uIn_C" 
+              :class="{ 'is-dimmed': activeIndex !== null && activeIndex !== 5 }"
+              @mouseenter="onItemEnter(5)"
+            >
+              <a class="Nav_link__Vx_8M" href="/in-stock">
+                <span class="Nav_label__EHdHO">
+                  <div class="line-mask"><div class="line">in stock</div></div>
                 </span>
               </a>
             </li>
@@ -200,6 +163,40 @@
             </li>
           </ul>
         </nav>
+
+        <!-- Products menu: pick a kind of test on the left, see its chambers (photo, name, one line) in the middle; quick links on the right -->
+        <div class="Nav_mega" :class="{ on: isProductsOpen }" @mouseenter="keepProductsMenu" @mouseleave="onMegaLeave">
+          <div class="Nav_megaIn">
+            <div class="mg-groups">
+              <span class="mg-eye">Products by test</span>
+              <button v-for="g in groups" :key="g" :class="{ on: g === megaGroup }" @mouseenter="megaGroup = g" @focus="megaGroup = g" @click="megaGroup = g">
+                <span>{{ g }}</span><small>{{ products.filter((q) => q.group === g).length }}</small>
+              </button>
+              <a class="mg-all" href="/products">All {{ products.length }} series <i>→</i></a>
+            </div>
+            <div class="mg-list">
+              <div class="mg-head"><b>{{ megaGroup }}</b><span>{{ groupLine[megaGroup] }}</span></div>
+              <div class="mg-grid">
+                <a v-for="p in products.filter((q) => q.group === megaGroup)" :key="p.slug" class="mg-item" :href="`/products/${p.slug}`">
+                  <span class="mg-th"><img :src="img(p, 'hero')" alt="" loading="lazy" /></span>
+                  <span class="mg-tx"><b>{{ p.name }}</b><small>{{ p.tagline }}</small></span>
+                </a>
+              </div>
+            </div>
+            <div class="mg-side">
+              <span class="mg-eye">Find a chamber</span>
+              <button @click="isProductsOpen = false; searchOpen = true">Search by model or test</button>
+              <a href="/in-stock">In stock, ready to ship</a>
+              <span class="mg-eye">Services</span>
+              <a href="/verticals">Vistara testing lab (NABL)</a>
+              <a href="/verticals">Rentals</a>
+              <a href="/verticals">Refurbishment and buy-back</a>
+              <a href="/verticals">After-sales and AMC</a>
+              <span class="mg-eye">Documents</span>
+              <a href="/resources">Brochures and guides</a>
+            </div>
+          </div>
+        </div>
 
         <!-- Company Dropdown Submenu Cards (Exact Architecture: Wide, Spacious, Aesthetic Floating Cards) -->
         <div 
@@ -297,6 +294,9 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import { scrollToTop } from '../utils/scrollTop'
 import SearchOverlay from './SearchOverlay.vue'
+import BrandMark from './BrandMark.vue'
+import { products, groups, img } from '../config/products'
+import type { Group } from '../config/products'
 
 defineEmits<{
   (e: 'build-click'): void
@@ -304,6 +304,16 @@ defineEmits<{
 
 // UI state
 const isCompanyOpen = ref(false)
+const isProductsOpen = ref(false)
+const megaGroup = ref<Group>(groups[0])
+// one plain line under each kind of test, in the products menu
+const groupLine: Record<Group, string> = {
+  'Climatic & thermal': 'Temperature and humidity, from a bench-top chamber to a walk-in room.',
+  'Shock, altitude & vacuum': 'Sudden temperature swings, low pressure and outgassing.',
+  'Vibration & mechanical': 'Shaking, dropping and loading, at temperature.',
+  'Ingress, corrosion & light': 'Water, dust, salt fog, sunlight and UV.',
+  'Energy & mobility': 'Batteries, electric motors and solar modules.'
+}
 const isMobileOpen = ref(false)
 const searchOpen = ref(false)
 const isContactHovered = ref(false)
@@ -311,7 +321,7 @@ const activeIndex = ref<number | null>(null)
 const hoveredSubIndex = ref<number | null>(null)
 let closeTimer: any = null
 // the landing page draws its giant wordmark in a canvas behind the menu; tell the page so it can step back
-watch(isCompanyOpen, (v) => { document.documentElement.dataset.menu = v ? '1' : '' })
+watch([isCompanyOpen, isProductsOpen], ([a, b]) => { document.documentElement.dataset.menu = a || b ? '1' : '' })
 watch(isMobileOpen, (v) => { document.documentElement.dataset.mnav = v ? '1' : ''; (window as any).lenisInstance?.[v ? 'stop' : 'start']?.() })
 
 // DOM refs
@@ -320,21 +330,7 @@ const headerRef = ref<HTMLElement | null>(null)
 const navBgRef = ref<HTMLElement | null>(null)
 const submenuRef = ref<HTMLElement | null>(null)
 
-// 7 Arcs Clip Rects
-const clipRect0 = ref<SVGRectElement | null>(null)
-const clipRect1 = ref<SVGRectElement | null>(null)
-const clipRect2 = ref<SVGRectElement | null>(null)
-const clipRect3 = ref<SVGRectElement | null>(null)
-const clipRect4 = ref<SVGRectElement | null>(null)
-const clipRect5 = ref<SVGRectElement | null>(null)
-const clipRect6 = ref<SVGRectElement | null>(null)
-
-// Wordmark Clip Rect for ENVISYS (Progressive sweep reveal matching reference)
-const wordmarkClipRef = ref<SVGRectElement | null>(null)
-
-function getArcClipRects(): (SVGRectElement | null)[] {
-  return [clipRect0.value, clipRect1.value, clipRect2.value, clipRect3.value, clipRect4.value, clipRect5.value, clipRect6.value]
-}
+const brandRef = ref<InstanceType<typeof BrandMark> | null>(null)
 
 // ── Hover Physics for Nav Items ────────────────────────────────
 function onItemEnter(index: number) {
@@ -343,6 +339,22 @@ function onItemEnter(index: number) {
   if (index !== 4) {
     isCompanyOpen.value = false
   }
+  if (index !== 1) isProductsOpen.value = false
+}
+
+// the products menu: opens a beat after the pointer arrives, stays while it moves into the panel
+function openProductsMenu() {
+  clearTimeout(closeTimer)
+  clearTimeout(openTimer)
+  activeIndex.value = 1
+  isCompanyOpen.value = false
+  if (window.matchMedia('(max-width: 768px)').matches) return // phones use the plain list
+  openTimer = setTimeout(() => { isProductsOpen.value = true }, 110)
+}
+function keepProductsMenu() { clearTimeout(closeTimer); isProductsOpen.value = true; activeIndex.value = 1 }
+function onMegaLeave() {
+  clearTimeout(closeTimer)
+  closeTimer = setTimeout(() => { isProductsOpen.value = false; if (activeIndex.value === 1) activeIndex.value = null }, 220)
 }
 
 let openTimer: any = null
@@ -351,6 +363,7 @@ function openCompanyMenu(index: number) {
   clearTimeout(openTimer)
   activeIndex.value = index
   if (isCompanyOpen.value) return
+  isProductsOpen.value = false
   openTimer = setTimeout(() => { isCompanyOpen.value = true; stagger() }, 110)
 }
 function stagger() {
@@ -392,50 +405,14 @@ function onNavWrapperLeave() {
   clearTimeout(closeTimer)
   closeTimer = setTimeout(() => {
     isCompanyOpen.value = false
+    isProductsOpen.value = false
     activeIndex.value = null
   }, 200)
 }
 
-// ── Top Left Brand Logo Animation (Arc Sweeping + Smooth ENVISYS Wordmark Reveal) ──
+// ── Top Left Brand Logo Animation: the letters rise from behind the baseline, the blocks drop in ──
 function playLogoAnim() {
-  // 1. 7 Arcs alternating sweep (even: left->right, odd: right->left)
-  const arcRects = getArcClipRects()
-  const duration = 0.95
-  const delayStep = 0.04
-
-  arcRects.forEach((rect, i) => {
-    if (!rect) return
-    gsap.killTweensOf(rect)
-    const isEven = i % 2 === 0
-    if (isEven) {
-      gsap.fromTo(
-        rect,
-        { attr: { width: '0%', x: '0%' } },
-        { attr: { width: '100%', x: '0%' }, duration, delay: i * delayStep, ease: 'power2.out' }
-      )
-    } else {
-      gsap.fromTo(
-        rect,
-        { attr: { width: '0%', x: '100%' } },
-        { attr: { width: '100%', x: '0%' }, duration, delay: i * delayStep, ease: 'power2.out' }
-      )
-    }
-  })
-
-  // 2. Progressive sweep reveal for ENVISYS wordmark
-  if (wordmarkClipRef.value) {
-    gsap.killTweensOf(wordmarkClipRef.value)
-    gsap.fromTo(
-      wordmarkClipRef.value,
-      { attr: { width: '0%' } },
-      { 
-        attr: { width: '100%' }, 
-        duration: 0.85, 
-        delay: 0.15, 
-        ease: 'power2.out' 
-      }
-    )
-  }
+  brandRef.value?.play(0.1)
 }
 
 // ── Global Entrance Choreography (animIn) ──────────────────────
@@ -603,36 +580,13 @@ defineExpose({
 .Header_brandLogo__AXo7t {
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
   cursor: pointer;
-  transition: opacity 0.25s ease;
 }
-
-.Header_brandLogo__AXo7t:hover {
-  opacity: 0.85;
-}
-
-.BrandLogo_logo__q8D51 {
-  width: 31px;
-  height: 27px;
-  display: block;
-  flex-shrink: 0;
-}
-
-.BrandLogo_lottie__SZi57 {
-  width: 155px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  overflow: visible;
-}
-
-.BrandLogo_envisysLettersSvg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
+/* hover dims the two layers themselves: opacity on the link would stop the ink layer blending with the page */
+.Header_brandLogo__AXo7t .lg-ink, .Header_brandLogo__AXo7t .lg-blue { transition: opacity 0.25s ease; }
+.Header_brandLogo__AXo7t:hover .lg-ink, .Header_brandLogo__AXo7t:hover .lg-blue { opacity: 0.85; }
+.nav-brand { width: 112px; }
 
 /* Mobile Hamburger Button */
 .mobile-hamburger {
@@ -693,7 +647,7 @@ defineExpose({
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  width: 535px;
+  width: 650px; /* room for the five links, the search and the button, with a little to spare */
 }
 
 /* Main Nav Capsule (Long, Spacious, Architectural Rounded Bar) */
@@ -751,6 +705,7 @@ defineExpose({
 }
 
 .Nav_link__Vx_8M {
+  position: relative;
   display: block;
   padding: 5.6px 11px;
   color: rgba(255, 255, 255, 0.7) !important;
@@ -761,6 +716,9 @@ defineExpose({
   white-space: nowrap;
   transition: color 0.25s ease;
 }
+
+/* an invisible, taller target: the whole height of the bar is clickable, not just the letters */
+.Nav_link__Vx_8M::after { content: ''; position: absolute; left: 0; right: 0; top: -14px; bottom: -14px; }
 
 .Nav_link__Vx_8M:hover {
   color: #ffffff !important;
@@ -924,10 +882,51 @@ defineExpose({
 .Nav_search { list-style: none; display: flex; align-items: center; }
 .Nav_searchBtn { width: 34px; height: 34px; margin: 0 4px 0 2px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: #fff; opacity: 0.7; cursor: pointer; transition: background 0.3s ease, opacity 0.3s ease; }
 .Nav_searchBtn:hover { background: rgba(255, 255, 255, 0.14); opacity: 1; }
-.Nav_scrim { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0; background: radial-gradient(70% 90% at 85% 0%, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5) 70%); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: opacity 0.45s ease; }
+.Nav_scrim { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0; background: radial-gradient(80% 100% at 80% 0%, rgba(2, 4, 8, 0.86), rgba(2, 4, 8, 0.7) 75%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: opacity 0.45s ease; }
 .Nav_scrim.on { opacity: 1; }
 .CompanySubmenuItem_sub { display: block; margin-top: 3px; font-size: 9.5px; letter-spacing: 0.1em; opacity: 0.5; text-transform: uppercase; transition: opacity 0.3s ease; }
 .CompanySubmenuItem_submenuItem__irMc_:hover .CompanySubmenuItem_sub { opacity: 0.65; }
+/* the products menu: three panes in a clear order: the kind of test, its chambers, quick links. A solid panel on a dimmed page,
+   set in the site's clean grotesk (names) and Geist (text), with normal letter-spacing, so it reads calmly. */
+.Nav_wrapper__EfAHX { position: relative; }
+.Nav_mega { position: absolute; top: calc(100% + 12px); right: 0; z-index: 1001; width: min(1180px, calc(100vw - 48px)); opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.9, 0.2, 1), visibility 0s linear 0.25s; }
+.Nav_mega.on { opacity: 1; visibility: visible; transform: none; transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.Nav_mega::before { content: ''; position: absolute; top: -14px; left: 0; right: 0; height: 14px; }
+.Nav_megaIn { display: grid; grid-template-columns: 300px minmax(0, 1fr) 260px; min-height: 440px; border-radius: 14px; overflow: hidden; background: #101216; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55); color: #fff; text-transform: none; letter-spacing: 0; font-family: 'Geist', var(--font-body), sans-serif; }
+.mg-eye { display: block; margin: 0 0 12px; font-family: 'Geist Mono', var(--font-body), monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+
+/* 1 · the kinds of test */
+.mg-groups { display: flex; flex-direction: column; gap: 2px; padding: 28px 14px 22px; background: #14161b; border-right: 1px solid rgba(255, 255, 255, 0.08); }
+.mg-groups .mg-eye { padding: 0 14px; }
+.mg-groups button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 14px 14px; border: 0; border-radius: 10px; background: none; color: rgba(255, 255, 255, 0.62); font-family: 'LayGrotesk-Semibold', 'Geist', sans-serif; font-size: 19px; line-height: 1.2; letter-spacing: -0.01em; text-align: left; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; }
+.mg-groups button small { font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0; color: rgba(255, 255, 255, 0.4); }
+.mg-groups button.on { background: rgba(255, 255, 255, 0.09); color: #fff; }
+.mg-groups button.on small { color: #ff6a1a; }
+.mg-all { margin-top: auto; padding: 16px 14px 0; color: #fff; font-family: 'Geist', sans-serif; font-size: 15px; text-decoration: none; }
+.mg-all i { font-style: normal; color: #ff6a1a; }
+
+/* 2 · the chambers of the chosen kind */
+.mg-list { padding: 28px 30px 26px; }
+.mg-head { display: flex; flex-direction: column; gap: 8px; padding-bottom: 18px; margin-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.mg-head b { font-weight: 400; font-family: 'LayGrotesk-Semibold', 'Geist', sans-serif; font-size: 30px; line-height: 1.1; letter-spacing: -0.015em; }
+.mg-head span { font-family: 'Geist', sans-serif; font-size: 15px; line-height: 1.45; color: rgba(255, 255, 255, 0.62); }
+.mg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; }
+.mg-item { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 16px; padding: 10px; border-radius: 12px; color: #fff; text-decoration: none; transition: background 0.2s ease; }
+.mg-item:hover { background: rgba(255, 255, 255, 0.07); }
+.mg-th { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 10px; background: linear-gradient(180deg, #eaf1f9, #d3e0ef); overflow: hidden; }
+.mg-th img { width: 86%; height: 86%; object-fit: contain; }
+.mg-tx { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mg-tx b { font-weight: 400; font-family: 'LayGrotesk-Semibold', 'Geist', sans-serif; font-size: 17px; line-height: 1.2; letter-spacing: -0.005em; }
+.mg-tx small { font-family: 'Geist', sans-serif; font-size: 14px; line-height: 1.4; color: rgba(255, 255, 255, 0.6); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.mg-item:hover .mg-tx b { color: #ff8a4a; }
+
+/* 3 · quick links */
+.mg-side { display: flex; flex-direction: column; align-items: flex-start; padding: 28px 26px 22px; border-left: 1px solid rgba(255, 255, 255, 0.08); }
+.mg-side .mg-eye:not(:first-child) { margin-top: 24px; }
+.mg-side a, .mg-side button { padding: 7px 0; border: 0; background: none; color: rgba(255, 255, 255, 0.88); font-family: 'Geist', sans-serif; font-size: 16px; line-height: 1.35; text-align: left; text-decoration: none; cursor: pointer; transition: color 0.2s ease; }
+.mg-side a:hover, .mg-side button:hover { color: #ff8a4a; }
+@media (max-width: 768px) { .Nav_mega { display: none; } }
+
 .Nav_submenu__EKbU9 {
   width: 100%;
   margin-top: 12.35px;

@@ -22,9 +22,10 @@ const click = (e: MouseEvent) => { if (props.href === '#') e.preventDefault(); e
 </script>
 
 <style scoped>
-/* the page dissolves into the footer's dark, like smoke rising from below */
-.nu-sec.solid { background: #04060a; }
-.nu-sec { position: relative; padding-top: 22vh; color: #eef3fa; background: linear-gradient(180deg, rgba(4, 6, 10, 0) 0%, rgba(4, 6, 10, 0.55) 26%, rgba(4, 6, 10, 0.92) 52%, #04060a 70%); }
+/* the page ends on a clean edge: the dark footer block rises over it with a large rounded top (a fade from pale blue to black only ever looked grey) */
+.nu-sec { position: relative; margin-top: 8vh; padding-top: 10vh; color: #eef3fa; background: #04060a; border-radius: clamp(28px, 4.5vw, 72px) clamp(28px, 4.5vw, 72px) 0 0; box-shadow: 0 -40px 80px -50px rgba(13, 35, 64, 0.45); }
+/* when the page above is already dark there is no edge to draw */
+.nu-sec.solid { margin-top: 0; padding-top: 22vh; border-radius: 0; box-shadow: none; }
 .nu { position: relative; display: grid; grid-template-columns: 9vw 1fr auto; align-items: center; gap: 2vw; margin: 0 5vw; padding: 10vh 0 12vh; color: inherit; text-decoration: none; }
 .nu-line { position: absolute; left: 0; right: 0; top: 10vh; height: 1px; margin-top: -4.5vh; background: currentColor; opacity: 0.16; }
 .nu-line u { position: absolute; inset: 0; background: #ff6a1a; transform: scaleX(0); transform-origin: 0 0; transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.2, 1); }

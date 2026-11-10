@@ -30,3 +30,14 @@ tools/
 
 # CAD sources for tools/step_to_obj.py: large, never deployed
 /cad/
+
+# raw sources and internal files: not part of the site (several GB)
+frontend/public/pics/
+frontend/public/about us pics/
+frontend/public/models/*.STEP
+frontend/public/models/*.SLDASM
+frontend/public/*.pdf
+frontend/graphify-out/
+image-sheets/
+*.xlsx
+~$*

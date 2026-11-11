@@ -41,3 +41,6 @@ frontend/graphify-out/
 image-sheets/
 *.xlsx
 ~$*
+
+# raw video sources (the site plays the encoded versions in public/media)
+frontend/public/videos/C0512.mp4

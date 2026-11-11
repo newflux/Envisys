@@ -188,10 +188,10 @@
               <button @click="isProductsOpen = false; searchOpen = true">Search by model or test</button>
               <a href="/in-stock">In stock, ready to ship</a>
               <span class="mg-eye">Services</span>
-              <a href="/verticals">Vistara testing lab (NABL)</a>
-              <a href="/verticals">Rentals</a>
-              <a href="/verticals">Refurbishment and buy-back</a>
-              <a href="/verticals">After-sales and AMC</a>
+              <a :href="VISTARA_URL || '/verticals/testing'" :target="VISTARA_URL ? '_blank' : undefined" rel="noopener">Vistara testing lab (NABL)</a>
+              <a href="/verticals/rentals">Rentals</a>
+              <a href="/verticals/refurb">Refurbishment and buy-back</a>
+              <a href="/verticals/aftersales">After-sales and AMC</a>
               <span class="mg-eye">Documents</span>
               <a href="/resources">Brochures and guides</a>
             </div>
@@ -295,6 +295,7 @@ import gsap from 'gsap'
 import { scrollToTop } from '../utils/scrollTop'
 import SearchOverlay from './SearchOverlay.vue'
 import BrandMark from './BrandMark.vue'
+import { VISTARA_URL } from '../config/verticals'
 import { products, groups, img } from '../config/products'
 import type { Group } from '../config/products'
 

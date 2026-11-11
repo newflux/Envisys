@@ -20,7 +20,7 @@
           <b>{{ c.h }}</b>
           <template v-for="l in c.links" :key="l.t">
             <button v-if="l.build" class="fn-a" @click="$emit('build')">{{ l.t }}</button>
-            <a v-else-if="l.href" class="fn-a" :href="l.href">{{ l.t }}</a>
+            <a v-else-if="l.href" class="fn-a" :href="l.href" :target="l.href.startsWith('http') ? '_blank' : undefined" rel="noopener">{{ l.t }}</a>
             <span v-else>{{ l.t }}</span>
           </template>
         </div>
@@ -53,6 +53,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import { vMagnetic } from '../utils/magnetic'
+import { VISTARA_URL } from '../config/verticals'
 import { scrollToTop } from '../utils/scrollTop'
 
 defineEmits<{ (e: 'build'): void }>()
@@ -85,7 +86,7 @@ function tick() {
 // Footer content. Phone, email and address are from envisystech.com/contact-us; page links are placeholders.
 const cols: { h: string; links: { t: string; href?: string; build?: boolean }[] }[] = [
   { h: 'Products', links: [{ t: 'Environmental', href: '/environmental-test-chambers' }, { t: 'Thermal shock', href: '/thermal-shock-chambers' }, { t: 'Altitude', href: '/altitude-test-chambers' }, { t: 'Salt spray', href: '/salt-spray-chambers' }, { t: 'Walk-in', href: '/environmental-walkin-chambers' }] },
-  { h: 'Services', links: [{ t: 'Testing lab', href: 'mailto:testlab@envisystech.com' }, { t: 'Rentals', href: 'mailto:help@envisystech.com' }, { t: 'After-sales', href: 'mailto:services@envisystech.com' }] },
+  { h: 'Services', links: [{ t: 'Testing lab', href: VISTARA_URL || '/verticals/testing' }, { t: 'Rentals', href: '/verticals/rentals' }, { t: 'After-sales', href: '/verticals/aftersales' }, { t: 'Express factory', href: '/verticals/express' }] },
   { h: 'Company', links: [{ t: 'About', href: '/about' }, { t: 'Industries', href: '/industries' }, { t: 'Careers', href: 'mailto:hrd@envisystech.com' }, { t: 'Contact', build: true }] },
   { h: 'Reach us', links: [{ t: '+91 99000 14150', href: 'tel:+919900014150' }, { t: 'enquiry@envisystech.com', href: 'mailto:enquiry@envisystech.com' }, { t: 'Peenya, Bengaluru 560058' }] }
 ]

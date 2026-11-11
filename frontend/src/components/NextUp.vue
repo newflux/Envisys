@@ -1,7 +1,7 @@
 <template>
   <!-- The link to the next page: a hairline that fills on hover, a small label, the title, and a round arrow. Quiet until touched. -->
   <div class="nu-sec" :class="{ solid }">
-  <a class="nu" :href="href" data-cursor="" @click="click">
+  <a class="nu" :href="href" :target="href.startsWith('http') ? '_blank' : undefined" rel="noopener" data-cursor="" @click="click">
     <i class="nu-line"><u></u></i>
     <span class="nu-l">{{ label }}</span>
     <span class="nu-m">
@@ -23,7 +23,7 @@ const click = (e: MouseEvent) => { if (props.href === '#') e.preventDefault(); e
 
 <style scoped>
 /* the page ends on a clean edge: the dark footer block rises over it with a large rounded top (a fade from pale blue to black only ever looked grey) */
-.nu-sec { position: relative; margin-top: 8vh; padding-top: 10vh; color: #eef3fa; background: #04060a; border-radius: clamp(28px, 4.5vw, 72px) clamp(28px, 4.5vw, 72px) 0 0; box-shadow: 0 -40px 80px -50px rgba(13, 35, 64, 0.45); }
+.nu-sec { position: relative; margin-top: 8vh; padding-top: 10vh; color: #eef3fa; background: #04060a; border-radius: clamp(28px, 4.5vw, 72px) clamp(28px, 4.5vw, 72px) 0 0; }
 /* when the page above is already dark there is no edge to draw */
 .nu-sec.solid { margin-top: 0; padding-top: 22vh; border-radius: 0; box-shadow: none; }
 .nu { position: relative; display: grid; grid-template-columns: 9vw 1fr auto; align-items: center; gap: 2vw; margin: 0 5vw; padding: 10vh 0 12vh; color: inherit; text-decoration: none; }

@@ -22,7 +22,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 
-// shortcut: the fallback is a stand-in clip from the hero composites, until the real film (the black, Blender-rendered product film) is at public/media/film.mp4
+// the landing film is public/media/film.mp4 (the tile assembly film, tools/tile-reveal, at its original speed); the hero composite below only stands in if that file is ever missing
 const props = withDefaults(defineProps<{ src?: string; fallback?: string; caption?: string }>(), { src: '/media/film.mp4', fallback: '/videos/composites/A02.mp4', caption: 'In the lab' })
 const cur = ref(props.src)
 const missing = ref(false)

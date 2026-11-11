@@ -1,69 +1,88 @@
 <template>
-  <PageShell title="Verticals" dark v-slot="{ contact }">
-    <!-- 1 · the tree: one company, six branches -->
-    <section class="vt-open">
-      <span class="ps-label rv"><i>+</i> Business verticals</span>
-      <h1 class="vt-h rv" style="--d: 0.06s">One stop for<br />environmental testing.</h1>
+  <PageShell title="Verticals" blue v-slot="{ contact }">
+    <!-- 1 · the dial: a chamber's temperature dial half risen from the bottom of the screen. The six verticals stand on its rim as
+         photo cards; scrolling (or dragging) turns the dial and the cards ride round with it. The card at the top is the one you open,
+         and its details are written on the dial's white face. -->
+    <section class="vd" ref="secRef">
+      <div class="vd-stage" :style="{ '--r': R + 'px', '--cy': cy + 'px', '--cw': cw + 'px' }" @pointerdown="down">
+        <header class="vd-head">
+          <span class="vd-eye"><i></i>Verticals</span>
+          <h1>Six ways to work with Envisys.</h1>
+        </header>
 
-      <div class="vt-tree rv" style="--d: 0.1s">
-        <svg class="vt-svg" :viewBox="`0 0 ${TW} ${TH}`" preserveAspectRatio="none" aria-hidden="true">
-          <path v-for="(v, i) in verticals" :key="v.id" :d="curve(i)" :class="{ on: hot === i }" pathLength="1" :style="{ '--i': i }" />
+        <div class="vd-count"><b>{{ String(active + 1).padStart(2, '0') }}</b><span>/ 06</span></div>
+        <p class="vd-hint">Scroll, or drag the dial</p>
+
+        <div class="vd-orbit">
+          <a v-for="(v, k) in verticals" :key="v.id" class="vd-card" :class="{ on: k === active }" v-bind="attrs(v)" data-cursor=""
+             :style="cardStyle(k)" @click="pick($event, k)">
+            <span class="vd-pic"><img :src="v.img" :alt="v.name" draggable="false" /><i v-if="v.external" class="vd-ext">Vistara ↗</i></span>
+            <span class="vd-cap"><em>0{{ k + 1 }}</em><b>{{ v.name }}</b><small>{{ v.short }}</small></span>
+          </a>
+        </div>
+
+        <svg class="vd-dial" :style="{ width: R * 2 + 'px', height: R * 2 + 'px', left: `calc(50% - ${R}px)`, top: cy - R + 'px' }" viewBox="-1000 -1000 2000 2000" aria-hidden="true">
+          <defs><radialGradient id="vd-face" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#d3e3f4" /></radialGradient></defs>
+          <circle r="1000" fill="#0d2340" />
+          <circle r="955" fill="url(#vd-face)" />
+          <g :transform="`rotate(${-d * STEP})`">
+            <line v-for="k in 180" :key="'k' + k" class="vd-knurl" x1="0" y1="-1000" x2="0" y2="-962" :transform="`rotate(${k * 2})`" />
+            <line v-for="k in 120" :key="'t' + k" class="vd-tick" :class="{ big: k % 5 === 0 }" x1="0" :y1="k % 5 === 0 ? -950 : -950" x2="0" :y2="k % 5 === 0 ? -916 : -934" :transform="`rotate(${k * 3})`" />
+            <circle v-for="(v, k) in verticals" :key="'n' + v.id" class="vd-mark" :class="{ on: k === active }" cx="0" cy="-886" r="13" :transform="`rotate(${k * STEP})`" />
+          </g>
+          <path class="vd-pointer" d="M0 -1040 L-26 -1090 L26 -1090 Z" />
         </svg>
-        <div class="vt-root"><b>Envisys</b><small>Technologies</small></div>
-        <button v-for="(v, i) in verticals" :key="v.id" class="vt-node" :class="{ on: hot === i }" :style="{ top: ny(i) + '%', '--i': i }" data-cursor="" @pointerenter="hot = i" @pointerleave="hot = -1" @click="goto(v.id)">
-          <em>0{{ i + 1 }}</em><span>{{ v.name }}</span><small>{{ v.line }}</small>
-        </button>
+
+        <div class="vd-info">
+          <Transition name="vd-swap" mode="out-in">
+            <div :key="active" class="vd-info-in">
+              <span class="vd-tagline">{{ cur.short }}</span>
+              <h2 v-html="hy(cur.name)"></h2>
+              <ul class="vd-chips"><li v-for="c in chips(cur)" :key="c">{{ c }}</li></ul>
+              <a class="vd-open" v-bind="attrs(cur)" data-cursor="">{{ cur.external ? 'Visit Vistara' : 'Open page' }} <svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4" /></svg></a>
+            </div>
+          </Transition>
+        </div>
       </div>
     </section>
 
-    <!-- 2 · the six chapters, joined by a line that fills as you read -->
-    <div class="vt-body" ref="bodyRef">
-      <div class="vt-spine"><i ref="fillRef"></i></div>
-
-      <section v-for="(v, i) in verticals" :key="v.id" :id="`v-${v.id}`" class="vt-ch">
-        <div class="vt-row">
-        <div class="vt-l">
-          <span class="vt-no rv">0{{ i + 1 }}<u></u></span>
-          <h2 class="vt-t rv" style="--d: 0.05s">{{ v.name }}</h2>
-          <p class="vt-d rv" style="--d: 0.1s">{{ v.text }}</p>
-          <button v-if="v.cta" class="ps-pill light rv" style="--d: 0.14s" data-cursor="" @click="contact()"><span>{{ v.cta }}</span><svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.3" /></svg></button>
+    <!-- 2 · one chamber, six ways we stand behind it. The drawing is traced from this very photograph, so a scan window that
+         opens on the drawing shows the real chamber exactly where it lands. -->
+    <section class="vx">
+      <div class="vx-in" ref="xrayRef">
+        <div class="vx-text">
+          <span class="vd-eye light rv"><i></i>fig. 02 · et300.xray</span>
+          <h2 class="rv" style="--d: 0.05s">One chamber.<br />Six ways we stand behind it.</h2>
+          <ul>
+            <li v-for="(c, k) in calls" :key="c.id" class="rv" :style="{ '--d': k * 0.05 + 's' }" :class="{ on: k === xi }" @pointerenter="hold(k)" @pointerleave="held = false">
+              <a v-bind="attrs(vOf(c.id))" data-cursor=""><em>0{{ k + 1 }}</em><b>{{ c.name }}</b><span>{{ c.part }}</span></a>
+            </li>
+          </ul>
         </div>
-
-        <ul class="vt-leaves">
-          <li v-for="(l, j) in v.leaves" :key="l.t" class="rv" :style="{ '--d': j * 0.06 + 's' }">
-            <component :is="l.href ? 'a' : 'div'" :href="l.href" :target="l.href && l.href.startsWith('http') ? '_blank' : undefined" rel="noopener" class="vt-leaf" data-cursor="">
-              <b>{{ l.t }}</b>
-              <span>{{ l.d }}</span>
-              <svg v-if="l.href" viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.2" /></svg>
-            </component>
-          </li>
-        </ul>
+        <div class="vx-stage">
+          <div class="vx-chamber">
+            <img class="vx-lines" src="/media/verticals/et-xray.webp" alt="" />
+            <img class="vx-real" src="/p/et/hero.webp" alt="Envisys ET300 environmental test chamber" :style="{ clipPath: scanClip }" />
+            <div class="vx-scan" :style="scanBox"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i><span>{{ xc.part }} · x: {{ coord(xc.r[0], 816) }} y: {{ coord(xc.r[1], 1600) }}</span></div>
+          </div>
+          <p class="vx-cap">ET 300 · 816 × 1600 · {{ String(xi + 1).padStart(2, '0') }}/06</p>
         </div>
+      </div>
+    </section>
 
-        <!-- the express factory carries the stock chart -->
-        <div v-if="v.id === 'express'" class="vt-stock rv">
-          <div class="vt-st-top">
-            <div><span class="ps-label"><i>+</i> In stock</span><h3>Standard models, ready to ship.</h3></div>
-            <span class="vt-demo">Sample statuses · connect to live stock</span>
-          </div>
-          <div class="vt-st-tools">
-            <div class="vt-chips"><button v-for="s in ['All', ...series]" :key="s" :class="{ on: sf === s }" data-cursor="" @click="sf = s">{{ s }}</button></div>
-            <input v-model="mq" type="text" placeholder="Find a model" spellcheck="false" />
-          </div>
-          <div class="vt-table">
-            <div class="vt-tr vt-th"><span>Series</span><span>Model</span><span>Status</span><span></span></div>
-            <div v-for="r in rows" :key="r.model" class="vt-tr">
-              <span>{{ r.series }}</span><span>{{ r.model }}</span>
-              <span class="st" :class="r.k"><i></i>{{ r.status }}</span>
-              <button data-cursor="" @click="contact()">Enquire</button>
-            </div>
-            <p v-if="!rows.length" class="vt-none">No model matches “{{ mq }}”.</p>
-          </div>
-        </div>
-      </section>
-    </div>
+    <!-- 3 · or say what you need -->
+    <section class="vn">
+      <span class="vd-eye rv"><i></i>Not sure where to start?</span>
+      <h2 class="rv" style="--d: 0.05s">Tell us what you need.</h2>
+      <ul>
+        <li v-for="(q, k) in needs" :key="q.id" class="rv" :style="{ '--d': k * 0.05 + 's' }">
+          <a v-bind="attrs(vOf(q.id))" data-cursor=""><span>{{ q.q }}</span><b>{{ vOf(q.id).name }}</b><svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.3" /></svg></a>
+        </li>
+      </ul>
+      <button class="ps-pill rv" data-cursor="" @click="contact()"><span>Or just talk to us</span><svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.3" /></svg></button>
+    </section>
 
-    <NextUp solid label="Next up" title="Guides and brochures" text="How to choose, rent and run environmental test equipment, from the engineers who build it." href="/resources" />
+    <NextUp label="Next up" title="Guides and brochures" text="How to choose, rent and run environmental test equipment." href="/resources" />
   </PageShell>
 </template>
 
@@ -72,150 +91,200 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import PageShell from '../components/PageShell.vue'
 import NextUp from '../components/NextUp.vue'
-import { products } from '../config/products'
+import { verticals, attrs, hy, type Vertical } from '../config/verticals'
 
-// Copy comes from the CII National Shining MSME Awards 2026 deck and envisystech.com.
-interface Leaf { t: string; d: string; href?: string }
-const verticals: { id: string; name: string; line: string; text: string; cta?: string; leaves: Leaf[] }[] = [
-  { id: 'design', name: 'Design & Build', line: 'Chambers and simulation systems', cta: 'Start a project',
-    text: 'Design and supply of environmental test chambers and simulation systems, standard or built to your specification, by a dedicated design and development team.',
-    leaves: [
-      { t: 'ET chambers', d: 'Temperature and humidity, 150 to 3000 L', href: '/products/et' }, { t: 'Thermal shock', d: 'Hot to cold in under ten seconds', href: '/products/ets' },
-      { t: 'Altitude', d: 'Low pressure with temperature', href: '/products/eta' }, { t: 'Mini chambers', d: 'Bench and floor models', href: '/products/mini' },
-      { t: 'Walk-in rooms', d: 'Large specimens, built to order', href: '/products/walk-in' }, { t: 'Everything else', d: 'The full catalogue of twenty-four series', href: '/products' }
-    ] },
-  { id: 'testing', name: 'Testing Services', line: 'Vistara, NABL-accredited lab', cta: 'Book a test',
-    text: 'Vistara is the testing lab of Envisys in Peenya, accredited by NABL under the environmental testing discipline. Product qualification, reliability and performance testing, run by the people who build the chambers.',
-    leaves: [
-      { t: 'Temperature & humidity', d: 'MIL-810, DO-160, IEC 60068-2 series' }, { t: 'Salt spray', d: 'ASTM B-117, ISO 9227, MIL-810' },
-      { t: 'Dust', d: 'IP tests to IEC 60529' }, { t: 'Rain', d: 'IP tests, up to a 3500 L chamber' },
-      { t: 'ESS: HALT & HASS', d: 'Stress screening, in the scope of the lab' }, { t: 'Prototype development', d: 'Material analysis and proto-type testing' }
-    ] },
-  { id: 'rentals', name: 'Rentals', line: 'Chambers, by the week', cta: 'Ask about a rental',
-    text: 'When the test is short, or the budget is for a project and not a purchase, rent the chamber. Envisys has a dedicated rental division.',
-    leaves: [
-      { t: 'Climatic chambers', d: 'Short-term testing, without owning one', href: 'https://www.envisystech.com/blog/where-can-i-rent-a-climatic-test-chamber-for-short-term-testing/' },
-      { t: 'Thermal shock rental', d: 'A quick buyer’s guide', href: 'https://www.envisystech.com/blog/thermal-shock-chamber-rental/' },
-      { t: 'What decides the price', d: 'Factors affecting rental price', href: 'https://www.envisystech.com/blog/factors-affecting-environmental-chamber-rental-price/' },
-      { t: 'Rent, buy or send it to a lab', d: 'How to decide', href: 'https://www.envisystech.com/blog/environmental-test-chamber-rental-vs-buying-vs-testing-labs/' }
-    ] },
-  { id: 'refurb', name: 'Refurbishments & Buyback', line: 'A second life for chambers', cta: 'Discuss your chamber',
-    text: 'Refurbishment and modernisation of existing chambers, and buy-back solutions when it is time to replace one.',
-    leaves: [{ t: 'Refurbishment', d: 'Restore an ageing chamber to working order' }, { t: 'Modernisation', d: 'Controls and systems brought up to date' }, { t: 'Buyback', d: 'Trade in the chamber you are replacing' }] },
-  { id: 'aftersales', name: 'After Sales & AMCs', line: 'Support for the life of the chamber', cta: 'Set up an AMC',
-    text: 'Calibration, annual maintenance contracts and lifecycle support, with engineers across India and complaints answered within 24 hours.',
-    leaves: [{ t: 'Annual maintenance', d: 'AMCs across the installed base' }, { t: 'Calibration', d: 'Calibration of chambers' }, { t: 'Repair and spares', d: 'Technical and engineering support round the clock' }, { t: 'Regional offices', d: 'Faridabad, Pune, Coimbatore and Hyderabad' }] },
-  { id: 'express', name: 'Express Factory', line: 'Standard models, ready stock', cta: 'Order a standard model',
-    text: 'Built for speed, ready for the world. A second factory with dedicated production lines and supply chain for standard models, kept in stock and shipped fast across India and abroad, while the project factory continues to take on complex custom work.',
-    leaves: [{ t: 'Standard models in stock', d: 'Ready to ship' }, { t: 'Quick-commerce delivery', d: 'Fast delivery on standard models' }, { t: 'Dedicated lines & supply chain', d: 'Production kept apart from custom work' }, { t: 'Pan-India and global network', d: 'Distribution across India and ten-plus countries' }] }
+const needs = [
+  { q: 'A chamber built to my standard', id: 'design' },
+  { q: 'A standard chamber, fast', id: 'express' },
+  { q: 'A test report', id: 'testing' },
+  { q: 'A chamber for a few weeks', id: 'rentals' },
+  { q: 'Service or calibration', id: 'aftersales' },
+  { q: 'Something for my old chamber', id: 'refurb' }
 ]
+const vOf = (id: string) => verticals.find((v) => v.id === id)!
+// three short lines of what each vertical covers, taken from the vertical's own copy
+const chipOverride: Record<string, string[]> = { express: ['Standard models', 'In stock', 'Quick delivery'], rentals: ['Climatic chambers', 'Thermal shock', 'Project budgets'] }
+const chips = (v: Vertical) => chipOverride[v.id] ?? v.offer.slice(0, 3).map((o) => o.t)
 
-const hot = ref(-1)
-// tree geometry, in a 1000 x 560 box: the root sits left, the six nodes right
-const TW = 1000, TH = 560, RX = 130, RY = 280, NX = 560
-const ny = (i: number) => ((60 + i * 88) / TH) * 100
-const curve = (i: number) => { const y = 60 + i * 88; return `M${RX} ${RY} C ${RX + 220} ${RY}, ${NX - 220} ${y}, ${NX} ${y}` }
-const bodyRef = ref<HTMLElement | null>(null)
-const fillRef = ref<HTMLElement | null>(null)
-function goto(id: string) {
-  const el = document.getElementById(`v-${id}`), sc = document.querySelector('#scroller') as HTMLElement
-  if (el) (window as any).lenisInstance?.scrollTo(el.getBoundingClientRect().top + sc.scrollTop - 40)
+// ── the dial ──
+const secRef = ref<HTMLElement | null>(null)
+const R = ref(520), cy = ref(1000), cw = ref(250), STEP = ref(24), d = ref(0)
+const active = computed(() => Math.min(5, Math.max(0, Math.round(d.value))))
+const cur = computed(() => verticals[active.value])
+let target = 0
+function cardStyle(k: number) {
+  const off = k - d.value, a = Math.abs(off)
+  return {
+    transform: `rotate(${off * STEP.value}deg) translateY(${-(R.value + 34)}px) scale(${(1 - Math.min(a, 3) * 0.12).toFixed(3)}) translate(-50%, -100%)`,
+    opacity: Math.max(0, 1 - a * 0.45).toFixed(3),
+    zIndex: 10 - Math.round(a)
+  }
 }
+function layout() {
+  const W = window.innerWidth, H = window.innerHeight, wide = W > 900
+  R.value = wide ? Math.min(W * 0.4, H * 0.62) : Math.min(W * 0.95, H * 0.46)
+  cy.value = H + R.value * (wide ? 0.26 : 0.3) // the dial's centre sits below the screen: only its upper rim shows
+  cw.value = wide ? Math.min(310, Math.max(225, W * 0.16)) : Math.min(180, W * 0.46)
+  STEP.value = ((cw.value * 1.08) / (R.value + 34)) * (180 / Math.PI) // neighbouring cards just overlap
+}
+const stepPx = () => window.innerHeight * 0.6
+function sectionTop() { const sc = document.querySelector('#scroller') as HTMLElement; return secRef.value!.getBoundingClientRect().top + sc.scrollTop }
+function goStep(k: number, immediate = false) { (window as any).lenisInstance?.scrollTo(sectionTop() + k * stepPx(), immediate ? { immediate: true } : { duration: 1.1 }) }
+// a card that is not at the top turns the dial to it; the card at the top opens
+function pick(e: MouseEvent, k: number) { if (moved || k !== active.value) { e.preventDefault(); if (!moved) goStep(k) } }
+// drag the dial: sideways movement turns it, and on release it settles on the nearest card
+let sx = 0, s0 = 0, dragging = false, moved = false
+function down(e: PointerEvent) {
+  dragging = true; moved = false; sx = e.clientX
+  s0 = (document.querySelector('#scroller') as HTMLElement).scrollTop
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up, { once: true })
+}
+function move(e: PointerEvent) {
+  if (!dragging) return
+  const dx = e.clientX - sx
+  if (Math.abs(dx) > 6) moved = true
+  if (moved) (window as any).lenisInstance?.scrollTo(s0 - dx * (stepPx() / 200), { immediate: true })
+}
+function up() { dragging = false; window.removeEventListener('pointermove', move); if (moved) goStep(Math.round(target)); setTimeout(() => (moved = false), 0) }
 
-// the express factory's stock chart: standard models from the product list. Statuses are a SAMPLE until live stock is connected.
-const std = ['et', 'mini', 'ets', 'battery', 'ovens-dryers'].map((s) => products.find((p) => p.slug === s)!)
-const series = std.map((p) => p.code === 'EO' ? 'EO / ETD' : p.code)
-const allRows = std.flatMap((p, k) => p.models[0].items.concat(p.slug === 'ovens-dryers' ? p.models[1].items : []).map((m) => {
-  let h = 0; for (const c of m) h = (h * 31 + c.charCodeAt(0)) >>> 0
-  const k2 = h % 5
-  return { series: series[k], model: m, ...(k2 < 2 ? { status: 'In stock', k: 'ok' } : k2 < 4 ? { status: 'Ships in 7 days', k: 'soon' } : { status: 'Made to order', k: 'mto' }) }
-}))
-const sf = ref('All'), mq = ref('')
-const rows = computed(() => allRows.filter((r) => (sf.value === 'All' || r.series === sf.value) && r.model.toLowerCase().includes(mq.value.trim().toLowerCase())).slice(0, 14))
+// ── the X-ray chamber: regions of the 816 × 1600 ET300 photograph, measured on it, as fractions [x0, y0, x1, y1] ──
+const calls = [
+  { id: 'design', name: 'Design & Build', part: 'the whole build', r: [0.03, 0.02, 0.97, 0.93] },
+  { id: 'express', name: 'Express Factory', part: 'ready to roll', r: [0.02, 0.92, 0.98, 1] },
+  { id: 'testing', name: 'Testing Services', part: 'the test space', r: [0.33, 0.215, 0.675, 0.437] },
+  { id: 'rentals', name: 'Rentals', part: 'ready to run', r: [0.22, 0.005, 0.63, 0.1] },
+  { id: 'aftersales', name: 'After Sales & AMCs', part: 'the controller', r: [0.405, 0.472, 0.595, 0.537] },
+  { id: 'refurb', name: 'Refurbishment', part: 'the refrigeration', r: [0.27, 0.58, 0.74, 0.915] }
+]
+const xi = ref(0), held = ref(false)
+const xc = computed(() => calls[xi.value])
+const pct = (x: number) => (x * 100).toFixed(2) + '%'
+const scanClip = computed(() => { const [a, b, c, e] = xc.value.r; return `inset(${pct(b)} ${pct(1 - c)} ${pct(1 - e)} ${pct(a)})` })
+const scanBox = computed(() => { const [a, b, c, e] = xc.value.r; return { left: pct(a), top: pct(b), width: pct(c - a), height: pct(e - b) } })
+const coord = (f: number, n: number) => String(Math.round(f * n)).padStart(4, '0')
+function hold(k: number) { xi.value = k; held.value = true }
+let cycle = 0
 
+const clamp = (x: number) => Math.min(1, Math.max(0, x))
+// the header logo turns white while the navy X-ray panel is under it (PageShell reads html.hx-dark)
+const under = (el: Element | null | undefined) => { if (!el) return false; const r = el.getBoundingClientRect(); return r.top < 44 && r.bottom > 44 }
+const xrayRef = ref<HTMLElement | null>(null)
 function tick() {
-  const b = bodyRef.value!.getBoundingClientRect(), H = window.innerHeight
-  fillRef.value!.style.transform = `scaleY(${Math.min(1, Math.max(0, (H * 0.55 - b.top) / b.height)).toFixed(4)})`
+  const r = secRef.value!.getBoundingClientRect(), H = window.innerHeight
+  target = clamp(-r.top / (r.height - H)) * 5
+  d.value += (target - d.value) * 0.14
+  if (Math.abs(target - d.value) < 0.0005) d.value = target
+  document.documentElement.classList.toggle('hx-dark', under(xrayRef.value))
 }
-onMounted(() => gsap.ticker.add(tick))
-onUnmounted(() => gsap.ticker.remove(tick))
+onMounted(() => {
+  layout(); window.addEventListener('resize', layout); gsap.ticker.add(tick)
+  cycle = window.setInterval(() => { if (!held.value) xi.value = (xi.value + 1) % calls.length }, 2600)
+})
+onUnmounted(() => { window.removeEventListener('resize', layout); gsap.ticker.remove(tick); clearInterval(cycle); document.documentElement.classList.remove('hx-dark') })
 </script>
 
 <style scoped>
-.vt-open { padding: 22vh 5vw 8vh; display: flex; flex-direction: column; gap: 3vh; }
-.vt-h { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(32px, 5.2vw, 98px); line-height: 1; letter-spacing: -0.055em; }
+.vd-eye { display: inline-flex; align-items: center; gap: 12px; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(13, 35, 64, 0.7); }
+.vd-eye i { width: 8px; height: 8px; border-radius: 50%; background: #ff6a1a; box-shadow: 0 0 0 5px rgba(255, 106, 26, 0.18); }
+.vd-eye.light { color: rgba(214, 228, 243, 0.75); text-transform: none; letter-spacing: 0.06em; }
+:deep(.hy) { font-family: 'Geist', sans-serif; font-style: normal; font-weight: 600; letter-spacing: 0; padding: 0 0.04em; } /* the display face draws its hyphen as a long dash */
 
-.vt-tree { position: relative; margin-top: 6vh; width: 100%; aspect-ratio: 1000 / 560; max-height: 74vh; }
-.vt-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.vt-svg path { fill: none; stroke: rgba(255, 255, 255, 0.28); stroke-width: 1.1; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke 0.4s ease; }
-.vt-tree.in .vt-svg path { animation: vt-draw 1.6s var(--ease) both; animation-delay: calc(0.3s + var(--i) * 0.1s); }
-@keyframes vt-draw { to { stroke-dashoffset: 0; } }
-.vt-svg path.on { stroke: #ff7a2a; stroke-width: 1.8; }
-.vt-root { position: absolute; left: 13%; top: 50%; translate: -50% -50%; width: clamp(80px, 9vw, 150px); aspect-ratio: 1; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f4f4f2; color: #0a0a0c; box-shadow: 0 0 0 10px rgba(244, 244, 242, 0.08), 0 0 60px rgba(255, 106, 26, 0.18); }
-.vt-root b { font-weight: 400; font-family: var(--font-display); font-size: clamp(14px, 1.4vw, 24px); letter-spacing: -0.05em; }
-.vt-root small { font-family: var(--font-body); font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55; }
-.vt-node { position: absolute; left: 56%; translate: 0 -50%; display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: baseline; text-align: left; padding: 0 0 0 22px; border: 0; background: none; color: inherit; cursor: pointer; opacity: 0; transition: transform 0.5s var(--ease), opacity 0.8s ease; }
-.vt-tree.in .vt-node { opacity: 0.55; transition-delay: calc(0.9s + var(--i) * 0.08s), 0s; }
-.vt-tree.in .vt-node.on { opacity: 1; transition-delay: 0s; transform: translateX(10px); }
-.vt-node::before { content: ''; position: absolute; left: 0; top: 50%; translate: -50% -50%; width: 9px; height: 9px; border-radius: 50%; background: #f4f4f2; transition: background 0.3s ease, box-shadow 0.4s ease; }
-.vt-node.on::before { background: #ff7a2a; box-shadow: 0 0 0 6px rgba(255, 122, 42, 0.2); }
-.vt-node em { font-style: normal; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; opacity: 0.6; }
-.vt-node span { font-family: var(--font-display); font-size: clamp(15px, 1.9vw, 34px); letter-spacing: -0.045em; }
-.vt-node small { grid-column: 2; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.55; }
+/* 1 · the dial */
+.vd { position: relative; height: 400vh; }
+.vd-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; color: #0d2340; touch-action: pan-y; user-select: none; cursor: grab; }
+.vd-stage:active { cursor: grabbing; }
+.vd-head { position: absolute; left: 5vw; top: 16vh; z-index: 20; width: 21vw; min-width: 200px; display: flex; flex-direction: column; gap: 2vh; animation: vd-fade 1s ease 0.2s both; }
+.vd-head h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(20px, 1.7vw, 32px); line-height: 1.1; letter-spacing: -0.05em; }
+.vd-count { position: absolute; right: 5vw; top: 16vh; z-index: 20; display: flex; align-items: baseline; gap: 10px; font-family: 'Geist Mono', monospace; }
+.vd-count b { font-family: var(--font-display); font-weight: 400; font-size: clamp(44px, 4.4vw, 84px); letter-spacing: -0.06em; line-height: 1; }
+.vd-count span { font-size: 16px; opacity: 0.55; }
+.vd-hint { position: absolute; right: 5vw; top: calc(16vh + clamp(56px, 5.4vw, 100px)); z-index: 20; margin: 0; text-align: right; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.55; }
 
-.vt-body { position: relative; padding: 4vh 5vw 8vh 9vw; }
-.vt-spine { position: absolute; left: 3.6vw; top: 0; bottom: 0; width: 1px; background: rgba(255, 255, 255, 0.14); }
-.vt-spine i { position: absolute; inset: 0; background: #ff7a2a; transform-origin: 0 0; transform: scaleY(0); }
-.vt-ch { position: relative; padding: 14vh 0 12vh; border-top: 1px solid rgba(255, 255, 255, 0.1); }
-.vt-ch:first-child { border-top: 0; }
-.vt-row { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 4vw; }
-.vt-l { align-items: flex-start; position: sticky; top: 16vh; align-self: start; display: flex; flex-direction: column; gap: 2.4vh; }
-.vt-no { position: relative; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.16em; opacity: 0.7; display: flex; align-items: center; gap: 14px; }
-.vt-no u { width: 46px; height: 1px; background: rgba(255, 255, 255, 0.35); }
-.vt-ch::before { content: ''; position: absolute; left: -5.4vw; top: calc(14vh + 5px); width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: #000; border: 1px solid rgba(255, 255, 255, 0.5); }
-.vt-t { margin: 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 3.6vw, 68px); line-height: 1; letter-spacing: -0.055em; }
-.vt-d { margin: 0; max-width: 30em; font-family: var(--font-body); font-size: clamp(12px, 0.95vw, 14px); line-height: 1.75; opacity: 0.72; }
+.vd-orbit { position: absolute; left: 50%; top: var(--cy); width: 0; height: 0; z-index: 10; }
+.vd-card { position: absolute; left: 0; top: 0; width: var(--cw); transform-origin: 0 0; display: flex; flex-direction: column; border-radius: 18px; background: #fff; color: #0d2340; text-decoration: none; box-shadow: 0 30px 60px -30px rgba(13, 35, 64, 0.5); will-change: transform; }
+.vd-pic { position: relative; display: block; aspect-ratio: 4 / 3.15; overflow: hidden; border-radius: 18px 18px 0 0; }
+.vd-pic img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.55); transition: filter 0.6s ease, transform 1s cubic-bezier(0.2, 0.9, 0.2, 1); pointer-events: none; }
+.vd-card.on .vd-pic img { filter: none; }
+.vd-card.on:hover .vd-pic img { transform: scale(1.05); }
+.vd-ext { position: absolute; right: 10px; top: 10px; padding: 5px 10px; border-radius: 20px; background: #ff6a1a; color: #0a0a0c; font-family: 'Geist Mono', monospace; font-size: 11px; font-style: normal; font-weight: 600; }
+.vd-cap { display: flex; flex-direction: column; gap: 3px; padding: 12px 16px 16px; }
+.vd-cap em { font-style: normal; font-family: 'Geist Mono', monospace; font-size: 12px; color: #ff6a1a; }
+.vd-cap b { font-family: 'Geist', sans-serif; font-weight: 600; font-size: 18px; line-height: 1.15; }
+.vd-cap small { font-family: 'Geist', sans-serif; font-size: 14.5px; opacity: 0.68; }
 
-/* the branch: a line down the left, a tick into every leaf */
-.vt-leaves { list-style: none; margin: 0; padding: 0 0 0 28px; border-left: 1px solid rgba(255, 255, 255, 0.22); display: flex; flex-direction: column; gap: 10px; align-self: start; }
-.vt-leaves li { position: relative; }
-.vt-leaves li::before { content: ''; position: absolute; left: -28px; top: 50%; width: 22px; height: 1px; background: rgba(255, 255, 255, 0.22); }
-.vt-leaf { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; padding: 18px 22px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03); color: inherit; text-decoration: none; transition: background 0.4s ease, border-color 0.4s ease, transform 0.5s var(--ease); }
-a.vt-leaf:hover { background: rgba(255, 255, 255, 0.09); border-color: rgba(255, 138, 74, 0.55); transform: translateX(6px); }
-.vt-leaf b { font-weight: 400; font-family: var(--font-display); font-size: clamp(15px, 1.4vw, 24px); letter-spacing: -0.04em; }
-.vt-leaf span { grid-column: 1; font-family: var(--font-body); font-size: 11.5px; opacity: 0.6; line-height: 1.5; }
-.vt-leaf svg { grid-row: 1 / span 2; grid-column: 2; align-self: center; width: 11px; height: 11px; opacity: 0.4; transition: transform 0.4s ease, opacity 0.3s ease; }
-a.vt-leaf:hover svg { opacity: 1; transform: translate(3px, -3px); }
+.vd-dial { position: absolute; z-index: 5; filter: drop-shadow(0 -30px 60px rgba(13, 35, 64, 0.22)); }
+.vd-knurl { stroke: rgba(214, 228, 243, 0.45); stroke-width: 4; }
+.vd-tick { stroke: #0d2340; stroke-opacity: 0.35; stroke-width: 3; }
+.vd-tick.big { stroke-opacity: 0.85; stroke-width: 5; }
+.vd-mark { fill: #fff; stroke: #0d2340; stroke-width: 4; transition: fill 0.4s ease, stroke 0.4s ease; }
+.vd-mark.on { fill: #ff6a1a; stroke: #ff6a1a; }
+.vd-pointer { fill: #ff6a1a; }
+@keyframes vd-fade { from { opacity: 0; } }
 
-.vt-stock { margin-top: 10vh; padding: 3vh 2.4vw 3.4vh; border-radius: 20px; background: #0f1013; border: 1px solid rgba(255, 255, 255, 0.1); }
-.vt-st-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 2vw; flex-wrap: wrap; }
-.vt-st-top h3 { margin: 1.4vh 0 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(20px, 2.2vw, 40px); letter-spacing: -0.05em; }
-.vt-demo { padding: 7px 12px; border-radius: 30px; border: 1px dashed rgba(255, 190, 120, 0.6); color: #ffc58a; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; }
-.vt-st-tools { display: flex; justify-content: space-between; align-items: center; gap: 2vw; margin: 3vh 0 2vh; flex-wrap: wrap; }
-.vt-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.vt-chips button { padding: 9px 14px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; color: inherit; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; cursor: pointer; transition: background 0.3s ease, color 0.3s ease; }
-.vt-chips button:hover { background: rgba(255, 255, 255, 0.1); }
-.vt-chips button.on { background: #f4f4f2; color: #0a0a0c; border-color: #f4f4f2; }
-.vt-st-tools input { width: 220px; height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.18); background: transparent; color: inherit; font-family: var(--font-body); font-size: 12px; outline: none; transition: border-color 0.3s ease; }
-.vt-st-tools input:focus { border-color: #ff8a4a; }
-.vt-tr { display: grid; grid-template-columns: 1fr 1.4fr 1.4fr 90px; align-items: center; gap: 12px; padding: 14px 6px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-family: var(--font-body); font-size: 12px; letter-spacing: 0.04em; transition: background 0.3s ease; }
-.vt-tr:not(.vt-th):hover { background: rgba(255, 255, 255, 0.04); }
-.vt-th { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.5; border-top: 0; }
-.vt-tr .st { display: flex; align-items: center; gap: 10px; }
-.vt-tr .st i { width: 8px; height: 8px; border-radius: 50%; background: #666; }
-.st.ok i { background: #4ade80; box-shadow: 0 0 10px rgba(74, 222, 128, 0.6); } .st.soon i { background: #fbbf24; } .st.mto i { background: #8a8f98; }
-.vt-tr button { justify-self: end; padding: 8px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; color: inherit; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.3s ease, color 0.3s ease; }
-.vt-tr button:hover { background: #f4f4f2; color: #0a0a0c; }
-.vt-none { margin: 3vh 0 0; text-align: center; font-family: var(--font-body); font-size: 12px; opacity: 0.55; }
+/* the label plate, written on the dial's white face */
+.vd-info { position: absolute; left: 50%; top: calc(var(--cy) - var(--r) + var(--r) * 0.2); z-index: 20; width: min(calc(var(--r) * 1.05), 600px); translate: -50% 0; text-align: center; }
+.vd-info-in { display: flex; flex-direction: column; align-items: center; gap: 1vh; }
+.vd-tagline { font-family: 'Geist', sans-serif; font-size: clamp(15px, 1.05vw, 19px); opacity: 0.75; }
+.vd-info h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, min(2.4vw, 4.8vh), 42px); line-height: 1; letter-spacing: -0.055em; text-wrap: balance; }
+.vd-chips { list-style: none; margin: 0.4vh 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.vd-chips li { padding: 8px 14px; border-radius: 30px; background: rgba(13, 35, 64, 0.07); font-family: 'Geist', sans-serif; font-size: 15px; }
+.vd-open { display: inline-flex; align-items: center; gap: 10px; margin-top: 0.8vh; padding: 14px 22px; border-radius: 40px; background: #0d2340; color: #fff; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; transition: background 0.4s ease, gap 0.4s ease, color 0.4s ease; }
+.vd-open:hover { background: #ff6a1a; color: #0a0a0c; gap: 16px; }
+.vd-open svg { width: 10px; height: 10px; }
+.vd-swap-enter-active, .vd-swap-leave-active { transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.vd-swap-enter-from { opacity: 0; transform: translateY(20px); }
+.vd-swap-leave-to { opacity: 0; transform: translateY(-14px); }
 
+/* 2 · the X-ray chamber */
+.vx { padding: 6vh 2vw; }
+.vx-in { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 3vw; align-items: center; padding: 12vh 4vw; border-radius: clamp(28px, 4vw, 64px); color: #eef3fa; background-color: #0b1d36; background-image: linear-gradient(rgba(214, 228, 243, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(214, 228, 243, 0.05) 1px, transparent 1px); background-size: 40px 40px; }
+.vx-text { display: flex; flex-direction: column; gap: 3vh; }
+.vx h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 3.4vw, 64px); line-height: 1.02; letter-spacing: -0.055em; }
+.vx ul { list-style: none; margin: 2vh 0 0; padding: 0; border-top: 1px solid rgba(214, 228, 243, 0.14); }
+.vx li { border-bottom: 1px solid rgba(214, 228, 243, 0.14); }
+.vx li a { display: grid; grid-template-columns: 44px 1fr auto; align-items: baseline; gap: 12px; padding: 2.2vh 0; color: inherit; text-decoration: none; opacity: 0.55; transition: opacity 0.3s ease, padding 0.5s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.vx li.on a { opacity: 1; padding-left: 10px; }
+.vx li em { font-style: normal; font-family: 'Geist Mono', monospace; font-size: 13px; color: #ff8a4a; }
+.vx li b { font-family: 'Geist', sans-serif; font-weight: 500; font-size: clamp(18px, 1.4vw, 24px); }
+.vx li span { font-family: 'Geist Mono', monospace; font-size: 13px; opacity: 0.7; }
+.vx-stage { display: flex; flex-direction: column; align-items: center; gap: 2vh; }
+.vx-chamber { position: relative; height: min(72vh, 720px); aspect-ratio: 816 / 1600; }
+.vx-chamber img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vx-lines { filter: drop-shadow(0 0 6px rgba(150, 205, 255, 0.45)); }
+.vx-real { transition: clip-path 0.9s cubic-bezier(0.7, 0, 0.2, 1); }
+.vx-scan { position: absolute; border: 1px solid rgba(255, 138, 74, 0.95); transition: all 0.9s cubic-bezier(0.7, 0, 0.2, 1); pointer-events: none; }
+.vx-scan i { position: absolute; width: 12px; height: 12px; border: 2px solid #ff6a1a; }
+.vx-scan .tl { left: -3px; top: -3px; border-right: 0; border-bottom: 0; } .vx-scan .tr { right: -3px; top: -3px; border-left: 0; border-bottom: 0; }
+.vx-scan .bl { left: -3px; bottom: -3px; border-right: 0; border-top: 0; } .vx-scan .br { right: -3px; bottom: -3px; border-left: 0; border-top: 0; }
+.vx-scan span { position: absolute; left: -1px; bottom: calc(100% + 6px); padding: 4px 8px; background: #ff6a1a; color: #0a0a0c; font-family: 'Geist Mono', monospace; font-size: 12px; white-space: nowrap; }
+.vx-cap { margin: 0; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.06em; opacity: 0.6; }
+
+/* 3 · tell us what you need */
+.vn { display: flex; flex-direction: column; gap: 3vh; padding: 16vh 5vw 8vh; color: #0d2340; }
+.vn h2 { margin: 0 0 3vh; font-family: var(--font-display); font-weight: 400; font-size: clamp(34px, 4.6vw, 88px); line-height: 1; letter-spacing: -0.055em; }
+.vn ul { list-style: none; margin: 0 0 4vh; padding: 0; border-top: 1px solid rgba(13, 35, 64, 0.16); }
+.vn li { border-bottom: 1px solid rgba(13, 35, 64, 0.16); }
+.vn a { display: grid; grid-template-columns: 1fr auto 18px; align-items: center; gap: 3vw; padding: 3vh 0; color: inherit; text-decoration: none; transition: padding 0.6s cubic-bezier(0.2, 0.9, 0.2, 1), color 0.4s ease; }
+.vn a span { font-family: 'Geist', sans-serif; font-size: clamp(19px, 1.7vw, 30px); }
+.vn a b { font-family: 'Geist Mono', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6; }
+.vn a svg { width: 13px; height: 13px; opacity: 0.5; transition: transform 0.5s ease, opacity 0.3s ease; }
+.vn a:hover { padding-left: 1.4vw; color: #ff6a1a; }
+.vn a:hover b, .vn a:hover svg { opacity: 1; }
+.vn a:hover svg { transform: translate(3px, -3px); }
+.vn .ps-pill { align-self: flex-start; padding: 16px 24px; font-size: 12px; }
+
+@media (max-height: 760px) { .vd-chips { display: none; } }
 @media (max-width: 900px) {
-  .vt-row { grid-template-columns: 1fr; }
-  .vt-l { position: static; }
-  .vt-tree { aspect-ratio: auto; max-height: none; display: flex; flex-direction: column; gap: 14px; }
-  .vt-svg, .vt-root { display: none; }
-  .vt-node { position: static; translate: none; opacity: 1 !important; padding-left: 0; }
-  .vt-node::before { display: none; }
-  .vt-body { padding-left: 8vw; }
-  .vt-tr { grid-template-columns: 1fr 1.2fr 1.2fr; } .vt-tr button, .vt-th span:last-child { display: none; }
+  .vd-head { top: 12vh; width: 56vw; } .vd-head h1 { font-size: 20px; }
+  .vd-count { top: 12vh; } .vd-count b { font-size: 40px; }
+  .vd-hint { display: none; }
+  .vd-info { top: calc(var(--cy) - var(--r) + var(--r) * 0.22); width: 78vw; }
+  .vd-chips { display: none; }
+  .vd-cap b { font-size: 15px; } .vd-cap small { display: none; }
+  .vx-in { grid-template-columns: 1fr; padding: 8vh 6vw; }
+  .vx-chamber { height: 60vh; }
+  .vn a { grid-template-columns: 1fr 16px; gap: 6px 14px; }
+  .vn a b { grid-row: 2; }
+  .vn a svg { grid-row: 1 / span 2; grid-column: 2; }
 }
 </style>

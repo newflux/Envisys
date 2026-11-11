@@ -60,7 +60,7 @@
 
     <!-- a photograph, as it is -->
     <section class="ph" ref="phRef" aria-hidden="true">
-      <VideoSlot ref="phImg" class="ph-media" src="/media/film-workings.mp4" poster="/media/step-1.jpg" label="workings film" />
+      <VideoSlot ref="phImg" class="ph-media" src="/media/film-lab.mp4" poster="/media/step-1.jpg" label="lab film" />
       <p data-words>Built in Peenya,<br />Bengaluru.</p>
     </section>
 
@@ -116,7 +116,7 @@
         <h2 class="ty-h" data-words>Don't see your test in the range? We'll build the chamber for it.</h2>
         <div class="en-cta rv" style="--d: 0.1s">
           <button class="ps-pill light" data-cursor="" @click="contact()"><span>Start a project</span><svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.3" /></svg></button>
-          <a href="/verticals" data-cursor="">Or rent one for a short test →</a>
+          <a href="/verticals/rentals" data-cursor="">Or rent one for a short test →</a>
         </div>
       </section>
 

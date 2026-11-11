@@ -9,7 +9,7 @@
           <!-- 1 · the hero holds still while the black slides up over it -->
           <div class="ab-intro">
             <section class="ab-hero">
-              <VideoSlot class="ab-hero-img" src="/media/film-aesthetics.mp4" poster="/media/hollow.jpg" label="aesthetics film" />
+              <VideoSlot class="ab-hero-img" src="/media/film-lab.mp4" poster="/media/hollow.jpg" label="lab film" />
               <div class="ab-hero-shade"></div>
               <h1 class="ab-h1">
                 <span v-for="(l, i) in heroLines" :key="i" class="ab-mask"><i :style="{ '--d': 0.5 + i * 0.12 + 's' }">{{ l }}</i></span>

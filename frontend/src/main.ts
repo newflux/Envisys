@@ -14,6 +14,10 @@ const pages: Record<string, () => Promise<typeof import('./App.vue')>> = {
 }
 const path = location.pathname.replace(/\/+$/, '') || '/'
 const product = path.startsWith('/products/')
+const vertical = path.startsWith('/verticals/')
+// the express factory has a page of its own; the other verticals share one
+if (path === '/verticals/express') pages[path] = () => import('./pages/ExpressPage.vue')
+else if (vertical) pages[path] = () => import('./pages/VerticalPage.vue')
 const landing = !pages[path] && !product
 ;(pages[path] ?? (product ? () => import('./pages/ProductPage.vue') : () => import('./App.vue')))().then(async ({ default: Root }) => {
   const app = createApp(Root)

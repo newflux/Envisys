@@ -29,7 +29,7 @@ const props = defineProps<{ title: string; dark?: boolean; blue?: boolean }>()
 // on the light-blue pages the header turns ink-dark, except where the page has gone dark: the footer's fade, or a scene that asks for it (html.hx-dark)
 const toneTick = () => {
   const nu = pageRef.value?.querySelector('.nu-sec') as HTMLElement | null
-  const past = !!nu && nu.getBoundingClientRect().top + nu.offsetHeight * 0.4 < 44
+  const past = !!nu && nu.getBoundingClientRect().top < 56 // the logo turns white the moment the dark closing block reaches it
   document.documentElement.dataset.tone = past || document.documentElement.classList.contains('hx-dark') ? 'dark' : 'light'
 }
 const ready = ref(false)

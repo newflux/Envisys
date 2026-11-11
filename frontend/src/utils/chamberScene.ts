@@ -333,7 +333,7 @@ function studio() {
 }
 
 // the controller page on the door's touchscreen: process value, set point, humidity and a running trace
-function screenUI() {
+export function screenUI() {
   const c = document.createElement('canvas')
   c.width = 512; c.height = 352
   const g = c.getContext('2d')!

@@ -15,24 +15,19 @@
     <!-- Smoky frosted blob (Pure CSS mask + backdrop-filter) -->
     <div class="smoke-blob" ref="frostBgRef"></div>
 
-    <!-- Info Text Block (Center of Chamber, Image 1 Exact Layout) -->
+    <!-- The chamber's spec card: opens on the right when a chamber is clicked, so the chamber itself stays in view on the left -->
     <div class="info-block" ref="textPanelRef" @pointerenter="isPointerInPanel = true" @pointerleave="isPointerInPanel = false">
-      <div class="info-close-btn" @click="closePanel">
+      <div class="info-close-btn" @click="closePanel" data-cursor="" aria-label="Close">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5"/></svg>
       </div>
-      <div class="info-index">{{ activeChamberData.index }}</div>
-      <h2 class="info-title">
-        <div>ENVISYS</div>
-        <div>{{ activeChamberData.model }}</div>
-        <div class="outline-text">SERIES</div>
-      </h2>
-      <div class="info-subtitle">{{ activeChamberData.subtitle }}</div>
-      <div class="info-pill">{{ activeChamberData.tempRange }}</div>
+      <div class="info-index"><i></i>{{ activeChamberData.index }} <span>/ 03 · {{ activeChamberData.subtitle }}</span></div>
+      <h2 class="info-title"><small>ENVISYS</small><span v-html="hy(activeChamberData.model)"></span></h2>
+      <div class="info-stat"><small>Temperature range</small><b>{{ activeChamberData.tempRange }}</b></div>
       <p class="info-desc">{{ activeChamberData.desc }}</p>
-      <div class="info-specs">
-        <div>{{ activeChamberData.spec1 }}</div>
-        <div>{{ activeChamberData.spec2 }}</div>
-      </div>
+      <dl class="info-specs">
+        <div v-for="sp in [activeChamberData.spec1, activeChamberData.spec2]" :key="sp"><dt>{{ sp.split(': ')[0] }}</dt><dd>{{ sp.split(': ')[1] }}</dd></div>
+      </dl>
+      <a class="info-cta" :href="activeChamberData.href" data-cursor="">View the series <svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.4" /></svg></a>
     </div>
 
     <!-- EXACT ICOMAT PRELOADER -->
@@ -320,6 +315,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { MathUtils, Box3, Vector3, CanvasTexture, RepeatWrapping } from 'three'
 import * as THREE from 'three'
+import { screenUI } from './utils/chamberScene'
+import { hy } from './config/verticals'
 import { Environment, Lightformer, ContactShadows, MeshReflectionMaterial } from '@tresjs/cientos'
 import { extend } from '@tresjs/core'
 import { Text } from 'troika-three-text'
@@ -505,6 +502,7 @@ interface ChamberModalData {
   desc: string
   spec1: string
   spec2: string
+  href: string
 }
 
 const chamberModalList: Record<number, ChamberModalData> = {
@@ -515,7 +513,8 @@ const chamberModalList: Record<number, ChamberModalData> = {
     tempRange: '-70°C to +180°C',
     desc: 'Compact precision simulation chamber engineered for high-frequency thermal cycling and sensor qualification in tight laboratory footprints.',
     spec1: 'HUMIDITY: 10% to 95% RH',
-    spec2: 'CONTROLLER: ET-Touch 5.7" HMI'
+    spec2: 'CONTROLLER: ET-Touch 5.7" HMI',
+    href: '/products/et'
   },
   1: {
     index: '02',
@@ -524,7 +523,8 @@ const chamberModalList: Record<number, ChamberModalData> = {
     tempRange: '-70°C to +180°C',
     desc: 'Simulates extreme environmental conditions flawlessly for the next generation of testing. Designed for precision and reliability.',
     spec1: 'HUMIDITY: 10% to 95% RH',
-    spec2: 'CONTROLLER: ET-Touch 5.7" HMI'
+    spec2: 'CONTROLLER: ET-Touch 5.7" HMI',
+    href: '/products/et'
   },
   2: {
     index: '03',
@@ -533,7 +533,8 @@ const chamberModalList: Record<number, ChamberModalData> = {
     tempRange: '-60°C to +150°C',
     desc: 'Heavy-capacity walk-in environmental suite designed for large automotive battery assemblies, aerospace structures, and long-duration endurance validation.',
     spec1: 'HUMIDITY: 10% to 95% RH',
-    spec2: 'CONTROLLER: ET-Touch 10.4" Multi-Zone HMI'
+    spec2: 'CONTROLLER: ET-Touch 10.4" Multi-Zone HMI',
+    href: '/products/walk-in'
   }
 }
 
@@ -738,13 +739,13 @@ onMounted(() => {
     panelTl.to(frostBgRef.value, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0)
   } else {
     // Animates CSS variable for the mask radius to open the blob
-    panelTl.to(frostBgRef.value, { '--radius': '800px', duration: 0.7, ease: 'power3.out' }, 0)
+    panelTl.to(frostBgRef.value, { '--radius': '2600px', duration: 0.8, ease: 'power3.out' }, 0)
   }
   
   // Stagger all child elements in the info block (starts at 0.2s)
   panelTl.fromTo('.info-block > *', 
-    { opacity: 0, x: -10 },
-    { opacity: 1, x: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' },
+    { opacity: 0, y: 14 },
+    { opacity: 1, y: 0, duration: 0.5, stagger: 0.06, ease: 'power3.out' },
     0.2
   )
 
@@ -935,7 +936,7 @@ let videoElB: HTMLVideoElement | null = null
 
 // Reactive scene state
 const exposure       = ref(1)
-const spotlightIntensity = ref(95) // Default for touch devices (retuned for Neutral tone mapping, which clips highlights harder)
+const spotlightIntensity = ref(60) // Default for touch devices (retuned for Neutral tone mapping, which clips highlights harder)
 let mouseHasMoved = false
 
 // GLB scenes
@@ -994,7 +995,11 @@ function initDustParticles() {
 }
 
 // Animation
+// the controller page on the door's touchscreen is repainted a few times a second (set in the model loader below)
+let hmiAt = -1, hmiDraw: (t: number) => void = () => {}
 let doorAnim = { mixer: null as any, action: null as any, duration: 0 }
+// the ET950's door is its own node, hinged on the left: it swings about the chamber's vertical, as on the products page
+const doorSwing = { node: null as any, q: new THREE.Quaternion(), turn: new THREE.Quaternion(), up: new THREE.Vector3(0, 1, 0), at: -1 }
 
 // ── GSAP Scroll Proxy ────────────────────────────────────────────────────────
 const scrollProxy = { 
@@ -1167,7 +1172,7 @@ onMounted(() => {
   window.addEventListener('mousemove', (e) => {
     if (!mouseHasMoved) {
       mouseHasMoved = true
-      gsap.to(spotlightIntensity, { value: 140, duration: 0.5, overwrite: true }) // +0.2 boost
+      gsap.to(spotlightIntensity, { value: 85, duration: 0.5, overwrite: true }) // the pointer's torch: soft enough not to burn out the white chamber
     }
     const nx = (e.clientX/window.innerWidth)*2-1
     const ny = -(e.clientY/window.innerHeight)*2+1
@@ -1185,6 +1190,7 @@ onMounted(() => {
   let bestFps = 0
 
   gsap.ticker.add((time) => {
+    if (time - hmiAt > 0.25) { hmiAt = time; hmiDraw(time) }
     const covered = document.documentElement.dataset.covered === '1'
     if (covered !== pageCovered.value) {
       pageCovered.value = covered
@@ -1269,6 +1275,10 @@ onMounted(() => {
         doorAnim.action.time = newTime
         doorAnim.mixer.update(0)
       }
+    }
+    if (doorSwing.node && doorSwing.at !== scrollProxy.door) {
+      doorSwing.at = scrollProxy.door
+      doorSwing.node.quaternion.copy(doorSwing.turn.setFromAxisAngle(doorSwing.up, -Math.PI / 2 * scrollProxy.door)).multiply(doorSwing.q)
     }
 
     // Dynamic Fleet Spread
@@ -1498,8 +1508,49 @@ onMounted(() => {
   draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
   const loader = new GLTFLoader()
   loader.setDRACOLoader(draco)
-  loader.load('/models/chamber_main.glb', (gltf: any) => {
-    // Retain original Blender materials, textures, and finishes untouched
+  // The hero is the products page's ET950. Under this stage's strong studio light its white is held back to a soft grey-white
+  // (it reads as white on screen, never blown out), and the gloss on the black centre strip is taken down to satin, so the strip
+  // reads as a dark panel instead of a mirror of the light boxes.
+  const hmi = screenUI(); hmiDraw = hmi.draw
+  const finish = (mat: any) => {
+    if (mat.name === 'Powder_White') { mat.color.setRGB(0.6, 0.607, 0.615); mat.envMapIntensity = 0.7; mat.roughness = 0.55; if ('clearcoat' in mat) mat.clearcoat = 0.08 }
+    else if (mat.name === 'HMI_Screen') { mat.map = null; mat.color.set(0x000000); mat.emissive.set(0xffffff); mat.emissiveMap = hmi.tex; mat.emissiveIntensity = 0.8; mat.roughness = 0.12; mat.metalness = 0; mat.needsUpdate = true } // the same live controller page the products page paints on its door
+    else if (mat.name === 'Logo_Silver') { mat.color.setRGB(0.88, 0.89, 0.9); mat.metalness = 0.35; mat.roughness = 0.35 } // full metal mirrors the dark tunnel and the letters vanish
+    else if (mat.name === 'Gloss_Black') { mat.color.setRGB(0.014, 0.015, 0.017); mat.roughness = 0.88; mat.metalness = 0; if ('clearcoat' in mat) mat.clearcoat = 0; mat.envMapIntensity = 0.45 } // matte: the pointer's torch must not show as a hot spot on it
+  }
+  // On this stage the chamber stands on its plinth, not its castors: the wheels (their own material) and the wheel brackets
+  // (the hardware below the body) are cut away, then the body is set down on the floor and centred front to back.
+  const seat = (root: any) => {
+    root.updateMatrixWorld(true)
+    const body = new Box3(); root.traverse((o: any) => { if (o.isMesh && o.material?.name === 'Powder_White') body.expandByObject(o) })
+    const cut = body.min.y + 0.002, gone: any[] = [], v = new Vector3()
+    root.traverse((o: any) => {
+      if (!o.isMesh) return
+      if (o.material?.name === 'Castor_Rubber') { gone.push(o); return }
+      if (o.material?.name !== 'Hardware_Black') return
+      const g = o.geometry, pos = g.attributes.position, n0 = pos.count, ys = new Float32Array(n0)
+      for (let i = 0; i < n0; i++) ys[i] = v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld).y
+      const src = g.index ? g.index.array : Array.from({ length: n0 }, (_, i) => i), map = new Int32Array(n0).fill(-1), idx: number[] = []
+      let n = 0
+      for (let t = 0; t < src.length; t += 3) {
+        const a = src[t], b = src[t + 1], c = src[t + 2]
+        if (Math.max(ys[a], ys[b], ys[c]) <= cut) continue
+        for (const k of [a, b, c]) { if (map[k] < 0) map[k] = n++; idx.push(map[k]) }
+      }
+      const ng = new THREE.BufferGeometry()
+      for (const [name, at] of Object.entries(g.attributes) as [string, any][]) {
+        const it = at.itemSize, arr = new Float32Array(n * it), get = ['getX', 'getY', 'getZ', 'getW']
+        for (let i = 0; i < n0; i++) if (map[i] >= 0) for (let j = 0; j < it; j++) arr[map[i] * it + j] = at[get[j]](i)
+        ng.setAttribute(name, new THREE.BufferAttribute(arr, it))
+      }
+      ng.setIndex(idx); o.geometry = ng; g.dispose()
+    })
+    gone.forEach((o) => o.parent.remove(o))
+    const b = new Box3().setFromObject(root), cz = (b.min.z + b.max.z) / 2 - 0.04
+    root.children.forEach((c: any) => { c.position.y -= b.min.y; c.position.z -= cz })
+  }
+  loader.load('/models/et950.glb', (gltf: any) => {
+    // Keep the Blender materials; only their colours are set (finish, above)
     gltf.scene.traverse((child: any) => {
       if (child.isMesh) {
         child.castShadow = true
@@ -1510,11 +1561,13 @@ onMounted(() => {
             if (!mat) return
             mat.fog = false
             mat.depthWrite = true
+            finish(mat)
           })
         }
       }
     })
     
+    seat(gltf.scene)
     chamberScene.value = gltf.scene
 
     // Compute exact bounding box post-scale
@@ -1546,23 +1599,44 @@ onMounted(() => {
 
     // Interior cavity -> exact-size smoke window on its back wall (world = model * 2.5 + (0,-2.05,0))
     let cavity: any = null
-    gltf.scene.traverse((o: any) => { if (o.isMesh && o.material?.name === 'Cavity_Interior.001') cavity = o })
+    gltf.scene.traverse((o: any) => { if (o.isMesh && (o.material?.name === 'Cavity_Interior.001' || o.material?.name === 'Cavity_Steel')) cavity = o })
     gltf.scene.updateMatrixWorld(true)
     const cb = cavity ? new Box3().setFromObject(cavity) : new Box3(new Vector3(-0.623, 0.769, -1.005), new Vector3(0.623, 2.038, 0.937))
-    // The exterior mesh also carries the parts inside the cavity (shelf rail, rod, feet), which show as stray shapes
-    // in front of the window: its shader skips anything inside the cavity volume, keeping a thin lip at the front
-    gltf.scene.traverse((o: any) => {
-      if (!o.isMesh || o.material?.name !== 'Cavity_Exterior.001') return
-      const inner = new Box3(cb.min.clone().addScalar(0.004), cb.max.clone().add(new Vector3(-0.004, -0.004, -0.03)))
-        .applyMatrix4(o.matrixWorld.clone().invert())
-      o.material.onBeforeCompile = (sh: any) => {
-        sh.uniforms.uCavMin = { value: inner.min }
-        sh.uniforms.uCavMax = { value: inner.max }
-        sh.vertexShader = 'varying vec3 vCavPos;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvCavPos = position;')
-        sh.fragmentShader = 'uniform vec3 uCavMin, uCavMax;\nvarying vec3 vCavPos;\n' + sh.fragmentShader.replace('void main() {', 'void main() {\n  if (all(greaterThan(vCavPos, uCavMin)) && all(lessThan(vCavPos, uCavMax))) discard;')
+    // The steel liner mesh also holds everything inside the hot space (shelf rails, rods, trays, ducts). From the front they show as stray
+    // bars and blocks beside the fire window, and they come apart as the camera moves. Rays from the middle of the space find its true inner
+    // walls (the farthest first hit, so a rail that sticks out of a wall is not taken for the wall); the liner's shader then skips whatever lies
+    // inside them. The walls themselves, on the boundary, stay, and so does a thin lip at the front.
+    if (cavity) {
+      const rc = new THREE.Raycaster(), mat = cavity.material, side = mat.side
+      mat.side = THREE.DoubleSide
+      const c = cb.getCenter(new Vector3()), sz = cb.getSize(new Vector3()), span = [-0.32, -0.12, 0.12, 0.32]
+      const reach = (dir: any, a: 0 | 1 | 2, b: 0 | 1 | 2) => {
+        let best = 0
+        for (const u of span) for (const v of span) {
+          const o = c.clone(); o.setComponent(a, o.getComponent(a) + u * sz.getComponent(a)); o.setComponent(b, o.getComponent(b) + v * sz.getComponent(b))
+          rc.set(o, dir); const h = rc.intersectObject(cavity, false)[0]; if (h) best = Math.max(best, h.distance)
+        }
+        return best
       }
-      o.material.needsUpdate = true
-    })
+      const e = 0.004, xp = reach(new Vector3(1, 0, 0), 1, 2), xn = reach(new Vector3(-1, 0, 0), 1, 2), yp = reach(new Vector3(0, 1, 0), 0, 2), yn = reach(new Vector3(0, -1, 0), 0, 2), zn = reach(new Vector3(0, 0, -1), 0, 1)
+      mat.side = side
+      const box = new Box3(new Vector3(c.x - xn + e, c.y - yn + e, c.z - zn + e), new Vector3(c.x + xp - e, c.y + yp - e, cb.max.z - 0.03))
+      // the same rule for the black hardware inside (shelf posts standing on the floor): its box reaches a little below the floor
+      let hw: any = null
+      gltf.scene.traverse((o: any) => { if (o.isMesh && o.material?.name === 'Hardware_Black' && o.parent?.name === 'Chamber') hw = o })
+      const skip = (m: any, b: any) => {
+        const inner = b.clone().applyMatrix4(m.matrixWorld.clone().invert()), mt = m.material
+        mt.onBeforeCompile = (sh: any) => {
+          sh.uniforms.uCavMin = { value: inner.min }
+          sh.uniforms.uCavMax = { value: inner.max }
+          sh.vertexShader = 'varying vec3 vCavPos;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvCavPos = position;')
+          sh.fragmentShader = 'uniform vec3 uCavMin, uCavMax;\nvarying vec3 vCavPos;\n' + sh.fragmentShader.replace('void main() {', 'void main() {\n  if (all(greaterThan(vCavPos, uCavMin)) && all(lessThan(vCavPos, uCavMax))) discard;')
+        }
+        mt.needsUpdate = true
+      }
+      skip(cavity, box)
+      if (hw) skip(hw, new Box3(new Vector3(box.min.x, box.min.y - 0.08, box.min.z), box.max))
+    }
     const W =(cb.max.x - cb.min.x) * 2.5, H = (cb.max.y - cb.min.y) * 2.5
     const pcx = ((cb.max.x + cb.min.x) / 2) * 2.5, pcy = ((cb.max.y + cb.min.y) / 2) * 2.5 - 2.05
     // The visible interior back (fan plate + shelf) sits well in front of the cavity's rear bound,
@@ -1594,16 +1668,18 @@ onMounted(() => {
     baseCameraTarget.copy(center)
     
     const fov = 30
-    baseDistance = (size.y/0.45)/(2*Math.tan(MathUtils.degToRad(fov/2)))
+    baseDistance = (size.y/0.45)/(2*Math.tan(MathUtils.degToRad(fov/2))) // the chamber fills 45% of the height: it stands in front of the lower part of the ENVISYS title, which stays readable above it
     const chamberFloorY = -2.05
     baseCameraPos.set(center.x, chamberFloorY+(0.3*baseSizeY), center.z+baseDistance)
 
     // Seed the GSAP proxy with true starting positions
     scrollProxy.camX = baseCameraPos.x
-    scrollProxy.camY = baseCameraPos.y
+    // the opening shot sits a little higher: by parallax the near chamber drops below the far ENVISYS title (only the start
+    // changes; every later move is relative to baseCameraPos / baseCameraTarget)
+    scrollProxy.camY = baseCameraPos.y + 0.9
     scrollProxy.camZ = baseCameraPos.z
     scrollProxy.lookX = baseCameraTarget.x
-    scrollProxy.lookY = baseCameraTarget.y
+    scrollProxy.lookY = baseCameraTarget.y + 0.3
     scrollProxy.lookZ = baseCameraTarget.z
 
     if (cameraRef.value) {
@@ -1620,16 +1696,19 @@ onMounted(() => {
       doorAnim.action   = action
       doorAnim.duration = gltf.animations[0].duration
     }
+    const door = gltf.scene.getObjectByName('Door')
+    if (door) { doorSwing.node = door; doorSwing.q.copy(door.quaternion) }
 
-    // Side units are small on screen: use a ~37% triangle LOD (178k vs 477k, topology-preserving: no fold artifacts) so the fleet phase
+    // Side units are small on screen: they use the lighter mobile build of the same chamber so the fleet phase
     // (3 chambers + mirrored floor pass) stays as light as the hero. Falls back to the full mesh.
     const useFullClones = () => {
       cloneA.value = gltf.scene.clone(true)
       cloneB.value = gltf.scene.clone(true)
     }
-    loader.load('/models/chamber_lod.glb', (lod: any) => {
+    loader.load('/models/et950_m.glb', (lod: any) => {
       // Guard: if the main model was replaced and this LOD is stale, fall back to the full mesh.
       // (compare unscaled sizes: by now the main scene sits in the world at 2.5x, which always failed this check)
+      seat(lod.scene)
       const b = new Box3().setFromObject(lod.scene)
       const sa = size.clone().divideScalar(2.5), sb = new Vector3(); b.getSize(sb)
       if (sa.distanceTo(sb) > 0.03 * sa.length()) { useFullClones(); return }
@@ -1638,7 +1717,7 @@ onMounted(() => {
         child.castShadow = true
         child.receiveShadow = false
         const mats = Array.isArray(child.material) ? child.material : [child.material]
-        mats.forEach((mat: any) => { if (mat) { mat.fog = false; mat.depthWrite = true } })
+        mats.forEach((mat: any) => { if (mat) { mat.fog = false; mat.depthWrite = true; finish(mat) } })
       })
       cloneA.value = lod.scene.clone(true)
       cloneB.value = lod.scene.clone(true)
@@ -2075,15 +2154,16 @@ html[data-covered="1"] .canvas-fixed-wrap {
   z-index: 990;
   pointer-events: none;
   
-  background: rgba(40, 40, 40, 0.85); /* graphite 85% */
+  /* the chamber stays readable on the left; a deep navy-black falls in from the right, behind the spec card */
+  background: linear-gradient(90deg, rgba(4, 6, 10, 0) 16%, rgba(4, 6, 10, 0.88) 48%, rgba(4, 6, 10, 0.97) 100%);
   
   --cx: 50vw;
   --cy: 50vh;
   --radius: 0px;
   
-  /* The soft radial mask for the smoky edge */
-  mask-image: radial-gradient(circle at var(--cx) var(--cy), black calc(var(--radius) * 0.2), transparent var(--radius));
-  -webkit-mask-image: radial-gradient(circle at var(--cx) var(--cy), black calc(var(--radius) * 0.2), transparent var(--radius));
+  /* the shade opens from where the chamber was clicked */
+  mask-image: radial-gradient(circle at var(--cx) var(--cy), black calc(var(--radius) * 0.6), transparent var(--radius));
+  -webkit-mask-image: radial-gradient(circle at var(--cx) var(--cy), black calc(var(--radius) * 0.6), transparent var(--radius));
 }
 
 .smoke-blob::before {
@@ -2145,38 +2225,47 @@ html[data-covered="1"] .canvas-fixed-wrap {
 }
 
 .info-block {
-  position: absolute;
+  position: fixed;
   top: 50%;
-  left: 50%; /* Center placement */
-  transform: translate(-50%, -50%);
-  width: 340px;
-  color: #e8ece6;
-  font-family: var(--font-body);
+  right: 6vw;
+  transform: translateY(-50%);
+  width: min(30vw, 460px);
+  color: #eef3fa;
+  font-family: 'Geist', sans-serif;
   z-index: 1001;
   pointer-events: none;
   visibility: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
+  padding-left: 2.2vw;
+  border-left: 1px solid rgba(238, 243, 250, 0.18);
 }
-.info-close-btn {
-  position: absolute;
-  top: -40px;
-  right: -20px;
-  cursor: pointer;
-  opacity: 0.5;
-  transition: opacity 0.2s;
+.info-close-btn { position: absolute; top: -52px; right: 0; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(238, 243, 250, 0.3); cursor: pointer; opacity: 0.8; transition: opacity 0.2s, background 0.3s, color 0.3s; }
+.info-close-btn:hover { opacity: 1; background: #eef3fa; color: #0a0a0c; }
+.info-index { display: flex; align-items: center; gap: 10px; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2.4vh; }
+.info-index i { width: 8px; height: 8px; border-radius: 50%; background: #ff6a1a; box-shadow: 0 0 0 5px rgba(255, 106, 26, 0.2); }
+.info-index span { opacity: 0.6; }
+.info-title { margin: 0 0 3vh; display: flex; flex-direction: column; gap: 6px; font-family: var(--font-display); font-weight: 400; line-height: 0.95; letter-spacing: -0.055em; }
+.info-title small { font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.2em; opacity: 0.6; }
+.info-title > span { font-size: clamp(40px, 4.6vw, 84px); }
+.info-title .hy { font-family: 'Geist', sans-serif; font-style: normal; font-weight: 600; letter-spacing: 0; padding: 0 0.04em; }
+.info-stat { display: flex; flex-direction: column; gap: 6px; margin-bottom: 3vh; }
+.info-stat small { font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; }
+.info-stat b { font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, 2.2vw, 40px); letter-spacing: -0.04em; color: #ff8a4a; }
+.info-desc { margin: 0 0 3vh; font-size: clamp(16px, 1.15vw, 19px); line-height: 1.55; opacity: 0.85; }
+.info-specs { margin: 0 0 4vh; width: 100%; border-top: 1px solid rgba(238, 243, 250, 0.16); }
+.info-specs div { display: flex; justify-content: space-between; gap: 16px; padding: 1.5vh 0; border-bottom: 1px solid rgba(238, 243, 250, 0.16); }
+.info-specs dt { font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; align-self: center; }
+.info-specs dd { margin: 0; font-size: 16px; text-align: right; }
+.info-cta { display: inline-flex; align-items: center; gap: 12px; padding: 16px 24px; border-radius: 40px; background: #ff6a1a; color: #0a0a0c; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; transition: background 0.4s, gap 0.4s; }
+.info-cta:hover { background: #ff8a4a; gap: 18px; }
+.info-cta svg { width: 10px; height: 10px; }
+@media (max-width: 800px) {
+  .info-block { top: auto; right: 5vw; left: 5vw; bottom: 5vh; transform: none; width: auto; padding: 22px; border: 1px solid rgba(238, 243, 250, 0.18); border-radius: 22px; background: rgba(4, 6, 10, 0.86); }
+  .info-close-btn { top: 14px; right: 14px; }
+  .info-title > span { font-size: 36px; }
+  .info-desc { display: none; }
 }
-.info-close-btn:hover { opacity: 1; }
-.info-index { font-weight: 300; letter-spacing: 4px; font-size: 12px; margin-bottom: 20px; }
-.info-title { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-height: 1.1; margin: 0 0 15px 0; letter-spacing: -1px; }
-.info-title .outline-text {
-  -webkit-text-stroke: 1px #e8ece6;
-  color: transparent;
-}
-.info-subtitle { font-weight: 600; font-size: 10px; letter-spacing: 2px; margin-bottom: 20px; }
-.info-pill { display: inline-block; font-family: var(--font-body); background: #e8ece6; color: black; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-bottom: 20px; font-weight: 600; }
-.info-desc { font-weight: 300; font-size: 14px; line-height: 1.5; margin-bottom: 20px; opacity: 0.8; letter-spacing: 0.02em; }
-.info-specs { font-weight: 400; font-size: 11px; letter-spacing: 1px; opacity: 0.6; display: flex; flex-direction: column; gap: 4px; align-items: center; }
 </style>

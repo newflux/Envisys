@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Vacuum-Insulated Thermal Barrier Tile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- A single-file Three.js motion graphic: a vacuum-insulated thermal barrier tile (the kind that lines a -70 to +180 °C test chamber)
+     assembles out of the dark from six interlocking stepped segments, locks flush, and a grazing light sweeps its surface ridges.
+     0.0-0.3 s black · 0.3-2.2 s assembly (cubic-bezier(0.16, 1, 0.3, 1), 45 ms stagger) · 2.2-3.5 s locked hold + specular sweep.
+     Bottom-right (hover): Replay, Hold/Loop, Export .webm. Add ?loop to start in loop mode.
+     For offline rendering a page can call window.__renderAt(seconds) and read the canvas: see render.cjs next to this file. -->
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #hud { position: fixed; right: 0; bottom: 0; width: 360px; height: 120px; display: flex; align-items: flex-end; justify-content: flex-end; padding: 22px; box-sizing: border-box; }
+  #bar { display: flex; gap: 4px; padding: 5px; border-radius: 12px; background: rgba(20, 22, 26, 0.55); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); opacity: 0; transform: translateY(8px); transition: opacity 0.35s ease, transform 0.35s ease; }
+  #hud:hover #bar, #bar:focus-within { opacity: 1; transform: none; }
+  #bar button { border: 0; border-radius: 8px; padding: 8px 12px; background: transparent; color: rgba(238, 246, 255, 0.85); font: 500 12px/1 system-ui, -apple-system, sans-serif; letter-spacing: 0.02em; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; }
+  #bar button:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+  #bar button[aria-pressed="true"] { color: #38bdf8; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/" } }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><div id="bar">
+  <button id="replay" title="Replay (3.5 s)">Replay (3.5s)</button>
+  <button id="mode" aria-pressed="false" title="Hold the locked tile at the end, or loop seamlessly">Hold at end</button>
+  <button id="export" title="Record a 60 fps WebM at 12 Mbps">Export 60fps (.webm)</button>
+</div></div>
+
+<script type="module">
+import * as THREE from 'three'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+
+// ── timing (seconds) ──
+const T_BLACK = 0.3, T_LOCK = 2.2, T_END = 3.5, STAGGER = 0.045
+const T_OUT = 0.9 // loop mode: the slab slides back out into the dark before the next cycle
+const LOOP_LEN = T_END + T_OUT + 0.3
+const SIZE = 3.6, THICK = 0.22, BEVEL = 0.015, CORE = 0.025
+
+// cubic-bezier(0.16, 1, 0.3, 1) and its inverse-in sibling for the exit
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by
+  const X = (t) => ((ax * t + bx) * t + cx) * t, Y = (t) => ((ay * t + by) * t + cy) * t
+  return (x) => { if (x <= 0) return 0; if (x >= 1) return 1; let lo = 0, hi = 1, t = x; for (let i = 0; i < 28; i++) { const v = X(t); if (Math.abs(v - x) < 1e-6) break; v < x ? (lo = t) : (hi = t); t = (lo + hi) / 2 } return Y(t) }
+}
+const easeOut = bezier(0.16, 1, 0.3, 1), easeIn = bezier(0.7, 0, 0.84, 0)
+
+// ── renderer ──
+const canvas = document.getElementById('c')
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' })
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
+renderer.setClearColor(0x000000, 1)
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 1
+const scene = new THREE.Scene()
+scene.background = new THREE.Color(0x000000)
+const camera = new THREE.PerspectiveCamera(26, 16 / 9, 0.1, 100)
+{ // locked isometric: 45° azimuth, 35° elevation
+  const az = Math.PI / 4, el = (35 * Math.PI) / 180, D = 14.6
+  camera.position.set(Math.sin(az) * Math.cos(el) * D, Math.sin(el) * D, Math.cos(az) * Math.cos(el) * D)
+  camera.lookAt(0, 0, 0)
+}
+
+// a faint studio environment so the 0.9-metal skin has something to reflect; most of the frame stays in shadow
+const pm = new THREE.PMREMGenerator(renderer)
+scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture
+scene.environmentIntensity = 0.55
+
+scene.add(new THREE.AmbientLight(0x0a0c10, 0.5))
+const key = new THREE.DirectionalLight(0xeef6ff, 3.2) // grazing cool-white key, top right
+scene.add(key, key.target)
+const rim = new THREE.DirectionalLight(0x38bdf8, 0.9) // faint cool-teal edge rim, low and behind: it only finds the raised crests and the chamfers
+rim.position.set(-7, 0.7, -3)
+scene.add(rim)
+
+// ── the wavy surface: a tiling normal map (fine diagonal ridges with a slow wobble), world-aligned so ridges run on across seams ──
+function waveNormalMap() {
+  const N = 1024, c = document.createElement('canvas'); c.width = c.height = N
+  const g = c.getContext('2d'), img = g.createImageData(N, N)
+  const h = new Float32Array(N * N), phi = 0.62, lam = 0.2, wob = 1.5
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const x = (i / N) * SIZE, z = (j / N) * SIZE
+    const t = x * Math.cos(phi) + z * Math.sin(phi)
+    h[j * N + i] = Math.sin((2 * Math.PI * t) / lam + wob * Math.sin((2 * Math.PI * (z * Math.cos(phi) - x * Math.sin(phi))) / 2.4))
+  }
+  const s = 1.3
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const dx = h[j * N + ((i + 1) % N)] - h[j * N + ((i - 1 + N) % N)], dz = h[((j + 1) % N) * N + i] - h[((j - 1 + N) % N) * N + i]
+    const nx = -dx * s, ny = -dz * s, nz = 1, l = Math.hypot(nx, ny, nz), k = (j * N + i) * 4
+    img.data[k] = (nx / l * 0.5 + 0.5) * 255; img.data[k + 1] = (ny / l * 0.5 + 0.5) * 255; img.data[k + 2] = (nz / l * 0.5 + 0.5) * 255; img.data[k + 3] = 255
+  }
+  g.putImageData(img, 0, 0)
+  const t = new THREE.CanvasTexture(c)
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / SIZE, 1 / SIZE); t.offset.set(0.5, 0.5)
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy()
+  return t
+}
+const skin = new THREE.MeshPhysicalMaterial({ color: 0x14161a, metalness: 0.9, roughness: 0.36, clearcoat: 0.2, clearcoatRoughness: 0.5, normalMap: waveNormalMap(), normalScale: new THREE.Vector2(0.7, 0.7), })
+const coreMat = new THREE.MeshStandardMaterial({ color: 0x232b33, metalness: 0.55, roughness: 0.55 })
+
+// ── six interlocking stepped segments: diagonal bands whose joints are staircases (each band slides in along the diagonal and locks flush) ──
+const STEP = 0.45, H = SIZE / 2
+function staircase(c) { // the staircase that follows x + z = c, long enough to leave the square
+  const pts = []
+  for (let j = -12; j <= 12; j++) { pts.push([j * STEP, c - j * STEP]); pts.push([(j + 1) * STEP, c - j * STEP]) }
+  return pts
+}
+function clipSquare(poly) { // Sutherland–Hodgman against the square [-H, H]²
+  const edges = [[(p) => p[0] >= -H, (a, b) => { const t = (-H - a[0]) / (b[0] - a[0]); return [-H, a[1] + t * (b[1] - a[1])] }],
+    [(p) => p[0] <= H, (a, b) => { const t = (H - a[0]) / (b[0] - a[0]); return [H, a[1] + t * (b[1] - a[1])] }],
+    [(p) => p[1] >= -H, (a, b) => { const t = (-H - a[1]) / (b[1] - a[1]); return [a[0] + t * (b[0] - a[0]), -H] }],
+    [(p) => p[1] <= H, (a, b) => { const t = (H - a[1]) / (b[1] - a[1]); return [a[0] + t * (b[0] - a[0]), H] }]]
+  for (const [inside, cut] of edges) {
+    const out = []
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length], ia = inside(a), ib = inside(b)
+      if (ia) out.push(a)
+      if (ia !== ib) out.push(cut(a, b))
+    }
+    poly = out
+  }
+  return poly
+}
+const cuts = [-2.5, -1.25, 0, 1.25, 2.5], edgesC = [-9, ...cuts, 9]
+const bands = []
+for (let i = 0; i < 6; i++) {
+  const lo = staircase(edgesC[i]), hi = staircase(edgesC[i + 1]).reverse()
+  const poly = clipSquare([...lo, ...hi])
+  if (poly.length > 2) bands.push(poly)
+}
+function plate(poly, y0, y1, mat) { // a bevelled plate between heights y0 and y1; the outline stays on the cut at mid-bevel
+  const shape = new THREE.Shape(poly.map(([x, z]) => new THREE.Vector2(x, -z)))
+  const d = Math.max(0.001, y1 - y0 - 2 * BEVEL)
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: d, bevelEnabled: true, bevelThickness: BEVEL, bevelSize: BEVEL, bevelOffset: -BEVEL, bevelSegments: 1, curveSegments: 1 })
+  const m = new THREE.Mesh(geo, mat); m.rotation.x = -Math.PI / 2; m.position.y = y0 + BEVEL
+  return m
+}
+const pieces = bands.map((poly, i) => {
+  const cx = poly.reduce((a, p) => a + p[0], 0) / poly.length, cz = poly.reduce((a, p) => a + p[1], 0) / poly.length
+  const g = new THREE.Group()
+  const hh = THICK / 2
+  g.add(plate(poly, CORE / 2, hh, skin), plate(poly, -hh, -CORE / 2, skin))
+  // the thermal-break core: a razor-thin layer, a hair smaller than the plates, so it shows only along the thin side profile
+  const shrink = poly.map(([x, z]) => [cx + (x - cx) * 0.985, cz + (z - cz) * 0.985])
+  g.add(plate(shrink, -CORE / 2, CORE / 2, coreMat))
+  const side = i % 2 ? 1 : -1
+  g.userData = { i, side, start: T_BLACK + STAGGER * i }
+  scene.add(g)
+  return g
+})
+
+// ── choreography ──
+const DIAG = new THREE.Vector3(1, 0, 1).normalize(), ALONG = new THREE.Vector3(1, 0, -1).normalize()
+function pose(t, loop) {
+  const tt = loop ? t % LOOP_LEN : t
+  for (const g of pieces) {
+    const { side, start } = g.userData
+    let p = easeOut((tt - start) / (T_LOCK - start)) // 0 → 1 over this piece's share of the assembly, ease-out, no bounce
+    let a = Math.min(1, Math.max(0, (tt - start) / 0.5))
+    if (loop && tt > T_END) { const q = (tt - T_END - 0.045 * (5 - g.userData.i)) / T_OUT; const e = easeIn(Math.min(1, Math.max(0, q))); p = 1 - e; a = 1 - Math.min(1, Math.max(0, q * 1.2)) }
+    const far = 5.2 * (1 - p), lift = 0.5 * (1 - p)
+    g.position.copy(DIAG).multiplyScalar(far * side).addScaledVector(ALONG, 1.1 * (1 - p) * side)
+    g.position.y = lift
+    g.visible = a > 0.001
+    g.userData.alpha = a
+  }
+  // the grazing sweep: after the lock the key slides across the ridges from a low angle on one side to the other
+  const s = Math.min(1, Math.max(0, (Math.min(tt, T_END) - T_LOCK) / (T_END - T_LOCK)))
+  const sw = s * s * (3 - 2 * s)
+  const az = THREE.MathUtils.lerp(0.35, 1.05, sw), el = THREE.MathUtils.lerp(0.42, 0.55, sw)
+  key.position.set(Math.cos(az) * Math.cos(el) * 9, Math.sin(el) * 9, -Math.sin(az) * Math.cos(el) * 9 + 3)
+  key.intensity = 3.2
+  key.target.position.set(0, 0, 0)
+}
+// per-piece opacity: the two shared materials cannot differ per piece, so each piece fades through its own clones
+for (const g of pieces) g.traverse((o) => { if (o.isMesh) o.material = o.material.clone() })
+function applyAlpha() { for (const g of pieces) g.traverse((o) => { if (o.isMesh) { o.material.opacity = g.userData.alpha; o.material.transparent = g.userData.alpha < 0.999 } }) }
+
+// ── post: bloom, then tone map ──
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: THREE.HalfFloatType, samples: 4 })) // multisampled, or the bevel highlights crawl
+composer.addPass(new RenderPass(scene, camera))
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.18, 0.35, 0.9)
+composer.addPass(bloom)
+composer.addPass(new OutputPass())
+function resize() {
+  const w = innerWidth, h = innerHeight
+  renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h
+  // keep the tile framed with generous negative space on narrow screens too
+  camera.fov = w / h < 1.2 ? 26 * (1.2 / (w / h)) ** 0.7 : 26
+  camera.updateProjectionMatrix()
+}
+addEventListener('resize', resize); resize()
+
+let mode = /[?&]loop/.test(location.search) ? 'loop' : 'hold'
+function renderAt(t) { pose(t, mode === 'loop'); applyAlpha(); composer.render() }
+window.__renderAt = (t, m) => { if (m) mode = m; renderAt(t) }
+window.__ready = true
+
+// ── playback ──
+let t0 = performance.now(), recording = false
+function now() { return (performance.now() - t0) / 1000 }
+function frame() { renderAt(mode === 'hold' ? Math.min(now(), T_END) : now()); requestAnimationFrame(frame) }
+requestAnimationFrame(frame)
+const $ = (id) => document.getElementById(id)
+$('replay').onclick = () => { t0 = performance.now() }
+const modeBtn = $('mode')
+function syncMode() { modeBtn.textContent = mode === 'loop' ? 'Seamless loop' : 'Hold at end'; modeBtn.setAttribute('aria-pressed', String(mode === 'loop')) }
+modeBtn.onclick = () => { mode = mode === 'loop' ? 'hold' : 'loop'; t0 = performance.now(); syncMode() }
+syncMode()
+$('export').onclick = () => {
+  if (recording || !window.MediaRecorder) return
+  recording = true; const prev = mode; mode = 'hold'
+  const stream = canvas.captureStream(60)
+  const type = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find((m) => MediaRecorder.isTypeSupported(m))
+  const rec = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 12_000_000 }), chunks = []
+  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data)
+  rec.onstop = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' })); a.download = 'thermal-barrier-tile.webm'; a.click(); mode = prev; recording = false; syncMode() }
+  t0 = performance.now(); rec.start()
+  setTimeout(() => rec.stop(), (T_END + 0.25) * 1000)
+}
+</script>
+</body>
+</html>

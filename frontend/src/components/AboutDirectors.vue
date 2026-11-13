@@ -7,13 +7,13 @@
     <div class="af" ref="pinRef" :style="{ height: 100 + (founders.length - 1) * 80 + 'vh' }">
       <div class="af-stage">
         <div v-for="(f, i) in founders" :key="i" class="af-shot" :class="{ on: i === at }">
-          <img v-if="f.img" :src="f.img" :alt="f.name" />
+          <img loading="lazy" decoding="async" v-if="f.img" :src="f.img" :alt="f.name" />
           <span v-else>Portrait to come</span>
         </div>
         <p class="af-lead">The people<br />behind Envisys.</p>
         <div class="af-thumbs">
           <button v-for="(f, i) in founders" :key="i" :class="{ on: i === at }" :aria-label="`Show ${f.name}`" data-cursor="" @click="go(i)">
-            <img v-if="f.img" :src="f.img" alt="" /><i v-else>0{{ i + 1 }}</i>
+            <img loading="lazy" decoding="async" v-if="f.img" :src="f.img" alt="" /><i v-else>0{{ i + 1 }}</i>
           </button>
         </div>
         <Transition name="af" mode="out-in">
@@ -24,7 +24,7 @@
 
     <h2 class="at-h rv">Team</h2>
     <figure class="at-band" ref="bandRef">
-      <img ref="bandImg" src="/media/about/team-group.jpg" alt="The Envisys team" />
+      <img loading="lazy" decoding="async" ref="bandImg" src="/media/about/team-group.jpg" alt="The Envisys team" />
     </figure>
   </section>
 </template>

@@ -26,13 +26,14 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
   const pmrem = new THREE.PMREMGenerator(renderer)
   // the light: a real photo studio, captured (Poly Haven's studio_kontrast_02, CC0, cut to 512 px; picked from 13 studios rendered side by side). The generated
   // studio stands in for the moment it takes to load.
-  scene.environment = pmrem.fromScene(studio(), 0.02).texture
   scene.environmentIntensity = 1
   scene.environmentRotation.y = Math.PI // three.js reads a panorama half a turn from Blender; this matches the test renders
-  new HDRLoader().load('/hdr/studio_512.hdr', (t: any) => {
-    t.mapping = THREE.EquirectangularReflectionMapping
-    const env = pmrem.fromEquirectangular(t).texture
-    scene.environment?.dispose(); scene.environment = env; t.dispose()
+  // One environment bake, not two: the chambers wait for the captured studio (a 512 px file); the generated studio is only the fallback.
+  const envReady = new Promise<void>((res) => {
+    new HDRLoader().load('/hdr/studio_512.hdr', (t: any) => {
+      t.mapping = THREE.EquirectangularReflectionMapping
+      scene.environment = pmrem.fromEquirectangular(t).texture; t.dispose(); res()
+    }, undefined, () => { scene.environment = pmrem.fromScene(studio(), 0.02).texture; res() })
   })
 
   // a soft key from the front left that travels with the camera, so every chamber is lit the same way
@@ -79,16 +80,23 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
   })
 
   const draco = new DRACOLoader()
-  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
+  draco.setDecoderPath('/draco/')
   const loader = new GLTFLoader()
   loader.setDRACOLoader(draco)
   // each file loads once; chambers sharing a file share its geometry and materials
   const files = new Map<string, Promise<any>>()
+  const lite = new Map<any, any>()
   const load = (url: string) => {
     if (!files.has(url)) files.set(url, new Promise((res, rej) => loader.load(url, (g: any) => {
       g.scene.traverse((o: any) => {
         if (!o.isMesh) return
         o.castShadow = o.receiveShadow = !small
+        // the standard shader looks the same here (no clearcoat in use) and compiles / draws cheaper than the physical one
+        if (o.material.isMeshPhysicalMaterial && !(o.material.transmission > 0)) {
+          let s = lite.get(o.material)
+          if (!s) { s = new THREE.MeshStandardMaterial(); s.copy(o.material); s.name = o.material.name; lite.set(o.material, s) }
+          o.material = s
+        }
         const m = o.material
         // the touchscreen shows a live controller page, lit like a real screen: readable, not glaring
         if (m.name === 'HMI_Screen') { m.color.set(0x000000); m.emissive.set(0xffffff); m.emissiveMap = hmi.tex; m.emissiveIntensity = 0.85; m.roughness = 0.12; m.needsUpdate = true }
@@ -102,7 +110,7 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
     return files.get(url)!
   }
   const photo = new THREE.TextureLoader()
-  const ready = Promise.all(slots.map(async (s) => {
+  const ready = Promise.all([envReady, ...slots.map(async (s) => {
     if (!s.url) {
       // the photograph, standing on the floor and facing the row, its own colours untouched by the lights
       const tex: any = await photo.loadAsync(s.image!)
@@ -138,7 +146,7 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
       s.edge = { x: right ? bb.min.x : bb.max.x, z: bb.max.z, y0: bb.min.y, y1: bb.max.y }
     }
     s.group.visible = true
-  }))
+  })])
 
   // cold mist: on hover it spills from the gap of the opened door, falls (it is colder than the room) and spreads over the floor
   const soft = (n: number, blobs: number, seed: number) => {
@@ -310,7 +318,18 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
   function dispose() {
     renderer.dispose(); pmrem.dispose(); blobTex.dispose(); draco.dispose(); hmi.tex.dispose(); puffTex.dispose(); hazeTex.dispose(); hazes.forEach((h) => h.t.dispose())
   }
-  return { ready, update, pick, spin, release, hover, intro, dispose }
+  // Resolve only once every shader has compiled: one draw through a 1 px scissor (all chambers shown for that draw) while the page is still
+  // behind its preloader, so the first real frame never stalls on a compile.
+  const warmed = ready.then(() => {
+    const vis = slots.map((s) => s.group.visible)
+    slots.forEach((s) => { s.group.visible = true })
+    renderer.setScissorTest(true); renderer.setScissor(0, 0, 1, 1)
+    try { renderer.render(scene, camera) } catch { /* warm-up only */ }
+    renderer.setScissorTest(false)
+    slots.forEach((s, i) => { s.group.visible = vis[i] })
+  })
+
+  return { ready: warmed, update, pick, spin, release, hover, intro, dispose }
 }
 
 // a photo studio, as an environment: a dim grey room with a big softbox overhead, tall strips either side and a

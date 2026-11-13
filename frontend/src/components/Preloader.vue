@@ -13,6 +13,7 @@
     <!-- 3. The Envisys logo: letters rise from behind the baseline, the blocks drop in, the tagline wipes on -->
     <div v-if="!smokeOnly" ref="logoStageRef" class="preloader-logo-stage">
       <BrandMark ref="brandRef" full class="preloader-logo" />
+      <i v-if="holding" class="pl-bar" aria-hidden="true"></i>
     </div>
   </div>
 </template>
@@ -46,6 +47,7 @@ const smokeCanvasRef = ref<HTMLCanvasElement | null>(null)
 const brandRef = ref<InstanceType<typeof BrandMark> | null>(null)
 const logoStageRef = ref<HTMLElement | null>(null)
 const isFinished = ref(false)
+const holding = ref(false)
 
 let tweens: gsap.core.Tween[] = []
 let masterTl: gsap.core.Timeline | null = null
@@ -241,6 +243,28 @@ function startAnimation() {
     smokeStartTime
   )
 
+  // Landing: the logo holds until the 3D scene has compiled its shaders, so the reveal is always the live scene (no freeze, no half-loaded frame)
+  if (!props.smokeOnly) {
+    masterTl.call(() => {
+      if ((window as any).__sceneReady !== false) return
+      masterTl!.pause()
+      const t = setTimeout(() => { holding.value = true }, 700) // CSS-driven bar: keeps moving even while the page is busy compiling
+      const go = () => { clearTimeout(t); holding.value = false; window.removeEventListener('scene:ready', go); masterTl?.play() }
+      window.addEventListener('scene:ready', go)
+    }, [], smokeStartTime)
+  }
+
+  // Inner pages with a 3D scene (window.__pagePending): the smoke keeps covering the page until the scene has compiled behind it
+  if (props.smokeOnly) {
+    masterTl.call(() => {
+      if (!(window as any).__pagePending) return
+      masterTl!.pause()
+      const go = () => { clearTimeout(t); window.removeEventListener('page:ready', go); masterTl?.play() }
+      const t = setTimeout(go, 15000) // never hold forever
+      window.addEventListener('page:ready', go)
+    }, [], smokeStartTime + 1.34)
+  }
+
   // 3. The white layer of the logo shifts to white as the black wave covers it
   masterTl.to(
     logoColorState,
@@ -295,6 +319,9 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.pl-bar { position: absolute; left: 50%; bottom: -34px; width: 120px; height: 2px; margin-left: -60px; overflow: hidden; background: rgba(14, 15, 18, 0.12); }
+.pl-bar::after { content: ''; position: absolute; inset: 0; width: 40%; background: #ff6a13; animation: pl-slide 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+@keyframes pl-slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
 .envisys-preloader-root {
   position: fixed;
   top: 0;

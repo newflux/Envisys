@@ -8,7 +8,7 @@
         <article v-for="(s, i) in steps" :key="s.n" class="st-card" :ref="(el) => (cardEls[i] = el as HTMLElement)">
           <div class="st-n">{{ s.n }}</div>
           <div class="st-dots"><i></i></div>
-          <div class="st-img"><img :src="s.src" alt="" decoding="async" /></div>
+          <div class="st-img"><img loading="lazy" decoding="async" :src="s.src"  alt="" /></div>
           <p>{{ s.cap }}</p>
         </article>
       </div>
@@ -20,7 +20,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 
-// Captions describe what each photo shows (public/images/imgs → public/media)
+// Captions describe what each photo shows (sources/photos/shoot → public/media)
 const steps = [
   { n: '01', src: '/media/step-1.jpg', cap: 'Fabrication · brazing and joining' },
   { n: '02', src: '/media/step-2.jpg', cap: 'Refrigeration circuits' },

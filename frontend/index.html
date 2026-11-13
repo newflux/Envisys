@@ -1446,9 +1446,12 @@ svg[data-v-71e9e103] {
 }</style>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- Dot-matrix numerals for the factory steps -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@600&display=swap" />
+    <!-- Landing only: start fetching the chamber model, its decoder and the 3D heading font while the scripts parse -->
+    <script>
+      if (location.pathname === '/') for (const [href, as, type] of [['/models/et950.glb', 'fetch'], ['/draco/draco_decoder.wasm', 'fetch'], ['/fonts/MonumentExtended-Ultrabold.woff', 'font', 'font/woff']]) {
+        const l = document.createElement('link'); l.rel = 'preload'; l.href = href; l.as = as; l.crossOrigin = ''; if (type) l.type = type; document.head.appendChild(l)
+      }
+    </script>
   </head>
   <body>
     <noscript>

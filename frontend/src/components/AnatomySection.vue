@@ -370,14 +370,21 @@ function tick() {
   render(p)
 }
 
-onMounted(() => {
+// The anatomy scene (its own WebGL context + 2.5 MB model) is built only once the section is about to be seen.
+let io: IntersectionObserver | null = null
+function start() {
   buildScene(canvasRef.value!)
   resize()
   window.addEventListener('resize', resize)
   gsap.ticker.add(tick)
+}
+onMounted(() => {
+  io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io?.disconnect(); io = null; start() } }, { rootMargin: '150% 0px' })
+  io.observe(canvasRef.value!)
 })
 onUnmounted(() => {
   disposed = true
+  io?.disconnect()
   window.removeEventListener('resize', resize)
   gsap.ticker.remove(tick)
   renderer?.dispose()

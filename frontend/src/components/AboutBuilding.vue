@@ -5,10 +5,10 @@
   <section class="ab2" ref="secRef">
     <div class="ab2-in">
       <div class="ab2-stage" ref="stageRef">
-        <img class="ab2-img" src="/media/site-aerial.jpg" alt="Aerial view of the Envisys and Vistara units in Peenya Industrial Estate, Bengaluru" />
+        <img loading="lazy" decoding="async" class="ab2-img" src="/media/site-aerial.jpg" alt="Aerial view of the Envisys and Vistara units in Peenya Industrial Estate, Bengaluru" />
 
         <!-- the same picture, in colour, shown only inside the building you point at -->
-        <img v-for="s in sites" :key="'c' + s.name" class="ab2-color" :class="{ on: hot === s.g }" src="/media/site-aerial.jpg" alt="" aria-hidden="true" :style="{ clipPath: clip(s.poly) }" />
+        <img loading="lazy" decoding="async" v-for="s in sites" :key="'c' + s.name" class="ab2-color" :class="{ on: hot === s.g }" src="/media/site-aerial.jpg" alt="" aria-hidden="true" :style="{ clipPath: clip(s.poly) }" />
 
         <svg class="ab2-svg" :viewBox="`0 0 ${W} ${H}`" preserveAspectRatio="none" aria-hidden="true">
           <path :d="route" class="r-line" />

@@ -67,17 +67,17 @@
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
-  <div class="canvas-fixed-wrap">    <TresCanvas ref="tresCanvasRef" window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
+  <div class="canvas-fixed-wrap">    <TresCanvas ref="tresCanvasRef" window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="!isMobile" power-preference="high-performance">
       <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.5" :far="250" />
       
       <!-- Fog (Soft cold bluish-ash atmospheric gallery void, slightly brightened) -->
       <TresFog :args="['#050609', 38, 160]" />
 
       <!-- Gentle Global Ambient Base Light (Brightened to lift deep shadow values) -->
-      <TresAmbientLight :intensity="0.80" color="#d8dee8" />
+      <TresAmbientLight :intensity="lean ? 1.15 : 0.8" color="#d8dee8" />
 
       <!-- Environment Lighting (Brightened studio illumination with crisp metallic reflections) -->
-      <Environment :background="false" :environment-intensity="0.72" :frames="1" :resolution="256">
+      <Environment v-if="!lean" :background="false" :environment-intensity="0.72" :frames="1" :resolution="256">
         <!-- Overhead luminous ceiling flood centered directly over chamber (cold bluish-ash tint) -->
         <Lightformer :intensity="5.8" :position="[0, tunnelH - 2.5, 0]" :scale="[8, 12, 1]" :rotation="[-Math.PI/2, 0, 0]" color="#fff7ee" />
         <!-- Rear Top Rim Lightformer: cuts metallic outlines along top bevels -->
@@ -88,7 +88,7 @@
       </Environment>
 
       <!-- Background 3D Text Effect (ENVISYS in Monument Extended with Seamless Looping Video Inside) -->
-      <TresGroup ref="bgTextGroupRef" :position="[0, 5.1, -15]" :scale="scrollProxy.textScale">
+      <TresGroup ref="bgTextGroupRef" :position="[0, 5.1, -15]" :scale="scrollProxy.textScale * textK">
         <!-- Solid white base text for guaranteed legibility -->
         <TresText
           ref="bgTextRef"
@@ -156,19 +156,19 @@
       <TresDirectionalLight :position="[-4.5, 3.5, -3]" :intensity="3.5" color="#c4d1e6" />
       <TresDirectionalLight :position="[4.5, 3.5, -3]" :intensity="3.5" color="#c4d1e6" />
       <!-- High-angle side fill lights (soft cold architectural bounce) -->
-      <TresPointLight :position="[-4.5, 2.5, -2]" :intensity="3.8" color="#9db0cc" :distance="16" />
-      <TresPointLight :position="[4.5, 2.5, -2]" :intensity="3.8" color="#9db0cc" :distance="16" />
+      <TresPointLight v-if="!lean" :position="[-4.5, 2.5, -2]" :intensity="3.8" color="#9db0cc" :distance="16" />
+      <TresPointLight v-if="!lean" :position="[4.5, 2.5, -2]" :intensity="3.8" color="#9db0cc" :distance="16" />
 
       <!-- Side Wall Subtle Cold Bluish-Ash Ambient Fill -->
-      <TresPointLight :position="[-tunnelW/2 + 2, 3, -4]" :intensity="3.0" color="#343c4c" :distance="38" />
-      <TresPointLight :position="[tunnelW/2 - 2, 3, -4]" :intensity="3.0" color="#343c4c" :distance="38" />
-      <TresPointLight :position="[-tunnelW/2 + 2, 3, 12]" :intensity="2.4" color="#2c3342" :distance="32" />
-      <TresPointLight :position="[tunnelW/2 - 2, 3, 12]" :intensity="2.4" color="#2c3342" :distance="32" />
+      <TresPointLight v-if="!lean" :position="[-tunnelW/2 + 2, 3, -4]" :intensity="3.0" color="#343c4c" :distance="38" />
+      <TresPointLight v-if="!lean" :position="[tunnelW/2 - 2, 3, -4]" :intensity="3.0" color="#343c4c" :distance="38" />
+      <TresPointLight v-if="!lean" :position="[-tunnelW/2 + 2, 3, 12]" :intensity="2.4" color="#2c3342" :distance="32" />
+      <TresPointLight v-if="!lean" :position="[tunnelW/2 - 2, 3, 12]" :intensity="2.4" color="#2c3342" :distance="32" />
 
       <!-- Phase 3 Fleet Fill Lights (Evenly lit, no pure black faces) -->
-      <TresPointLight ref="fleetL" :position="[-14, 2, 14]" :intensity="0" color="#e6ebf3" :distance="45" />
-      <TresPointLight ref="fleetCenter" :position="[0, 2, 16]" :intensity="0" color="#e6ebf3" :distance="45" />
-      <TresPointLight ref="fleetR" :position="[14, 2, 14]" :intensity="0" color="#e6ebf3" :distance="45" />
+      <TresPointLight v-if="!lean" ref="fleetL" :position="[-14, 2, 14]" :intensity="0" color="#e6ebf3" :distance="45" />
+      <TresPointLight v-if="!lean" ref="fleetCenter" :position="[0, 2, 16]" :intensity="0" color="#e6ebf3" :distance="45" />
+      <TresPointLight v-if="!lean" ref="fleetR" :position="[14, 2, 14]" :intensity="0" color="#e6ebf3" :distance="45" />
 
       <!-- Interactive Mouse Spotlight -->
       <TresSpotLight 
@@ -185,12 +185,13 @@
         <TresMesh :rotation="[-Math.PI/2, 0, 0]" :position="[0, -2.05, 0]">
           <TresPlaneGeometry :args="[tunnelW, tunnelD]" />
           <MeshReflectionMaterial 
-            v-if="!isMobile && floorSeamMap && scrollProxy.transitionScale < 0.1"
+            v-if="floorSeamMap && scrollProxy.transitionScale < 0.1"
             color="#08090c"
             :map="floorSeamMap"
             :metalness="0.12"
             :roughness="0.30"
-            :resolution="512"
+            :key="reflRes"
+            :resolution="reflRes"
             :blur="[220, 70]"
             :mixBlur="0.95"
             :mixStrength="0.42"
@@ -547,7 +548,23 @@ function openChamberModal(idx: number) {
   openPanel(window.innerWidth / 2, window.innerHeight / 2)
 }
 
-const isMobile = ref(false)
+// phones / touch devices: lighter 3D (smaller mirror, lower pixel ratio, no antialias), hero word sized to fit the narrow screen
+const isMobile = ref(window.matchMedia('(max-width: 800px)').matches || window.matchMedia('(pointer: coarse)').matches)
+const textK = isMobile.value ? 0.4 : 1
+// Weak-GPU tier (integrated Intel UHD/HD, Mali, old Adreno, software GL, or a 4-thread / 4 GB machine): smaller mirror. Phones always count.
+const weak = isMobile.value || (() => {
+  try {
+    const gl = document.createElement('canvas').getContext('webgl2') as WebGL2RenderingContext | null
+    const ext = gl?.getExtension('WEBGL_debug_renderer_info')
+    const name = ext ? String(gl!.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : ''
+    gl?.getExtension('WEBGL_lose_context')?.loseContext()
+    return /Intel\(R\) (UHD|HD) Graphics|Intel HD|Mali-|Adreno \(TM\) [3-5]\d\d|PowerVR|SwiftShader|llvmpipe|Basic Render/i.test(name)
+      || (navigator.hardwareConcurrency || 8) <= 4 || ((navigator as any).deviceMemory || 8) <= 4
+  } catch { return false }
+})()
+// Lighting for everyone: every extra light multiplies each shader's size, and on Windows (ANGLE/D3D) each of the ~15 programs then costs
+// ~0.45 s to compile at first draw, even on a fast GPU. Fewer lights = no load delay anywhere, and the look is practically the same.
+const lean = ref(true)
 const pixelRatio = ref(1)
 const isDebug = new URLSearchParams(window.location.search).get('debug') === 'lineup'
 
@@ -732,7 +749,7 @@ function generateTextures() {
 }
 
 onMounted(() => {
-  pixelRatio.value = Math.min(window.devicePixelRatio || 1, 1.5)
+  pixelRatio.value = Math.min(window.devicePixelRatio || 1, isMobile.value ? 1.25 : 1.5)
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (prefersReducedMotion) {
@@ -750,6 +767,7 @@ onMounted(() => {
   )
 
   panelTl.eventCallback('onStart', () => {
+    document.documentElement.classList.add('ci-open')
     if (textPanelRef.value) {
       textPanelRef.value.style.visibility = 'visible'
       textPanelRef.value.style.pointerEvents = 'auto'
@@ -758,6 +776,7 @@ onMounted(() => {
   })
   
   panelTl.eventCallback('onReverseComplete', () => {
+    document.documentElement.classList.remove('ci-open')
     if (textPanelRef.value) {
       textPanelRef.value.style.visibility = 'hidden'
       textPanelRef.value.style.pointerEvents = 'none'
@@ -784,12 +803,14 @@ function openPanel(cx: number, cy: number) {
 function closePanel() {
   if (!isPanelOpen.value) return
   isPanelOpen.value = false
+  document.documentElement.classList.remove('ci-open')
   panelTl.reverse()
 }
 
 function closePanelImmediate() {
   if (!isPanelOpen.value) return
   isPanelOpen.value = false
+  document.documentElement.classList.remove('ci-open')
   panelTl.pause(0)
   if (textPanelRef.value) {
     textPanelRef.value.style.visibility = 'hidden'
@@ -892,6 +913,7 @@ window.addEventListener('pointerup', (e) => {
 
 // ── Refs ────────────────────────────────────────────────────────────────────
 const cameraRef       = ref<any>(null)
+const reflRes = ref(weak ? 256 : 512) // mirrored-floor resolution; steps down on weak GPUs, never removed
 const mouseSpotLightRef = ref<any>(null)
 const fleetL          = ref<any>(null)
 const fleetCenter     = ref<any>(null)
@@ -1068,6 +1090,7 @@ if (typeof window !== 'undefined') (window as any).toggleNightMode = toggleNight
 
 // ── onMounted ───────────────────────────────────────────────────────────────
 onMounted(() => {
+  holdRender()
   // Prevent browser from restoring previous scroll position and causing GSAP to snap
   if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual'
@@ -1172,7 +1195,7 @@ onMounted(() => {
   window.addEventListener('mousemove', (e) => {
     if (!mouseHasMoved) {
       mouseHasMoved = true
-      gsap.to(spotlightIntensity, { value: 85, duration: 0.5, overwrite: true }) // the pointer's torch: soft enough not to burn out the white chamber
+      gsap.to(spotlightIntensity, { value: 92, duration: 0.5, overwrite: true }) // the pointer's torch: a touch brighter than before, still soft enough not to burn out the white chamber
     }
     const nx = (e.clientX/window.innerWidth)*2-1
     const ny = -(e.clientY/window.innerHeight)*2+1
@@ -1390,7 +1413,7 @@ onMounted(() => {
       bgTextGroupRef.value.position.y += (targetTextY - bgTextGroupRef.value.position.y) * 0.1
       bgTextGroupRef.value.position.z = -15 // Hard anchored in center
 
-      bgTextGroupRef.value.scale.setScalar(scrollProxy.textScale)
+      bgTextGroupRef.value.scale.setScalar(scrollProxy.textScale * textK)
       // Hide completely when faded out to save rendering/raycasting
       bgTextGroupRef.value.visible = scrollProxy.textOpacity > 0
     }
@@ -1505,16 +1528,25 @@ onMounted(() => {
 
   // ── Load GLBs ──────────────────────────────────────────────────────────
   const draco = new DRACOLoader()
-  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
+  draco.setDecoderPath('/draco/')
   const loader = new GLTFLoader()
   loader.setDRACOLoader(draco)
   // The hero is the products page's ET950. Under this stage's strong studio light its white is held back to a soft grey-white
   // (it reads as white on screen, never blown out), and the gloss on the black centre strip is taken down to satin, so the strip
   // reads as a dark panel instead of a mirror of the light boxes.
   const hmi = screenUI(); hmiDraw = hmi.draw
+  // The chamber's clearcoat is ~0, so the lighter standard shader looks the same and compiles/renders much cheaper.
+  const stdCache = new Map<any, any>()
+  const lite = (m: any) => {
+    if (!m?.isMeshPhysicalMaterial || m.transmission > 0 || m.sheen > 0 || m.iridescence > 0) return m
+    let s = stdCache.get(m)
+    if (!s) { s = new THREE.MeshStandardMaterial(); s.copy(m); s.name = m.name; stdCache.set(m, s) }
+    return s
+  }
+  const liteMesh = (o: any) => { o.material = Array.isArray(o.material) ? o.material.map(lite) : lite(o.material) }
   const finish = (mat: any) => {
     if (mat.name === 'Powder_White') { mat.color.setRGB(0.6, 0.607, 0.615); mat.envMapIntensity = 0.7; mat.roughness = 0.55; if ('clearcoat' in mat) mat.clearcoat = 0.08 }
-    else if (mat.name === 'HMI_Screen') { mat.map = null; mat.color.set(0x000000); mat.emissive.set(0xffffff); mat.emissiveMap = hmi.tex; mat.emissiveIntensity = 0.8; mat.roughness = 0.12; mat.metalness = 0; mat.needsUpdate = true } // the same live controller page the products page paints on its door
+    else if (mat.name === 'HMI_Screen') { mat.map = null; mat.color.set(0x000000); mat.emissive.set(0xffffff); mat.emissiveMap = hmi.tex; mat.emissiveIntensity = 0.8; mat.roughness = 0.5; mat.metalness = 0; mat.needsUpdate = true } // the same live controller page the products page paints on its door
     else if (mat.name === 'Logo_Silver') { mat.color.setRGB(0.88, 0.89, 0.9); mat.metalness = 0.35; mat.roughness = 0.35 } // full metal mirrors the dark tunnel and the letters vanish
     else if (mat.name === 'Gloss_Black') { mat.color.setRGB(0.014, 0.015, 0.017); mat.roughness = 0.88; mat.metalness = 0; if ('clearcoat' in mat) mat.clearcoat = 0; mat.envMapIntensity = 0.45 } // matte: the pointer's torch must not show as a hot spot on it
   }
@@ -1555,6 +1587,7 @@ onMounted(() => {
       if (child.isMesh) {
         child.castShadow = true
         child.receiveShadow = false // Prevents CAD self-shadow fighting
+        liteMesh(child)
         if (child.material) {
           const mats = Array.isArray(child.material) ? child.material : [child.material]
           mats.forEach((mat: any) => {
@@ -1705,7 +1738,7 @@ onMounted(() => {
       cloneA.value = gltf.scene.clone(true)
       cloneB.value = gltf.scene.clone(true)
     }
-    loader.load('/models/et950_m.glb', (lod: any) => {
+    if (!isMobile.value) loader.load('/models/et950_m.glb', (lod: any) => { // phones skip the fleet phase, so no side chambers
       // Guard: if the main model was replaced and this LOD is stale, fall back to the full mesh.
       // (compare unscaled sizes: by now the main scene sits in the world at 2.5x, which always failed this check)
       seat(lod.scene)
@@ -1716,6 +1749,7 @@ onMounted(() => {
         if (!child.isMesh) return
         child.castShadow = true
         child.receiveShadow = false
+        liteMesh(child)
         const mats = Array.isArray(child.material) ? child.material : [child.material]
         mats.forEach((mat: any) => { if (mat) { mat.fog = false; mat.depthWrite = true; finish(mat) } })
       })
@@ -1725,6 +1759,7 @@ onMounted(() => {
     transitionChamber.value = gltf.scene.clone(true)
 
     buildScrollTimeline()
+    setTimeout(warmShaders, 600)
   })
 })
 
@@ -1985,6 +2020,106 @@ function buildScrollTimeline() {
 }
 
 
+// The 3D loop stays stopped, and screen draws are dropped, until the shader warm-up below has run, so the preloader never freezes
+// behind a wall of synchronous compiles. The preloader waits for 'scene:ready' before it lifts.
+let warmRuns = 0
+let holdTimer = 0, origRender: any = null, warming = false
+const reflCache = new Map<any, any>()
+let reflList: any[] | null = null, reflAge = 0
+function reflMat(m: any) {
+  if (Array.isArray(m) || !(m?.isMeshStandardMaterial)) return null
+  let b = reflCache.get(m)
+  if (!b) {
+    b = new THREE.MeshBasicMaterial({ color: m.color.clone().multiplyScalar(m.name ? 0.16 : 0.006), side: m.side, transparent: m.transparent, opacity: m.opacity, fog: false })
+    if (m.emissiveMap || m.emissiveIntensity > 0 && (m.emissive.r + m.emissive.g + m.emissive.b) > 0.5) b.color.setRGB(0.35, 0.4, 0.5)
+    reflCache.set(m, b)
+  }
+  return b
+}
+function holdRender() {
+  ;(window as any).__sceneReady = false
+  let tries = 0
+  const grab = () => {
+    const ctx = tresCanvasRef.value?.context, r = ctx?.renderer?.instance
+    if (!r) { if (++tries < 300) requestAnimationFrame(grab); return }
+    // Tres restarts its own loop once its renderer is ready, so keep it stopped until releaseRender()
+    origRender = r.render
+    r.render = function (this: any, sc: any, cam: any) {
+      const rt = this.getRenderTarget()
+      if (!(window as any).__sceneReady && !warming && rt === null) return
+      // The mirror pass draws the scene into a render target, which would compile every material a second time (a different shader
+      // variant). It is blurred and faint, so it draws with plain same-colour materials instead: same look, half the shader work.
+      if (rt !== null && sc === ctx.scene.value && cam !== cameraRef.value && !location.search.includes("noovr")) {
+        if (!reflList || ++reflAge > 90) { reflList = []; reflAge = 0; sc.traverse((o: any) => { if (o.isMesh && reflMat(o.material)) reflList!.push(o) }) } // rebuilt every ~1.5 s
+        // tunnel walls / ceiling are near-black, so leaving them out of the mirror changes nothing visible; chambers use plain materials
+        const orig = reflList.map((o: any) => o.material), vis = reflList.map((o: any) => o.visible)
+        reflList.forEach((o: any, i: number) => { if (orig[i].name) o.material = reflMat(orig[i]); else o.visible = false })
+        try { return origRender.call(this, sc, cam) } finally { reflList.forEach((o: any, i: number) => { o.material = orig[i]; o.visible = vis[i] }) }
+      }
+      return origRender.call(this, sc, cam)
+    }
+    holdTimer = window.setInterval(() => { if (!(window as any).__sceneReady && !warming) ctx.loop?.stop() }, 30)
+    ctx.loop?.stop()
+  }
+  grab()
+  setTimeout(releaseRender, 20000) // never hold forever
+}
+function releaseRender() {
+  if ((window as any).__sceneReady) return
+  ;(window as any).__sceneReady = true
+  clearInterval(holdTimer)
+  const ctx = tresCanvasRef.value?.context
+  ctx?.loop?.start()
+  window.dispatchEvent(new Event('scene:ready'))
+}
+
+// ANGLE/D3D finishes compiling a shader at its first draw, so "async compile" does not help on Windows. Instead the scene is drawn
+// once into a 1 px scissor: every program the hero needs (incl. the mirror pass) compiles behind the preloader, nothing visible is shown.
+// Programs for later sections (side chambers, transition, headline) are compiled afterwards, one group at a time, while the hero is up.
+async function warmShaders() {
+  if (warmRuns > 0) return
+  warmRuns++
+  const ctx = tresCanvasRef.value?.context, r = ctx?.renderer?.instance, sc = ctx?.scene?.value, cam = cameraRef.value?.value ?? cameraRef.value
+  if (!r || !sc || !cam) return releaseRender()
+  const frame = () => new Promise<void>(res => requestAnimationFrame(() => res()))
+  r.setScissorTest(true); r.setScissor(0, 0, 1, 1)
+  warming = true
+  ctx.loop?.start()
+  await frame(); await frame(); await frame()
+  ctx.loop?.stop()
+  warming = false
+  r.setScissorTest(false)
+  releaseRender()
+  window.dispatchEvent(new Event('shaders:warm'))
+  setTimeout(adaptQuality, 1500)
+  // phase B: hidden groups, one per task
+  await new Promise(res => setTimeout(res, 1200))
+  for (const g of [...sc.children]) {
+    if (g.visible) continue
+    g.visible = true
+    r.setScissorTest(true); r.setScissor(0, 0, 1, 1)
+    try { origRender.call(r, sc, cam) } catch { /* warm-up only */ }
+    r.setScissorTest(false)
+    g.visible = false
+    await new Promise(res => setTimeout(res, 250))
+  }
+  window.dispatchEvent(new Event('shaders:warm'))
+}
+
+// Weak GPU (integrated graphics): keep the mirrored floor but render it smaller, then drop the pixel ratio if still slow.
+function adaptQuality(level = 0) {
+  let n = 0, t0 = 0
+  const tick = (t: number) => {
+    if (!t0) t0 = t
+    if (++n < 90) return requestAnimationFrame(tick)
+    if (90000 / (t - t0) >= 52 || level >= 2) return
+    if (level === 0) reflRes.value = Math.min(reflRes.value, 256)
+    else { reflRes.value = 256; pixelRatio.value = 1 } // below 256 the blurred mirror turns blocky // the mirror itself is never removed
+    setTimeout(() => adaptQuality(level + 1), 1500)
+  }
+  requestAnimationFrame(tick)
+}
+
 // --- ICOMAT INTEGRATION HANDLERS ---
 function onPreloaderComplete() {
   document.body.style.overflow = ''
@@ -2224,6 +2359,7 @@ html[data-covered="1"] .canvas-fixed-wrap {
   .bg-grain { opacity: 0.03; }
 }
 
+html.ci-open .Hero_text__cn7Li { opacity: 0 !important; transition: opacity 0.25s; } /* the hero copy must not show through the open spec card */
 .info-block {
   position: fixed;
   top: 50%;
@@ -2242,9 +2378,9 @@ html[data-covered="1"] .canvas-fixed-wrap {
   padding-left: 2.2vw;
   border-left: 1px solid rgba(238, 243, 250, 0.18);
 }
-.info-close-btn { position: absolute; top: -52px; right: 0; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(238, 243, 250, 0.3); cursor: pointer; opacity: 0.8; transition: opacity 0.2s, background 0.3s, color 0.3s; }
+.info-close-btn { position: absolute; top: -9px; right: 0; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(238, 243, 250, 0.3); cursor: pointer; opacity: 0.8; transition: opacity 0.2s, background 0.3s, color 0.3s; }
 .info-close-btn:hover { opacity: 1; background: #eef3fa; color: #0a0a0c; }
-.info-index { display: flex; align-items: center; gap: 10px; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2.4vh; }
+.info-index { max-width: calc(100% - 56px); display: flex; align-items: center; gap: 10px; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2.4vh; }
 .info-index i { width: 8px; height: 8px; border-radius: 50%; background: #ff6a1a; box-shadow: 0 0 0 5px rgba(255, 106, 26, 0.2); }
 .info-index span { opacity: 0.6; }
 .info-title { margin: 0 0 3vh; display: flex; flex-direction: column; gap: 6px; font-family: var(--font-display); font-weight: 400; line-height: 0.95; letter-spacing: -0.055em; }

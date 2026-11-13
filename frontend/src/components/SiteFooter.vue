@@ -88,7 +88,7 @@ const cols: { h: string; links: { t: string; href?: string; build?: boolean }[] 
   { h: 'Products', links: [{ t: 'Environmental', href: '/environmental-test-chambers' }, { t: 'Thermal shock', href: '/thermal-shock-chambers' }, { t: 'Altitude', href: '/altitude-test-chambers' }, { t: 'Salt spray', href: '/salt-spray-chambers' }, { t: 'Walk-in', href: '/environmental-walkin-chambers' }] },
   { h: 'Services', links: [{ t: 'Testing lab', href: VISTARA_URL || '/verticals/testing' }, { t: 'Rentals', href: '/verticals/rentals' }, { t: 'After-sales', href: '/verticals/aftersales' }, { t: 'Express factory', href: '/verticals/express' }] },
   { h: 'Company', links: [{ t: 'About', href: '/about' }, { t: 'Industries', href: '/industries' }, { t: 'Careers', href: 'mailto:hrd@envisystech.com' }, { t: 'Contact', build: true }] },
-  { h: 'Reach us', links: [{ t: '+91 99000 14150', href: 'tel:+919900014150' }, { t: 'enquiry@envisystech.com', href: 'mailto:enquiry@envisystech.com' }, { t: 'Peenya, Bengaluru 560058' }] }
+  { h: 'Reach us', links: [{ t: '+91 99000 14150', href: 'tel:+919900014150' }, { t: '+91 80283 77888 (office)', href: 'tel:+918028377888' }, { t: 'WhatsApp us', href: 'https://wa.me/919900014150' }, { t: 'enquiry@envisystech.com', href: 'mailto:enquiry@envisystech.com' }, { t: 'Peenya, Bengaluru 560058' }] }
 ]
 const socials = [
   { n: 'LinkedIn', href: 'https://www.linkedin.com/company/envisystech/', icon: '<path d="M4 9h4v11H4zM6 3.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM10 9h3.8v1.6c.6-1 1.9-1.9 3.8-1.9 4 0 4.4 2.6 4.4 6V20h-4v-4.8c0-1.4 0-3.1-1.9-3.1s-2.1 1.5-2.1 3V20h-4z"/>' },

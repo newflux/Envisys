@@ -61,8 +61,8 @@
         </div>
         <div class="vx-stage">
           <div class="vx-chamber">
-            <img class="vx-lines" src="/media/verticals/et-xray.webp" alt="" />
-            <img class="vx-real" src="/p/et/hero.webp" alt="Envisys ET300 environmental test chamber" :style="{ clipPath: scanClip }" />
+            <img loading="lazy" decoding="async" class="vx-lines" src="/media/verticals/et-xray.webp" alt="" />
+            <img loading="lazy" decoding="async" class="vx-real" src="/p/et/hero.webp" alt="Envisys ET300 environmental test chamber" :style="{ clipPath: scanClip }" />
             <div class="vx-scan" :style="scanBox"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i><span>{{ xc.part }} · x: {{ coord(xc.r[0], 816) }} y: {{ coord(xc.r[1], 1600) }}</span></div>
           </div>
           <p class="vx-cap">ET 300 · 816 × 1600 · {{ String(xi + 1).padStart(2, '0') }}/06</p>

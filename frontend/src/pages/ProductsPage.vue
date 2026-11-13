@@ -135,6 +135,7 @@ import Preloader from '../components/Preloader.vue'
 import NextUp from '../components/NextUp.vue'
 import VideoSlot from '../components/VideoSlot.vue'
 import { createChamberScene } from '../utils/chamberScene'
+;(window as any).__pagePending = true // the smoke preloader holds until the 3D scene is ready (see Preloader)
 import { createSmoke } from '../utils/smokeWave'
 import { products, mainProducts, catalogue, img, models, quotesFor } from '../config/products'
 
@@ -310,7 +311,7 @@ onMounted(() => {
       const m = models[p.slug]
       return m ? { url: small ? m.replace('.glb', '_m.glb') : m, scale: scale[p.slug] ?? 0.8 } : { image: img(p, 'hero'), scale: scale[p.slug] ?? 0.8 }
     }), small)
-    chambers.ready.then(() => { loaded.value = true; greet() })
+    chambers.ready.then(() => { (window as any).__pagePending = false; window.dispatchEvent(new Event('page:ready')); loaded.value = true; greet() })
   }
   if (cloudSmokeRef.value) cloud = createSmoke(cloudSmokeRef.value, false, small)
   window.addEventListener('pointermove', onMove, { passive: true })

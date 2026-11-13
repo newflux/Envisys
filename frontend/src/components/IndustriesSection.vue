@@ -4,7 +4,7 @@
     <div class="in-stage" ref="stageRef">
       <div class="in-frame">
         <div v-for="(s, i) in slides" :key="s.id" class="in-slide" :class="{ on: i === cur, prev: i === prevIdx }" :style="{ '--g': s.bg }">
-          <img v-if="!s.missing" :src="s.src" alt="" @error="s.missing = true" />
+          <img loading="lazy" decoding="async" v-if="!s.missing" :src="s.src" alt="" @error="s.missing = true" />
           <div class="in-grain"></div>
         </div>
         <div class="in-shade"></div>

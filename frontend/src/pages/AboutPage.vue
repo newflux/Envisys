@@ -24,7 +24,7 @@
               </div>
               <template v-for="(b, i) in beats" :key="i">
                 <section class="ab-beat" :class="{ 'ab-beat-img': b.img }" :data-bgsec="b.img ? '' : undefined">
-                  <img v-if="b.img" class="ab-beat-bg" :src="b.img" alt="" />
+                  <img loading="lazy" decoding="async" v-if="b.img" class="ab-beat-bg" :src="b.img" alt="" />
                   <p class="ab-say" data-say><template v-for="(w, j) in b.t.split(' ')" :key="j"><span class="ab-w">{{ w }}</span>{{ ' ' }}</template></p>
                 </section>
                 <AboutBuilding v-if="i === 0" />
@@ -37,7 +37,7 @@
             <h2 class="ab-h2 rv">Built for every kind of stress.</h2>
             <div class="ab-frame" ref="frameRef" aria-hidden="true">
               <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
-              <div class="ab-frame-img" ref="frameImgRef"><img src="/media/step-4.jpg" alt="" /></div>
+              <div class="ab-frame-img" ref="frameImgRef"><img loading="lazy" decoding="async" src="/media/step-4.jpg" alt="" /></div>
             </div>
             <div class="ab-two">
               <span class="ab-label rv">What we make</span>
@@ -80,7 +80,7 @@
           <!-- 6 · the floor -->
           <figure class="ab-fig" ref="figRef">
             <div class="ab-fig-in" ref="figInRef">
-              <img src="/media/step-7.jpg" alt="Finished Envisys units" ref="figImgRef" />
+              <img loading="lazy" decoding="async" src="/media/step-7.jpg" alt="Finished Envisys units" ref="figImgRef" />
               <div class="ab-cap"><span>Manufacturing unit</span><span>Peenya Industrial Estate, Bengaluru</span></div>
             </div>
           </figure>

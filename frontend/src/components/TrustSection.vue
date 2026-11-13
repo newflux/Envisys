@@ -19,7 +19,7 @@
           <div class="tr-clients">
             <div class="tr-label">Clientele</div>
             <div class="tr-grid">
-              <div v-for="c in clients" :key="c.n" class="tr-logo"><img :src="`/clients/${c.f}.png`" :alt="c.n" /></div>
+              <div v-for="c in clients" :key="c.n" class="tr-logo"><img loading="lazy" decoding="async" :src="`/clients/${c.f}.png`" :alt="c.n" /></div>
             </div>
           </div>
 

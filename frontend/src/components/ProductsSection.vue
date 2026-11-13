@@ -10,7 +10,7 @@
       </div>
 
       <a v-for="(p, i) in products" :key="p.name" class="pr-prod" :href="p.href" data-cursor="VIEW" :ref="(el) => (prodEls[i] = el as HTMLElement)" :tabindex="Math.round(t) === i ? 0 : -1">
-        <img :src="p.img" :alt="p.name" draggable="false" />
+        <img loading="lazy" decoding="async" :src="p.img" :alt="p.name" draggable="false" />
         <span class="pr-shadow"></span>
       </a>
 

@@ -9,7 +9,7 @@
     <!-- the newest post, large -->
     <section v-if="lead" class="rs-lead rv">
       <a class="rs-lead-a" :href="lead.url" target="_blank" rel="noopener" data-cursor="READ">
-        <div class="rs-lead-img"><img :src="lead.img" :alt="lead.title" /></div>
+        <div class="rs-lead-img"><img loading="lazy" decoding="async" :src="lead.img" :alt="lead.title" /></div>
         <div class="rs-lead-tx">
           <span class="rs-meta">{{ lead.cat }} · {{ lead.date }}</span>
           <h2>{{ lead.title }}</h2>
@@ -64,11 +64,11 @@ import { ref, computed, onMounted } from 'vue'
 import PageShell from '../components/PageShell.vue'
 import NextUp from '../components/NextUp.vue'
 import { products } from '../config/products'
+import blogData from '../data/blogs.json' // bundled (4 KB): no late fetch, so no layout shift
 
 interface Blog { title: string; url: string; date: string; cat: string; excerpt: string; img: string }
-const blogs = ref<Blog[]>([])
+const blogs = ref<Blog[]>(blogData as Blog[])
 const cat = ref('All')
-onMounted(async () => { try { blogs.value = await (await fetch('/data/blogs.json')).json() } catch { /* the page still shows the brochures */ } })
 
 const lead = computed(() => blogs.value[0])
 const cats = computed(() => ['All', ...new Set(blogs.value.slice(1).map((b) => b.cat))])

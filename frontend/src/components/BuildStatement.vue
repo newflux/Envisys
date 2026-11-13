@@ -6,7 +6,7 @@
 
     <div class="bs-images">
       <figure v-for="(im, i) in images" :key="im.src" class="bs-fig" :ref="(el) => (figEls[i] = el as HTMLElement)">
-        <img :src="im.src" :style="{ objectPosition: im.pos }" alt="" />
+        <img loading="lazy" decoding="async" :src="im.src" :style="{ objectPosition: im.pos }" alt="" />
         <figcaption>{{ im.caption }}</figcaption>
       </figure>
     </div>
@@ -19,7 +19,7 @@ import gsap from 'gsap'
 
 const copy = 'How we build. Every Envisys chamber is engineered, built and tested in Bengaluru, then put to work in automotive, electronics, defence and aerospace labs, with partners in the USA and the UK.'
 const words = copy.split(' ')
-// Photos from the Envisys shoot (public/images/imgs), resized to public/media
+// Photos from the Envisys shoot (sources/photos/shoot), resized to public/media
 const images = [
   { src: '/media/floor.jpg', pos: '50% 50%', caption: 'The test floor' },
   { src: '/media/eye.jpg', pos: '42% 52%', caption: 'Every detail watched' }

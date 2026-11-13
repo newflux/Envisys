@@ -220,7 +220,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img src="/media/team.jpg" alt="" aria-hidden="true" style="object-position: 58% 40%" />
+                <img loading="lazy" decoding="async" src="/media/team.jpg" alt="" aria-hidden="true" style="object-position: 58% 40%" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">about us</div></div>
                   <small class="CompanySubmenuItem_sub">Our story, our team, our sites</small>
@@ -245,7 +245,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img src="/media/step-3.jpg" alt="" aria-hidden="true" />
+                <img loading="lazy" decoding="async" src="/media/step-3.jpg" alt="" aria-hidden="true" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">resources</div></div>
                   <small class="CompanySubmenuItem_sub">Guides and documents</small>
@@ -270,7 +270,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img src="/media/site-aerial.jpg" alt="" aria-hidden="true" style="object-position: 52% 50%" />
+                <img loading="lazy" decoding="async" src="/media/site-aerial.jpg" alt="" aria-hidden="true" style="object-position: 52% 50%" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">contact</div></div>
                   <small class="CompanySubmenuItem_sub">Peenya, Bengaluru</small>

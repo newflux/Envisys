@@ -33,7 +33,7 @@
     <section class="id-trust">
       <h2 class="id-h2 rv">Trusted by teams who can’t afford a failure.</h2>
       <ul class="id-grid">
-        <li v-for="(l, i) in logos" :key="l" class="rv hl" :style="{ '--d': i * 0.06 + 's' }"><img :src="`/clients/${l}.png`" :alt="l" loading="lazy" /></li>
+        <li v-for="(l, i) in logos" :key="l" class="rv hl" :style="{ '--d': i * 0.06 + 's' }"><img :src="`/clients/${l}.png`" :alt="l" /></li>
       </ul>
     </section>
 

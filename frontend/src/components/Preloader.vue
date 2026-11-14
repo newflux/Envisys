@@ -9,11 +9,11 @@
 
     <!-- 2. Exact Icomat WebGL Animated Smoke Wave Shader Canvas -->
     <canvas ref="smokeCanvasRef" class="preloader-smoke-canvas"></canvas>
+    <i v-if="holding" class="pl-bar" aria-hidden="true"><b :style="{ width: pct + '%' }"></b></i>
 
     <!-- 3. The Envisys logo: letters rise from behind the baseline, the blocks drop in, the tagline wipes on -->
     <div v-if="!smokeOnly" ref="logoStageRef" class="preloader-logo-stage">
       <BrandMark ref="brandRef" full class="preloader-logo" />
-      <i v-if="holding" class="pl-bar" aria-hidden="true"></i>
     </div>
   </div>
 </template>
@@ -48,6 +48,8 @@ const brandRef = ref<InstanceType<typeof BrandMark> | null>(null)
 const logoStageRef = ref<HTMLElement | null>(null)
 const isFinished = ref(false)
 const holding = ref(false)
+const pct = ref(4)
+const onProgress = (e: any) => { pct.value = Math.max(pct.value, Math.round(e.detail * 100)) }
 
 let tweens: gsap.core.Tween[] = []
 let masterTl: gsap.core.Timeline | null = null
@@ -248,8 +250,9 @@ function startAnimation() {
     masterTl.call(() => {
       if ((window as any).__sceneReady !== false) return
       masterTl!.pause()
-      const t = setTimeout(() => { holding.value = true }, 700) // CSS-driven bar: keeps moving even while the page is busy compiling
-      const go = () => { clearTimeout(t); holding.value = false; window.removeEventListener('scene:ready', go); masterTl?.play() }
+      const t = setTimeout(() => { holding.value = true }, 400)
+      window.addEventListener('scene:progress', onProgress)
+      const go = () => { clearTimeout(t); holding.value = false; window.removeEventListener('scene:ready', go); window.removeEventListener('scene:progress', onProgress); masterTl?.play() }
       window.addEventListener('scene:ready', go)
     }, [], smokeStartTime)
   }
@@ -259,8 +262,9 @@ function startAnimation() {
     masterTl.call(() => {
       if (!(window as any).__pagePending) return
       masterTl!.pause()
-      const go = () => { clearTimeout(t); window.removeEventListener('page:ready', go); masterTl?.play() }
-      const t = setTimeout(go, 15000) // never hold forever
+      holding.value = true; window.addEventListener('scene:progress', onProgress)
+      const go = () => { clearTimeout(t); holding.value = false; window.removeEventListener('page:ready', go); window.removeEventListener('scene:progress', onProgress); masterTl?.play() }
+      const t = setTimeout(go, 20000) // never hold forever
       window.addEventListener('page:ready', go)
     }, [], smokeStartTime + 1.34)
   }
@@ -319,9 +323,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.pl-bar { position: absolute; left: 50%; bottom: -34px; width: 120px; height: 2px; margin-left: -60px; overflow: hidden; background: rgba(14, 15, 18, 0.12); }
-.pl-bar::after { content: ''; position: absolute; inset: 0; width: 40%; background: #ff6a13; animation: pl-slide 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-@keyframes pl-slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+.pl-bar { position: absolute; z-index: 11; left: 50%; top: 61%; width: min(220px, 46vw); height: 2px; transform: translateX(-50%); background: rgba(127, 127, 127, 0.28); overflow: hidden; }
+.pl-bar b { display: block; height: 100%; background: #ff6a13; transition: width 0.25s ease-out; }
 .envisys-preloader-root {
   position: fixed;
   top: 0;

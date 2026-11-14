@@ -178,7 +178,7 @@
               <div class="mg-head"><b>{{ megaGroup }}</b><span>{{ groupLine[megaGroup] }}</span></div>
               <div class="mg-grid">
                 <a v-for="p in products.filter((q) => q.group === megaGroup)" :key="p.slug" class="mg-item" :href="`/products/${p.slug}`">
-                  <span class="mg-th"><img :src="img(p, 'hero')" alt="" loading="lazy" /></span>
+                  <span class="mg-th"><img :src="img(p, 'hero')" alt="" /></span>
                   <span class="mg-tx"><b>{{ p.name }}</b><small>{{ p.tagline }}</small></span>
                 </a>
               </div>
@@ -220,7 +220,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img loading="lazy" decoding="async" src="/media/team.jpg" alt="" aria-hidden="true" style="object-position: 58% 40%" />
+                <img decoding="async" src="/media/team.jpg" alt="" aria-hidden="true" style="object-position: 58% 40%" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">about us</div></div>
                   <small class="CompanySubmenuItem_sub">Our story, our team, our sites</small>
@@ -245,7 +245,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img loading="lazy" decoding="async" src="/media/step-3.jpg" alt="" aria-hidden="true" />
+                <img decoding="async" src="/media/step-3.jpg" alt="" aria-hidden="true" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">resources</div></div>
                   <small class="CompanySubmenuItem_sub">Guides and documents</small>
@@ -270,7 +270,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img loading="lazy" decoding="async" src="/media/site-aerial.jpg" alt="" aria-hidden="true" style="object-position: 52% 50%" />
+                <img decoding="async" src="/media/site-aerial.jpg" alt="" aria-hidden="true" style="object-position: 52% 50%" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">contact</div></div>
                   <small class="CompanySubmenuItem_sub">Peenya, Bengaluru</small>
@@ -885,8 +885,9 @@ defineExpose({
 .Nav_searchBtn:hover { background: rgba(255, 255, 255, 0.14); opacity: 1; }
 .Nav_scrim { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0; background: radial-gradient(80% 100% at 80% 0%, rgba(2, 4, 8, 0.86), rgba(2, 4, 8, 0.7) 75%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: opacity 0.45s ease; }
 .Nav_scrim.on { opacity: 1; }
-.CompanySubmenuItem_sub { display: block; margin-top: 3px; font-size: 9.5px; letter-spacing: 0.1em; opacity: 0.5; text-transform: uppercase; transition: opacity 0.3s ease; }
-.CompanySubmenuItem_submenuItem__irMc_:hover .CompanySubmenuItem_sub { opacity: 0.65; }
+.Nav_submenu__EKbU9 .CompanySubmenuItem_link__ZOT0M .line { font-size: 15px; letter-spacing: 0.06em; }
+.CompanySubmenuItem_sub { display: block; margin-top: 5px; font-size: 12px; letter-spacing: 0.08em; opacity: 0.72; text-transform: uppercase; transition: opacity 0.3s ease; }
+.CompanySubmenuItem_submenuItem__irMc_:hover .CompanySubmenuItem_sub { opacity: 0.9; }
 /* the products menu: three panes in a clear order: the kind of test, its chambers, quick links. A solid panel on a dimmed page,
    set in the site's clean grotesk (names) and Geist (text), with normal letter-spacing, so it reads calmly. */
 .Nav_wrapper__EfAHX { position: relative; }

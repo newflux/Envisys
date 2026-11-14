@@ -76,7 +76,7 @@
         <div class="pd-gal-pin">
           <div class="pd-top"><span>{{ photoNum }}</span><span>Photographs</span><span class="pd-count">{{ String(shotAt + 1).padStart(2, '0') }} / {{ String(shots.length).padStart(2, '0') }}</span></div>
           <div class="pd-track" ref="trackRef">
-            <figure v-for="(s, k) in shots" :key="s" :class="{ photo: scenePhotos.has(s) || (k === 0 && p.photo) }"><img :src="s" :alt="`${p.name}, view ${k + 1}`" loading="lazy" draggable="false" /></figure>
+            <figure v-for="(s, k) in shots" :key="s" :class="{ photo: scenePhotos.has(s) || (k === 0 && p.photo) }"><img :src="s" :alt="`${p.name}, view ${k + 1}`" draggable="false" /></figure>
           </div>
         </div>
       </section>

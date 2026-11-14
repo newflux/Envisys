@@ -104,7 +104,7 @@
         <div class="bx-grid" ref="ixList">
           <a v-for="p in catalogue" v-show="grp === 'All' || p.group === grp" :key="p.slug" class="bx-card" :class="{ photo: p.photo }" :href="`/products/${p.slug}`" data-cursor="OPEN">
             <b class="bx-name" aria-hidden="true">{{ p.name }}</b>
-            <div class="bx-img"><img :src="img(p, 'hero')" :alt="p.name" loading="lazy" /></div>
+            <div class="bx-img"><img :src="img(p, 'hero')" :alt="p.name" /></div>
             <span class="bx-cap"><b>{{ p.name }}</b><small>{{ p.group }}</small></span>
             <i class="bx-plus"><svg viewBox="0 0 10 10"><path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.1" /></svg></i>
           </a>
@@ -332,10 +332,10 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .hx-card, .hx-q, .hx-ix, .hx-act, .hx-hint { position: absolute; z-index: 3; }
 
 /* top left: the name, then hairline rows like film credits */
-.hx-card { left: 2.2vw; top: 12vh; width: min(380px, 27vw); pointer-events: none; }
-.hx-card h1 { margin: 0 0 1.4vh; font-weight: 400; font-family: var(--font-display); font-size: clamp(22px, 2.3vw, 40px); line-height: 0.98; letter-spacing: -0.05em; text-transform: uppercase; }
+.hx-card { left: 2.2vw; top: 19vh; width: min(400px, 28vw); pointer-events: none; }
+.hx-card h1 { margin: 0 0 3.2vh; font-weight: 400; font-family: var(--font-display); font-size: clamp(22px, 2.3vw, 40px); line-height: 0.98; letter-spacing: -0.05em; text-transform: uppercase; }
 .hx-card dl { margin: 0; }
-.hx-card dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0 8px; border-top: 1px solid currentColor; }
+.hx-card dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 11px 0 12px; border-top: 1px solid currentColor; }
 .hx-card dt { font-family: var(--font-body); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; }
 .hx-card dd { margin: 0; font-family: var(--font-display); font-size: clamp(16px, 1.3vw, 21px); letter-spacing: -0.03em; white-space: nowrap; }
 .hx-card dd small { margin-left: 4px; font-family: var(--font-body); font-size: 12px; opacity: 0.6; }
@@ -459,7 +459,7 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 /* ───────── phones: one stage, a bottom panel, no heavy effects ───────── */
 @media (max-width: 800px) {
   .hx-pin { height: 100svh; }
-  .hx-card { left: 5vw; right: 5vw; top: 11svh; width: auto; }
+  .hx-card { left: 5vw; right: 5vw; top: 15svh; width: auto; }
   .hx-card h1 { font-size: 26px; }
   .hx-card dl { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
   .hx-card dd { font-size: 15px; }

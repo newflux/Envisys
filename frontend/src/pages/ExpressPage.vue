@@ -30,7 +30,7 @@
     </section>
 
     <!-- the floor: standard units on the move -->
-    <section class="ex-film" ref="filmRef"><figure ref="filmPicRef"><img src="/media/verticals/express.jpg" alt="Standard chambers moved across the express factory floor" loading="lazy" /></figure><p>Built for speed.<br />Ready for the world.</p></section>
+    <section class="ex-film" ref="filmRef"><figure ref="filmPicRef"><img src="/media/verticals/express.jpg" alt="Standard chambers moved across the express factory floor" /></figure><p>Built for speed.<br />Ready for the world.</p></section>
 
     <!-- 2 · two factories: the project factory keeps the complex custom work; the express factory only does standard models, fast -->
     <section class="ex-two">

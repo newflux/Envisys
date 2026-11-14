@@ -9,11 +9,11 @@
 
           <div class="sh-vis">
             <Transition name="fade" mode="out-in">
-              <img loading="lazy" decoding="async" :key="pic" :src="pic === 0 ? img(product, 'hero') : img(product, `g${pic}`)" :alt="product.name" />
+              <img decoding="async" :key="pic" :src="pic === 0 ? img(product, 'hero') : img(product, `g${pic}`)" :alt="product.name" />
             </Transition>
             <div v-if="product.gallery" class="sh-th">
               <button v-for="n in product.gallery + 1" :key="n" :class="{ on: pic === n - 1 }" data-cursor="" @click="pic = n - 1" :aria-label="`View ${n}`">
-                <img :src="n === 1 ? img(product, 'hero') : img(product, `g${n - 1}`)" alt="" loading="lazy" />
+                <img :src="n === 1 ? img(product, 'hero') : img(product, `g${n - 1}`)" alt="" />
               </button>
             </div>
           </div>

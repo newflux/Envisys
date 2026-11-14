@@ -9,7 +9,7 @@
     <!-- the newest post, large -->
     <section v-if="lead" class="rs-lead rv">
       <a class="rs-lead-a" :href="lead.url" target="_blank" rel="noopener" data-cursor="READ">
-        <div class="rs-lead-img"><img loading="lazy" decoding="async" :src="lead.img" :alt="lead.title" /></div>
+        <div class="rs-lead-img"><img decoding="async" :src="lead.img" :alt="lead.title" /></div>
         <div class="rs-lead-tx">
           <span class="rs-meta">{{ lead.cat }} · {{ lead.date }}</span>
           <h2>{{ lead.title }}</h2>
@@ -29,7 +29,7 @@
       </div>
       <TransitionGroup name="card" tag="div" class="rs-grid">
         <a v-for="b in rest" :key="b.url" class="rs-card" :href="b.url" target="_blank" rel="noopener" data-cursor="READ">
-          <div class="rs-ph"><img :src="b.img" :alt="b.title" loading="lazy" /></div>
+          <div class="rs-ph"><img :src="b.img" :alt="b.title" /></div>
           <span class="rs-meta">{{ b.cat }} · {{ b.date }}</span>
           <b>{{ b.title }}</b>
           <p>{{ b.excerpt }}</p>

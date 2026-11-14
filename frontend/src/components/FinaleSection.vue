@@ -35,7 +35,7 @@
     <!-- two doors -->
     <section class="fn-tiles">
       <a v-for="(t, i) in tiles" :key="t.name" class="fn-tile rv" :style="{ '--d': i * 0.1 + 's' }" :href="t.href" data-cursor="OPEN">
-        <img :src="t.img" alt="" loading="lazy" />
+        <img :src="t.img" alt="" />
         <span class="fn-glass">{{ t.name }} <i>→</i></span>
       </a>
     </section>

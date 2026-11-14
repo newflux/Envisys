@@ -22,7 +22,7 @@
 
           <ul v-else class="so-res">
             <li v-for="(h, i) in hits" :key="h.product.slug" :class="{ on: sel === i }" @mouseenter="sel = i" @click="go(i)" data-cursor="">
-              <div class="so-th"><img :src="img(h.product, 'hero')" alt="" loading="lazy" /></div>
+              <div class="so-th"><img :src="img(h.product, 'hero')" alt="" /></div>
               <div class="so-tx">
                 <b>{{ h.product.name }}</b>
                 <small>{{ h.product.group }} · {{ h.product.tier === 'main' ? 'Main range' : 'Catalogue' }}</small>

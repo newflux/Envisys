@@ -36,7 +36,7 @@
       </section>
 
       <!-- the second photograph, where there is one -->
-      <section v-if="v.img2" class="vp-band rv"><img :src="v.img2" alt="" loading="lazy" /><span>fig. 0{{ i + 1 }}c · {{ v.img2.split('/').pop() }}</span></section>
+      <section v-if="v.img2" class="vp-band rv"><img :src="v.img2" alt="" /><span>fig. 0{{ i + 1 }}c · {{ v.img2.split('/').pop() }}</span></section>
 
       <!-- 3 · each vertical's own section -->
       <section class="vp-own">
@@ -93,7 +93,7 @@
         <!-- refurbishment: three ways to a second life -->
         <div v-else class="vp-three">
           <article v-for="(o, k) in v.offer" :key="o.t" class="vp-panel rv" :style="{ '--d': k * 0.1 + 's' }">
-            <img v-if="o.img" :src="o.img" alt="" loading="lazy" />
+            <img v-if="o.img" :src="o.img" alt="" />
             <span v-else class="vp-panel-m"><VMotif kind="loop" /></span>
             <em>0{{ k + 1 }}</em><b>{{ o.t }}</b><small>{{ o.d }}</small>
           </article>

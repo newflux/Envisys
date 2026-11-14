@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js'
+import { sliceWarm } from './warm'
 
 /**
  * The products page's chambers, standing in a row on the floor like the range photograph.
@@ -320,12 +321,10 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
   }
   // Resolve only once every shader has compiled: one draw through a 1 px scissor (all chambers shown for that draw) while the page is still
   // behind its preloader, so the first real frame never stalls on a compile.
-  const warmed = ready.then(() => {
+  const warmed = ready.then(async () => {
     const vis = slots.map((s) => s.group.visible)
     slots.forEach((s) => { s.group.visible = true })
-    renderer.setScissorTest(true); renderer.setScissor(0, 0, 1, 1)
-    try { renderer.render(scene, camera) } catch { /* warm-up only */ }
-    renderer.setScissorTest(false)
+    await sliceWarm(renderer, scene, camera, undefined, (p: number) => window.dispatchEvent(new CustomEvent('scene:progress', { detail: p })))
     slots.forEach((s, i) => { s.group.visible = vis[i] })
   })
 

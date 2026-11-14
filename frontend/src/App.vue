@@ -67,7 +67,7 @@
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
-  <div class="canvas-fixed-wrap">    <TresCanvas ref="tresCanvasRef" window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="!isMobile" power-preference="high-performance">
+  <div class="canvas-fixed-wrap">    <TresCanvas ref="tresCanvasRef" window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
       <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.5" :far="250" />
       
       <!-- Fog (Soft cold bluish-ash atmospheric gallery void, slightly brightened) -->
@@ -317,6 +317,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { MathUtils, Box3, Vector3, CanvasTexture, RepeatWrapping } from 'three'
 import * as THREE from 'three'
 import { screenUI } from './utils/chamberScene'
+import { sliceWarm } from './utils/warm'
 import { hy } from './config/verticals'
 import { Environment, Lightformer, ContactShadows, MeshReflectionMaterial } from '@tresjs/cientos'
 import { extend } from '@tresjs/core'
@@ -550,7 +551,8 @@ function openChamberModal(idx: number) {
 
 // phones / touch devices: lighter 3D (smaller mirror, lower pixel ratio, no antialias), hero word sized to fit the narrow screen
 const isMobile = ref(window.matchMedia('(max-width: 800px)').matches || window.matchMedia('(pointer: coarse)').matches)
-const textK = isMobile.value ? 0.4 : 1
+const textK = isMobile.value ? 0.3 : 1
+const textLift = isMobile.value ? 0.9 : 0
 // Weak-GPU tier (integrated Intel UHD/HD, Mali, old Adreno, software GL, or a 4-thread / 4 GB machine): smaller mirror. Phones always count.
 const weak = isMobile.value || (() => {
   try {
@@ -749,7 +751,7 @@ function generateTextures() {
 }
 
 onMounted(() => {
-  pixelRatio.value = Math.min(window.devicePixelRatio || 1, isMobile.value ? 1.25 : 1.5)
+  pixelRatio.value = Math.min(window.devicePixelRatio || 1, isMobile.value ? 1.75 : 1.5)
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (prefersReducedMotion) {
@@ -913,7 +915,7 @@ window.addEventListener('pointerup', (e) => {
 
 // ── Refs ────────────────────────────────────────────────────────────────────
 const cameraRef       = ref<any>(null)
-const reflRes = ref(weak ? 256 : 512) // mirrored-floor resolution; steps down on weak GPUs, never removed
+const reflRes = ref(isMobile.value ? 384 : weak ? 256 : 512) // mirrored-floor resolution; steps down on weak GPUs, never removed
 const mouseSpotLightRef = ref<any>(null)
 const fleetL          = ref<any>(null)
 const fleetCenter     = ref<any>(null)
@@ -1181,7 +1183,7 @@ onMounted(() => {
   if (scrollerEl) scrollerEl.scrollTop = 0 // Reset custom scroller
   
   // eventsTarget: window so wheel/touch still scrolls while the pointer is over the interactive overlay sections
-  const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, eventsTarget: window, lerp: 0.08, smoothWheel: true })
+  const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, eventsTarget: window, lerp: 0.08, smoothWheel: true, syncTouch: true, syncTouchLerp: 0.12 }) // touch: the full-screen canvas sits over the scroller, so Lenis drives touch scrolling itself
   ;(window as any).lenisInstance = lenis
   
   lenis.on('scroll', (e: any) => {
@@ -1406,7 +1408,7 @@ onMounted(() => {
       // Extremely soft and subtle interaction per your request (barely moves).
       const targetTextRotY = targetMouseX * -0.02
       const targetTextX = targetMouseX * -0.15
-      const targetTextY = scrollProxy.textY + (targetMouseY * -0.05)
+      const targetTextY = scrollProxy.textY + (targetMouseY * -0.05) + textLift // phones: the word sits higher, clear of the chamber's top
       
       bgTextGroupRef.value.rotation.y += (targetTextRotY - bgTextGroupRef.value.rotation.y) * 0.05
       bgTextGroupRef.value.position.x += (targetTextX - bgTextGroupRef.value.position.x) * 0.1
@@ -2062,7 +2064,7 @@ function holdRender() {
     ctx.loop?.stop()
   }
   grab()
-  setTimeout(releaseRender, 20000) // never hold forever
+  setTimeout(releaseRender, 25000) // never hold forever
 }
 function releaseRender() {
   if ((window as any).__sceneReady) return
@@ -2082,8 +2084,11 @@ async function warmShaders() {
   const ctx = tresCanvasRef.value?.context, r = ctx?.renderer?.instance, sc = ctx?.scene?.value, cam = cameraRef.value?.value ?? cameraRef.value
   if (!r || !sc || !cam) return releaseRender()
   const frame = () => new Promise<void>(res => requestAnimationFrame(() => res()))
-  r.setScissorTest(true); r.setScissor(0, 0, 1, 1)
   warming = true
+  // one material per task, the page breathes in between (so the preloader animates and its bar moves)
+  await sliceWarm(r, sc, cam, (s2: any, c2: any) => origRender.call(r, s2, c2), (p: number) => window.dispatchEvent(new CustomEvent('scene:progress', { detail: p })))
+  // then a few real frames through the 1 px scissor: the mirror pass and the small programs (text, dust)
+  r.setScissorTest(true); r.setScissor(0, 0, 1, 1)
   ctx.loop?.start()
   await frame(); await frame(); await frame()
   ctx.loop?.stop()

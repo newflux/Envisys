@@ -8,7 +8,7 @@
         <article v-for="(s, i) in steps" :key="s.n" class="st-card" :ref="(el) => (cardEls[i] = el as HTMLElement)">
           <div class="st-n">{{ s.n }}</div>
           <div class="st-dots"><i></i></div>
-          <div class="st-img"><img loading="lazy" decoding="async" :src="s.src"  alt="" /></div>
+          <div class="st-img"><img decoding="async" :src="s.src"  alt="" /></div>
           <p>{{ s.cap }}</p>
         </article>
       </div>

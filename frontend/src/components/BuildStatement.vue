@@ -6,7 +6,7 @@
 
     <div class="bs-images">
       <figure v-for="(im, i) in images" :key="im.src" class="bs-fig" :ref="(el) => (figEls[i] = el as HTMLElement)">
-        <img loading="lazy" decoding="async" :src="im.src" :style="{ objectPosition: im.pos }" alt="" />
+        <img decoding="async" :src="im.src" :style="{ objectPosition: im.pos }" alt="" />
         <figcaption>{{ im.caption }}</figcaption>
       </figure>
     </div>

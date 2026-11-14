@@ -507,10 +507,21 @@ function showNav() {
   gsap.fromTo(navBgRef.value, { xPercent: 105 }, { xPercent: 0, duration: 0.75, ease: 'power3.out', delay: 0.05 })
   gsap.fromTo(navLines(), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.04, ease: 'power2.out', delay: 0.12, clearProps: 'transform,opacity' })
 }
+// Once the page scrolls, a band fades in behind the logo / burger in the colour of whatever is under it, so no text runs into them.
+let scrolled = false, bandTick = 0
+function updateBand(y: number) {
+  const on = y > 60
+  if (on !== scrolled) { scrolled = on; document.documentElement.toggleAttribute('data-scrolled', on) }
+  if (!on || ++bandTick % 10) return
+  let e = document.elementFromPoint(window.innerWidth / 2, 72) as HTMLElement | null, rgb = ''
+  while (e && !rgb) { const m = getComputedStyle(e).backgroundColor.match(/rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/); if (m && (m[4] === undefined || +m[4] > 0.5)) rgb = `${m[1]}, ${m[2]}, ${m[3]}`; e = e.parentElement }
+  document.documentElement.style.setProperty('--band', rgb || '5, 6, 9')
+}
 function watchScroll() {
-  if (!introDone) return
   const sc = document.getElementById('scroller')
   const y = (window as any).lenisInstance?.scroll ?? sc?.scrollTop ?? 0
+  updateBand(y)
+  if (!introDone) return
   const dy = y - lastY
   lastY = y
   let hide = hidden
@@ -537,7 +548,7 @@ onMounted(() => {
   }
   gsap.ticker.add(watchScroll)
 })
-onUnmounted(() => gsap.ticker.remove(watchScroll))
+onUnmounted(() => { gsap.ticker.remove(watchScroll); document.documentElement.removeAttribute('data-scrolled') })
 
 defineExpose({
   animIn,
@@ -1085,6 +1096,31 @@ defineExpose({
 </style>
 
 <style>
+/* phone menu: a clean full-screen list (big type, hairlines), not the desktop pill's boxed items */
+@media (max-width: 768px) {
+  .Header_header__qBw1J.is-mobile-open { padding: 108px 7vw 8vw !important; background: #05070b !important; }
+  .Header_header__qBw1J.is-mobile-open .Nav_backgroundMobile__HYUuU, .Header_header__qBw1J.is-mobile-open .Header_brandLogoSpacer__MPAO1 { display: none !important; }
+  .Header_header__qBw1J.is-mobile-open .Nav_wrapper__EfAHX, .Header_header__qBw1J.is-mobile-open .Nav_nav__ABerH { width: 100% !important; margin: 0 !important; left: 0 !important; transform: none !important; }
+  .Header_header__qBw1J.is-mobile-open .Nav_mainMenu__pDzJf { gap: 0 !important; width: 100%; }
+  .Header_header__qBw1J.is-mobile-open .Nav_mainMenu__pDzJf > * { width: 100%; margin: 0 !important; background: none !important; border-bottom: 1px solid rgba(238, 243, 250, 0.12); }
+  .Header_header__qBw1J.is-mobile-open .Nav_link__Vx_8M,
+  .Header_header__qBw1J.is-mobile-open .Nav_companyBtn__ceON4 { display: flex !important; align-items: center; justify-content: space-between; width: 100%; padding: 17px 0 !important; background: none !important; box-shadow: none !important; border-radius: 0 !important; color: #eef3fa !important; }
+  .Header_header__qBw1J.is-mobile-open .Nav_label__EHdHO,
+  .Header_header__qBw1J.is-mobile-open .Nav_label__EHdHO .line-mask,
+  .Header_header__qBw1J.is-mobile-open .Nav_label__EHdHO .line { background: none !important; box-shadow: none !important; text-shadow: none !important; filter: none !important; }
+  .Header_header__qBw1J.is-mobile-open .Nav_label__EHdHO .line { font-family: var(--font-display), sans-serif; font-size: 23px !important; line-height: 1.15 !important; letter-spacing: -0.03em; text-transform: capitalize; }
+  .Header_header__qBw1J.is-mobile-open .Nav_search { border-bottom: 0 !important; padding: 14px 0; }
+  .Header_header__qBw1J.is-mobile-open .Nav_contact__H607i { border-bottom: 0 !important; margin-top: 22px !important; }
+  .Header_header__qBw1J.is-mobile-open .Nav_contactBtn__pdvQU { display: inline-flex !important; width: auto !important; padding: 16px 26px !important; border-radius: 40px !important; min-height: 0 !important; }
+  .Header_header__qBw1J.is-mobile-open .Nav_contactBtn__pdvQU .line { font-family: 'Geist Mono', monospace; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.1em; }
+}
+
+.Header_topBar__t3Nfy::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 100px; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.35s ease;
+  background: linear-gradient(180deg, rgba(var(--band, 5, 6, 9), 0.94) 0%, rgba(var(--band, 5, 6, 9), 0.78) 52%, rgba(var(--band, 5, 6, 9), 0) 100%); }
+html[data-scrolled] .Header_topBar__t3Nfy::before { opacity: 1; }
+html[data-mnav] .Header_topBar__t3Nfy::before { opacity: 0; }
+@media (max-width: 800px) { .Header_topBar__t3Nfy::before { height: 92px; } }
+
 /* while the company menu is open the 3D scene behind it softens and darkens, so the wordmark never fights the cards */
 .canvas-fixed-wrap { transition: filter 0.5s ease; }
 html[data-menu="1"] .canvas-fixed-wrap { filter: blur(12px) brightness(0.3); }

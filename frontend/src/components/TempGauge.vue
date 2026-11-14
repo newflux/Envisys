@@ -103,7 +103,11 @@ defineExpose({ setTemp })
 .tg-bot { top: 100%; }
 
 @media (max-width: 800px) {
+  /* phones: a small readout tucked under the header, top right, clear of the copy */
+  .tg-root { top: 104px; transform: none !important; }
   .tg-rail { display: none; }
-  .tg-num { font-size: 44px; }
+  .tg-text { gap: 6px; }
+  .tg-state { font-size: 10px; }
+  .tg-num { font-size: 30px; }
 }
 </style>

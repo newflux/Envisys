@@ -915,7 +915,7 @@ window.addEventListener('pointerup', (e) => {
 
 // ── Refs ────────────────────────────────────────────────────────────────────
 const cameraRef       = ref<any>(null)
-const reflRes = ref(isMobile.value ? 384 : weak ? 256 : 512) // mirrored-floor resolution; steps down on weak GPUs, never removed
+const reflRes = ref(isMobile.value ? 384 : 512) // mirrored-floor resolution; steps down on weak GPUs, never removed
 const mouseSpotLightRef = ref<any>(null)
 const fleetL          = ref<any>(null)
 const fleetCenter     = ref<any>(null)
@@ -1183,7 +1183,7 @@ onMounted(() => {
   if (scrollerEl) scrollerEl.scrollTop = 0 // Reset custom scroller
   
   // eventsTarget: window so wheel/touch still scrolls while the pointer is over the interactive overlay sections
-  const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, eventsTarget: window, lerp: 0.08, smoothWheel: true, syncTouch: true, syncTouchLerp: 0.12 }) // touch: the full-screen canvas sits over the scroller, so Lenis drives touch scrolling itself
+  const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, eventsTarget: window, lerp: 0.08, smoothWheel: true })
   ;(window as any).lenisInstance = lenis
   
   lenis.on('scroll', (e: any) => {
@@ -2053,10 +2053,11 @@ function holdRender() {
       // variant). It is blurred and faint, so it draws with plain same-colour materials instead: same look, half the shader work.
       if (rt !== null && sc === ctx.scene.value && cam !== cameraRef.value && !location.search.includes("noovr")) {
         if (!reflList || ++reflAge > 90) { reflList = []; reflAge = 0; sc.traverse((o: any) => { if (o.isMesh && reflMat(o.material)) reflList!.push(o) }) } // rebuilt every ~1.5 s
-        // tunnel walls / ceiling are near-black, so leaving them out of the mirror changes nothing visible; chambers use plain materials
-        const orig = reflList.map((o: any) => o.material), vis = reflList.map((o: any) => o.visible)
-        reflList.forEach((o: any, i: number) => { if (orig[i].name) o.material = reflMat(orig[i]); else o.visible = false })
-        try { return origRender.call(this, sc, cam) } finally { reflList.forEach((o: any, i: number) => { o.material = orig[i]; o.visible = vis[i] }) }
+        // tunnel walls / ceiling are near-black, so leaving them out of the mirror changes nothing visible (and saves their shaders);
+        // the chambers keep their real materials so the reflection stays smooth (flat stand-ins broke it into cells)
+        const vis = reflList.map((o: any) => o.visible)
+        reflList.forEach((o: any) => { if (!o.material.name) o.visible = false })
+        try { return origRender.call(this, sc, cam) } finally { reflList.forEach((o: any, i: number) => { o.visible = vis[i] }) }
       }
       return origRender.call(this, sc, cam)
     }
@@ -2118,8 +2119,8 @@ function adaptQuality(level = 0) {
     if (!t0) t0 = t
     if (++n < 90) return requestAnimationFrame(tick)
     if (90000 / (t - t0) >= 52 || level >= 2) return
-    if (level === 0) reflRes.value = Math.min(reflRes.value, 256)
-    else { reflRes.value = 256; pixelRatio.value = 1 } // below 256 the blurred mirror turns blocky // the mirror itself is never removed
+    if (level === 0) { /* keep the mirror sharp: lower the pixel ratio instead */ }
+    else { pixelRatio.value = 1 } // the mirror itself is never removed or shrunk
     setTimeout(() => adaptQuality(level + 1), 1500)
   }
   requestAnimationFrame(tick)
@@ -2248,6 +2249,8 @@ body, #app { background: transparent !important; overflow-x: hidden; }
   z-index: 0;
   pointer-events: auto; /* MUST be auto for raycaster chamber clicks! */
 }
+/* touch screens: let swipes fall through to the native scroller (smooth on any phone); there is no hover to aim at the chamber anyway */
+@media (hover: none) and (pointer: coarse) { .canvas-fixed-wrap, .canvas-fixed-wrap canvas { pointer-events: none !important; touch-action: pan-y !important; } }
 html[data-covered="1"] .canvas-fixed-wrap {
   pointer-events: none;
   visibility: hidden;

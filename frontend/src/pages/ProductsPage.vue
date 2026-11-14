@@ -483,4 +483,17 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
   .bx-plus { width: 30px; height: 30px; right: 10px; top: 10px; }
   .en { padding: 8vh 5vw 18vh; }
 }
+
+/* phones: the chamber is the hero (its numbers live on its own page), and the catalogue cards stack picture over caption */
+@media (max-width: 640px) {
+  .hx-card dl { display: none; }
+  .hx-card h1 { margin: 0; font-size: 28px; }
+  .bx-card { aspect-ratio: auto; display: flex; flex-direction: column; padding: 14px 12px 14px; min-height: 0; }
+  .bx-name { display: none; }
+  .bx-img, .bx-card.photo .bx-img { position: relative; left: auto; right: auto; top: auto; bottom: auto; height: 120px; margin: 26px 6px 12px; }
+  .bx-cap { position: static; }
+  .bx-cap b { font-size: 14px; line-height: 1.15; }
+  .bx-cap small { font-size: 10.5px; }
+  .bx-card:hover .bx-cap { opacity: 1; transform: none; }
+}
 </style>

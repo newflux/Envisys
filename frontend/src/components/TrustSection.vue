@@ -300,6 +300,8 @@ onUnmounted(() => gsap.ticker.remove(tick))
 
 @media (max-width: 900px) {
   .tr-trust { width: auto; margin-left: 0; }
-  .tr-grid { grid-template-columns: repeat(3, 1fr); }
+  .tr-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 14px; }
+  .tr-logo { min-width: 0; justify-content: center; }
+  .tr-logo img { max-width: 100%; max-height: 34px; }
 }
 </style>

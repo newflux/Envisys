@@ -64,7 +64,10 @@ const footRef = ref<HTMLElement | null>(null)
 let lastShift = NaN
 // Shutter: whatever sits above the footer slides up over it while it holds still at its final place on screen.
 // Its laid-out top (without the shift) runs from the bottom of the screen up to H - height.
+// phones: no shutter and no live isotherms (a per-frame transform fights touch scrolling); the footer simply scrolls in, fully shown
+const phone = window.matchMedia('(max-width: 800px)').matches
 function tick() {
+  if (phone) { if (lastShift !== 0) { lastShift = 0; footRef.value?.style.setProperty('--rp', '1') } return }
   // shutter: while the cover is passing, pull the footer up so it sits still at its final place on screen.
   // Its laid-out top (without the shift) runs from the bottom of the screen up to H - height.
   const foot = footRef.value
@@ -235,5 +238,16 @@ onUnmounted(() => gsap.ticker.remove(tick))
   .fn-ftop { flex-direction: column; }
   .fn-cols { grid-template-columns: repeat(2, auto); }
   .fn-base { grid-template-columns: 1fr; }
+}
+@media (max-width: 800px) {
+  .fn-foot { height: auto; min-height: 0; padding: 9vh 6vw 4vh; }
+  .fn-lines, .fn-probe { display: none; }
+  .fn-say { font-size: 30px; }
+  .fn-cols { width: 100%; grid-template-columns: 1fr 1fr; column-gap: 22px; row-gap: 30px; white-space: normal; margin-top: 5vh; }
+  .fn-fcol { font-size: 13px; letter-spacing: 0.06em; gap: 9px; }
+  .fn-fcol b { font-size: 11px; letter-spacing: 0.14em; }
+  .fn-mark { margin-top: 7vh; font-size: 21vw; }
+  .fn-base { gap: 14px; font-size: 11px; line-height: 1.6; }
+  .fn-base-r { justify-content: flex-start; flex-wrap: wrap; gap: 18px; }
 }
 </style>

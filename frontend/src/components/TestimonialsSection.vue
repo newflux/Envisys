@@ -227,8 +227,14 @@ onUnmounted(() => {
 .ts-card.on cite { opacity: 0.55; }
 
 @media (max-width: 900px) {
-  .ts-title { top: 20vh; transform: none; }
-  .ts-cards { width: 90vw; right: 5vw; top: auto; bottom: 6vh; }
-  .ts-inner blockquote { padding-top: 24px; }
+  /* phones: title on top, one card below it (the scroll swaps which), never stacked over the title */
+  .ts-bar, .ts-trusted { display: none; }
+  .ts-title { top: 14vh; transform: none; font-size: 30px; }
+  .ts-cards { width: 90vw; right: 5vw; top: auto; bottom: 7vh; }
+  .ts-card:not(.on) { display: none; }
+  .ts-card { padding: 0 18px; }
+  .ts-card header { height: 48px; font-size: 11px; }
+  .ts-inner blockquote { padding: 16px 0 16px; font-size: 18px; }
+  .ts-inner cite { margin-bottom: 16px; }
 }
 </style>

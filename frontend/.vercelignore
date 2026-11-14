@@ -1,0 +1,14 @@
+# Local-only raw material: never uploaded (the build only needs src, public/{media,p,models,fonts,...} and config)
+node_modules
+dist
+dist-dbg
+sources
+tools
+graphify-out
+.env.local
+public/pics
+public/about us pics
+public/videos/C0512.mp4
+public/*.pdf
+public/models/*.STEP
+public/models/*.SLDASM

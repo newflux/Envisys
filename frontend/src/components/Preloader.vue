@@ -245,6 +245,9 @@ function startAnimation() {
     smokeStartTime
   )
 
+  // the logo has finished drawing: heavy page work may start now without making it stutter
+  masterTl.call(() => window.dispatchEvent(new Event('preloader:logo')), [], props.smokeOnly ? 0 : smokeStartTime)
+
   // Landing: the logo holds until the 3D scene has compiled its shaders, so the reveal is always the live scene (no freeze, no half-loaded frame)
   if (!props.smokeOnly) {
     masterTl.call(() => {
@@ -311,7 +314,10 @@ onMounted(() => {
   window.addEventListener('resize', resizeAll)
 
   render()
-  startAnimation()
+  // the logo starts once the page has finished starting up (the first moments are full of native work that would make it stutter)
+  const go = () => requestAnimationFrame(() => requestAnimationFrame(startAnimation))
+  if ('requestIdleCallback' in window) (window as any).requestIdleCallback(go, { timeout: 1500 })
+  else setTimeout(go, 400)
 })
 
 onBeforeUnmount(() => {

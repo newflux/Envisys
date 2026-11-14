@@ -67,7 +67,7 @@
     <div id="__layout"><div id="scroller" class="layout" data-v-314f53c6><main class="layout__page" data-v-314f53c6><div class="main-page" data-v-314f53c6><div class="start-screen-wrapper" data-v-34202237><div class="start-screen night-mode" ref="startScreenRef" data-v-34202237><div class="start-screen__canvas-wrapper" data-v-741cd722 data-v-34202237>
 
   <!-- FIXED CANVAS WRAP -->
-  <div class="canvas-fixed-wrap">    <TresCanvas ref="tresCanvasRef" window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
+  <div class="canvas-fixed-wrap">    <TresCanvas v-if="sceneOn" ref="tresCanvasRef" window-size :clear-color="'#050609'" :clear-alpha="1" :tone-mapping="THREE.NeutralToneMapping" :tone-mapping-exposure="1.12" :pixel-ratio="pixelRatio" :antialias="true" power-preference="high-performance">
       <TresPerspectiveCamera ref="cameraRef" :fov="30" :near="0.5" :far="250" />
       
       <!-- Fog (Soft cold bluish-ash atmospheric gallery void, slightly brightened) -->
@@ -448,23 +448,22 @@ const camUp = new THREE.Vector3()
 const pq = new THREE.Vector3()
 
 function makePuffTexture() {
-  const c = document.createElement('canvas')
-  c.width = c.height = 128
-  const g = c.getContext('2d')!
-  const base = g.createRadialGradient(64, 64, 4, 64, 64, 62)
-  base.addColorStop(0, 'rgba(255,255,255,0.9)')
-  base.addColorStop(1, 'rgba(255,255,255,0)')
-  g.fillStyle = base
-  g.fillRect(0, 0, 128, 128)
-  for (let i = 0; i < 34; i++) {
-    const x = 20 + Math.random() * 88, y = 20 + Math.random() * 88, r = 10 + Math.random() * 26
-    const b = g.createRadialGradient(x, y, 0, x, y, r)
-    b.addColorStop(0, `rgba(255,255,255,${0.06 + Math.random() * 0.16})`)
-    b.addColorStop(1, 'rgba(255,255,255,0)')
-    g.fillStyle = b
-    g.fillRect(x - r, y - r, r * 2, r * 2)
+  // built from plain data, not a canvas: creating the page's first 2D canvas costs ~1 s and used to land on the preloader's logo
+  const N = 128, px = new Float32Array(N * N)
+  const add = (cx: number, cy: number, r: number, a0: number) => {
+    for (let y = Math.max(0, Math.floor(cy - r)); y < Math.min(N, Math.ceil(cy + r)); y++)
+      for (let x = Math.max(0, Math.floor(cx - r)); x < Math.min(N, Math.ceil(cx + r)); x++) {
+        const d = Math.hypot(x - cx, y - cy) / r
+        if (d < 1) px[y * N + x] += a0 * (1 - d)
+      }
   }
-  return new THREE.CanvasTexture(c)
+  add(64, 64, 62, 0.9)
+  for (let i = 0; i < 34; i++) add(20 + Math.random() * 88, 20 + Math.random() * 88, 10 + Math.random() * 26, 0.06 + Math.random() * 0.16)
+  const data = new Uint8Array(N * N * 4)
+  for (let i = 0; i < N * N; i++) { data[i * 4] = data[i * 4 + 1] = data[i * 4 + 2] = 255; data[i * 4 + 3] = Math.min(255, px[i] * 255) }
+  const t = new THREE.DataTexture(data, N, N)
+  t.needsUpdate = true
+  return t
 }
 const smokeGroup = new THREE.Group()
 const puffTex = makePuffTexture()
@@ -553,17 +552,6 @@ function openChamberModal(idx: number) {
 const isMobile = ref(window.matchMedia('(max-width: 800px)').matches || window.matchMedia('(pointer: coarse)').matches)
 const textK = isMobile.value ? 0.3 : 1
 const textLift = isMobile.value ? 0.9 : 0
-// Weak-GPU tier (integrated Intel UHD/HD, Mali, old Adreno, software GL, or a 4-thread / 4 GB machine): smaller mirror. Phones always count.
-const weak = isMobile.value || (() => {
-  try {
-    const gl = document.createElement('canvas').getContext('webgl2') as WebGL2RenderingContext | null
-    const ext = gl?.getExtension('WEBGL_debug_renderer_info')
-    const name = ext ? String(gl!.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : ''
-    gl?.getExtension('WEBGL_lose_context')?.loseContext()
-    return /Intel\(R\) (UHD|HD) Graphics|Intel HD|Mali-|Adreno \(TM\) [3-5]\d\d|PowerVR|SwiftShader|llvmpipe|Basic Render/i.test(name)
-      || (navigator.hardwareConcurrency || 8) <= 4 || ((navigator as any).deviceMemory || 8) <= 4
-  } catch { return false }
-})()
 // Lighting for everyone: every extra light multiplies each shader's size, and on Windows (ANGLE/D3D) each of the ~15 programs then costs
 // ~0.45 s to compile at first draw, even on a fast GPU. Fewer lights = no load delay anywhere, and the look is practically the same.
 const lean = ref(true)
@@ -915,6 +903,11 @@ window.addEventListener('pointerup', (e) => {
 
 // ── Refs ────────────────────────────────────────────────────────────────────
 const cameraRef       = ref<any>(null)
+// The 3D canvas (its WebGL context asks for the high-performance GPU, a ~1 s hitch on laptops that switch GPUs) is created only once
+// the preloader's logo has drawn itself, so the logo always plays clean.
+const sceneOn = ref(false)
+window.addEventListener('preloader:logo', () => { sceneOn.value = true }, { once: true })
+setTimeout(() => { sceneOn.value = true }, 6000)
 const reflRes = ref(isMobile.value ? 384 : 512) // mirrored-floor resolution; steps down on weak GPUs, never removed
 const mouseSpotLightRef = ref<any>(null)
 const fleetL          = ref<any>(null)
@@ -1583,7 +1576,10 @@ onMounted(() => {
     const b = new Box3().setFromObject(root), cz = (b.min.z + b.max.z) / 2 - 0.04
     root.children.forEach((c: any) => { c.position.y -= b.min.y; c.position.z -= cz })
   }
-  loader.load('/models/et950.glb', (gltf: any) => {
+  // The model is unpacked and measured only once the preloader's logo has drawn itself (that work blocks the page for ~1 s and
+  // made the logo stutter). The file itself is already downloading (preloaded in index.html).
+  const logoDrawn = new Promise<void>(res => { window.addEventListener('preloader:logo', () => res(), { once: true }); setTimeout(res, 6000) })
+  logoDrawn.then(() => loader.load('/models/et950.glb', (gltf: any) => {
     // Keep the Blender materials; only their colours are set (finish, above)
     gltf.scene.traverse((child: any) => {
       if (child.isMesh) {
@@ -1761,8 +1757,8 @@ onMounted(() => {
     transitionChamber.value = gltf.scene.clone(true)
 
     buildScrollTimeline()
-    setTimeout(warmShaders, 600)
-  })
+    setTimeout(warmShaders, 30)
+  }))
 })
 
 // ── The 4-Phase Cinematic Scroll Architecture ───────────────────────────────────────────
@@ -2026,6 +2022,14 @@ function buildScrollTimeline() {
 // behind a wall of synchronous compiles. The preloader waits for 'scene:ready' before it lifts.
 let warmRuns = 0
 let holdTimer = 0, origRender: any = null, warming = false
+// Held from the very first frame: until the scene is ready, nothing is drawn to the screen (Tres starts its loop before holdRender
+// can reach its renderer, and those first frames compiled shaders right in the middle of the preloader's logo).
+if (location.pathname === '/' || !location.pathname.replace(/\/+$/, '')) (window as any).__sceneReady = false
+const protoRender = THREE.WebGLRenderer.prototype.render
+THREE.WebGLRenderer.prototype.render = function (this: any, sc: any, cam: any) {
+  if ((window as any).__sceneReady === false && !warming && this.getRenderTarget() === null) return
+  return protoRender.call(this, sc, cam)
+}
 const reflCache = new Map<any, any>()
 let reflList: any[] | null = null, reflAge = 0
 function reflMat(m: any) {
@@ -2043,7 +2047,7 @@ function holdRender() {
   let tries = 0
   const grab = () => {
     const ctx = tresCanvasRef.value?.context, r = ctx?.renderer?.instance
-    if (!r) { if (++tries < 300) requestAnimationFrame(grab); return }
+    if (!r) { if (++tries < 1200) requestAnimationFrame(grab); return }
     // Tres restarts its own loop once its renderer is ready, so keep it stopped until releaseRender()
     origRender = r.render
     r.render = function (this: any, sc: any, cam: any) {

@@ -129,6 +129,12 @@
                   </div>
                 </span>
               </button>
+              <!-- phones only: the company links open right under their row, as plain links (desktop uses the cards below) -->
+              <div class="mnav-sub" :class="{ on: isCompanyOpen }">
+                <a href="/about">About us <small>Story, team, sites</small></a>
+                <a href="/resources">Resources <small>Guides and documents</small></a>
+                <a href="#" @click.prevent="isMobileOpen = false; $emit('build-click')">Contact <small>Peenya, Bengaluru</small></a>
+              </div>
             </li>
 
             <!-- search: opens the product search sheet -->
@@ -510,7 +516,7 @@ function showNav() {
 // Once the page scrolls, a band fades in behind the logo / burger in the colour of whatever is under it, so no text runs into them.
 let scrolled = false, bandTick = 0
 function updateBand(y: number) {
-  const on = y > 60
+  const on = y > 60 && window.innerWidth <= 800
   if (on !== scrolled) { scrolled = on; document.documentElement.toggleAttribute('data-scrolled', on) }
   if (!on || ++bandTick % 10) return
   let e = document.elementFromPoint(window.innerWidth / 2, 72) as HTMLElement | null, rgb = ''
@@ -896,9 +902,8 @@ defineExpose({
 .Nav_searchBtn:hover { background: rgba(255, 255, 255, 0.14); opacity: 1; }
 .Nav_scrim { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0; background: radial-gradient(80% 100% at 80% 0%, rgba(2, 4, 8, 0.86), rgba(2, 4, 8, 0.7) 75%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: opacity 0.45s ease; }
 .Nav_scrim.on { opacity: 1; }
-.Nav_submenu__EKbU9 .CompanySubmenuItem_link__ZOT0M .line { font-size: 15px; letter-spacing: 0.06em; }
-.CompanySubmenuItem_sub { display: block; margin-top: 5px; font-size: 12px; letter-spacing: 0.08em; opacity: 0.72; text-transform: uppercase; transition: opacity 0.3s ease; }
-.CompanySubmenuItem_submenuItem__irMc_:hover .CompanySubmenuItem_sub { opacity: 0.9; }
+.CompanySubmenuItem_sub { display: block; margin-top: 3px; font-size: 9.5px; letter-spacing: 0.1em; opacity: 0.5; text-transform: uppercase; transition: opacity 0.3s ease; }
+.CompanySubmenuItem_submenuItem__irMc_:hover .CompanySubmenuItem_sub { opacity: 0.65; }
 /* the products menu: three panes in a clear order: the kind of test, its chambers, quick links. A solid panel on a dimmed page,
    set in the site's clean grotesk (names) and Geist (text), with normal letter-spacing, so it reads calmly. */
 .Nav_wrapper__EfAHX { position: relative; }
@@ -1096,6 +1101,15 @@ defineExpose({
 </style>
 
 <style>
+.mnav-sub { display: none; }
+@media (max-width: 768px) {
+  .Header_header__qBw1J.is-mobile-open .Nav_submenu__EKbU9 { display: none !important; }
+  .Header_header__qBw1J.is-mobile-open .is-dimmed { opacity: 1 !important; filter: none !important; }
+  .mnav-sub { display: flex; flex-direction: column; overflow: hidden; max-height: 0; transition: max-height 0.45s cubic-bezier(0.2, 0.9, 0.2, 1); }
+  .mnav-sub.on { max-height: 260px; padding-bottom: 12px; }
+  .mnav-sub a { display: flex; flex-direction: column; gap: 3px; padding: 11px 0 11px 16px; border-left: 1px solid rgba(255, 106, 26, 0.6); color: #eef3fa; font-family: 'Geist', sans-serif; font-size: 18px; text-decoration: none; }
+  .mnav-sub a small { font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(238, 243, 250, 0.55); }
+}
 /* phone menu: a clean full-screen list (big type, hairlines), not the desktop pill's boxed items */
 @media (max-width: 768px) {
   .Header_header__qBw1J.is-mobile-open { padding: 108px 7vw 8vw !important; background: #05070b !important; }
@@ -1115,11 +1129,13 @@ defineExpose({
   .Header_header__qBw1J.is-mobile-open .Nav_contactBtn__pdvQU .line { font-family: 'Geist Mono', monospace; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.1em; }
 }
 
-.Header_topBar__t3Nfy::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 100px; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.35s ease;
-  background: linear-gradient(180deg, rgba(var(--band, 5, 6, 9), 0.94) 0%, rgba(var(--band, 5, 6, 9), 0.78) 52%, rgba(var(--band, 5, 6, 9), 0) 100%); }
-html[data-scrolled] .Header_topBar__t3Nfy::before { opacity: 1; }
-html[data-mnav] .Header_topBar__t3Nfy::before { opacity: 0; }
-@media (max-width: 800px) { .Header_topBar__t3Nfy::before { height: 92px; } }
+/* phones only: the header is a plain fixed bar in the colour of the page under it, so content slides away beneath it.
+   Desktop keeps its finished header untouched. */
+@media (max-width: 800px) {
+  .Header_topBar__t3Nfy::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 78px; z-index: -1; pointer-events: none; opacity: 0; background: rgb(var(--band, 5, 6, 9)); transition: opacity 0.25s ease, background-color 0.25s ease; }
+  html[data-scrolled] .Header_topBar__t3Nfy::before { opacity: 1; }
+  html[data-mnav] .Header_topBar__t3Nfy::before { opacity: 0; }
+}
 
 /* while the company menu is open the 3D scene behind it softens and darkens, so the wordmark never fights the cards */
 .canvas-fixed-wrap { transition: filter 0.5s ease; }

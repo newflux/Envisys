@@ -246,7 +246,7 @@ onUnmounted(() => gsap.ticker.remove(tick))
   .fn-cols { width: 100%; grid-template-columns: 1fr 1fr; column-gap: 22px; row-gap: 30px; white-space: normal; margin-top: 5vh; }
   .fn-fcol { font-size: 13px; letter-spacing: 0.06em; gap: 9px; }
   .fn-fcol b { font-size: 11px; letter-spacing: 0.14em; }
-  .fn-mark { margin-top: 7vh; font-size: 21vw; }
+  .fn-mark { margin: 7vh 0 0; font-size: 16.6vw; }
   .fn-base { gap: 14px; font-size: 11px; line-height: 1.6; }
   .fn-base-r { justify-content: flex-start; flex-wrap: wrap; gap: 18px; }
 }

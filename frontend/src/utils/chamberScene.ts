@@ -86,18 +86,11 @@ export function createChamberScene(canvas: HTMLCanvasElement, items: { url?: str
   loader.setDRACOLoader(draco)
   // each file loads once; chambers sharing a file share its geometry and materials
   const files = new Map<string, Promise<any>>()
-  const lite = new Map<any, any>()
   const load = (url: string) => {
     if (!files.has(url)) files.set(url, new Promise((res, rej) => loader.load(url, (g: any) => {
       g.scene.traverse((o: any) => {
         if (!o.isMesh) return
         o.castShadow = o.receiveShadow = !small
-        // the standard shader looks the same here (no clearcoat in use) and compiles / draws cheaper than the physical one
-        if (o.material.isMeshPhysicalMaterial && !(o.material.transmission > 0)) {
-          let s = lite.get(o.material)
-          if (!s) { s = new THREE.MeshStandardMaterial(); s.copy(o.material); s.name = o.material.name; lite.set(o.material, s) }
-          o.material = s
-        }
         const m = o.material
         // the touchscreen shows a live controller page, lit like a real screen: readable, not glaring
         if (m.name === 'HMI_Screen') { m.color.set(0x000000); m.emissive.set(0xffffff); m.emissiveMap = hmi.tex; m.emissiveIntensity = 0.85; m.roughness = 0.12; m.needsUpdate = true }

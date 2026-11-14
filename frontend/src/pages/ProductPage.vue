@@ -37,6 +37,14 @@
         </div>
       </section>
 
+      <!-- phones only: the key figures get their own section, so nothing sits over the chamber in the hero -->
+      <section class="pd-keys">
+        <div class="pd-top"><span>(00)</span><span>Key figures</span><span>{{ p.code }}</span></div>
+        <dl>
+          <div v-for="c in credits" :key="c[0]"><dt>{{ c[0] }}</dt><dd>{{ c[1] }}<small v-if="c[2]">{{ c[2] }}</small></dd></div>
+        </dl>
+      </section>
+
       <!-- 2 · what it is -->
       <section id="overview" class="pd-sec pd-about">
         <div class="pd-top rv hl"><span>(01)</span><span>About</span><span>{{ p.group }}</span></div>
@@ -302,5 +310,17 @@ onUnmounted(() => gsap.ticker.remove(tick))
   /* the quote button rides along at the foot of the screen */
   .pd-nav { display: none; }
   .pd-sticky { display: inline-flex; position: fixed; left: 5vw; right: 5vw; bottom: 14px; z-index: 40; justify-content: center; padding: 15px 18px; box-shadow: 0 10px 30px rgba(13, 35, 64, 0.25); }
+}
+
+.pd-keys { display: none; }
+@media (max-width: 640px) {
+  .pd-card dl { display: none; }
+  .pd-keys { display: block; padding: 7vh 6vw 2vh; color: #0d2340; }
+  .pd-keys dl { margin: 3vh 0 0; }
+  .pd-keys dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 14px 0; border-top: 1px solid rgba(13, 35, 64, 0.18); }
+  .pd-keys dl div:last-child { border-bottom: 1px solid rgba(13, 35, 64, 0.18); }
+  .pd-keys dt { font-family: var(--font-body); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
+  .pd-keys dd { margin: 0; font-family: var(--font-display); font-size: 20px; letter-spacing: -0.03em; }
+  .pd-keys dd small { margin-left: 4px; font-family: var(--font-body); font-size: 12px; opacity: 0.6; }
 }
 </style>

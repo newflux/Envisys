@@ -12,7 +12,7 @@ const url = process.argv[2] || 'https://envisys.vercel.app/', mobile = process.a
   pg.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE ' + m.text().slice(0, 200)) })
   await pg.evaluateOnNewDocument(() => { window.__ev = {}; for (const e of ['shaders:warm', 'scene:ready', 'preloader:done']) addEventListener(e, () => (window.__ev[e] = window.__ev[e] || []).push(Math.round(performance.now()))) })
   const t0 = Date.now(); await pg.goto(url, { waitUntil: 'load', timeout: 90000 }); console.log('load event', Date.now() - t0, 'ms')
-  for (const s of [3, 6, 10, 15]) { await new Promise(r => setTimeout(r, (s * 1000) - (Date.now() - t0))); console.log(s + 's', JSON.stringify(await pg.evaluate(() => ({ ev: window.__ev, ready: window.__sceneReady, y: (document.querySelector('#scroller') || {}).scrollTop }))) ) }
+  for (const s of (process.env.TS || '3,6,10,15').split(',').map(Number)) { await new Promise(r => setTimeout(r, (s * 1000) - (Date.now() - t0))); console.log(s + 's', JSON.stringify(await pg.evaluate(() => ({ ev: window.__ev, ready: window.__sceneReady, y: (document.querySelector('#scroller') || {}).scrollTop }))) ) }
   console.log('BAD', bad.slice(0, 12).join('\n')); console.log('ERRS', errs.slice(0, 8).join('\n'))
   await pg.screenshot({ path: process.argv[4] || 'prod.png' }); await b.close()
 })()

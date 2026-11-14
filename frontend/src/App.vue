@@ -1176,7 +1176,7 @@ onMounted(() => {
   if (scrollerEl) scrollerEl.scrollTop = 0 // Reset custom scroller
   
   // eventsTarget: window so wheel/touch still scrolls while the pointer is over the interactive overlay sections
-  const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, eventsTarget: window, lerp: 0.08, smoothWheel: true })
+  const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, eventsTarget: window, lerp: 0.08, smoothWheel: true, syncTouch: window.matchMedia('(pointer: coarse)').matches, syncTouchLerp: 0.1 }) // touch: the later sections live in a fixed layer outside the scroller, so a native swipe that starts on a card has nothing to scroll; Lenis drives touch itself
   ;(window as any).lenisInstance = lenis
   
   lenis.on('scroll', (e: any) => {

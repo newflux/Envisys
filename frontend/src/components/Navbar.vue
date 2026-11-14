@@ -1129,10 +1129,10 @@ defineExpose({
   .Header_header__qBw1J.is-mobile-open .Nav_contactBtn__pdvQU .line { font-family: 'Geist Mono', monospace; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.1em; }
 }
 
-/* phones only: the header is a plain fixed bar in the colour of the page under it, so content slides away beneath it.
+/* phones only: the header is frosted glass tinted with the scene under it: content blurs away beneath it, the scene still shows.
    Desktop keeps its finished header untouched. */
 @media (max-width: 800px) {
-  .Header_topBar__t3Nfy::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 78px; z-index: -1; pointer-events: none; opacity: 0; background: rgb(var(--band, 5, 6, 9)); transition: opacity 0.25s ease, background-color 0.25s ease; }
+  .Header_topBar__t3Nfy::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 78px; z-index: -1; pointer-events: none; opacity: 0; background: rgba(var(--band, 5, 6, 9), 0.42); -webkit-backdrop-filter: blur(18px) saturate(1.3); backdrop-filter: blur(18px) saturate(1.3); transition: opacity 0.25s ease, background-color 0.25s ease; }
   html[data-scrolled] .Header_topBar__t3Nfy::before { opacity: 1; }
   html[data-mnav] .Header_topBar__t3Nfy::before { opacity: 0; }
 }

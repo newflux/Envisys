@@ -212,7 +212,7 @@ async function loadModel() {
 
 function buildScene(canvas: HTMLCanvasElement) {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.matchMedia('(max-width: 800px)').matches ? 1.25 : 1.75)) // phones: fewer pixels for a detailed model
   renderer.setClearColor(0x000000, 0)
   renderer.toneMapping = THREE.NeutralToneMapping
   renderer.toneMappingExposure = 1.0

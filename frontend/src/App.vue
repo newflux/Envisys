@@ -1208,8 +1208,8 @@ onMounted(() => {
   let bestFps = 0
 
   gsap.ticker.add((time) => {
-    if (time - hmiAt > 0.25) { hmiAt = time; hmiDraw(time) }
     const covered = document.documentElement.dataset.covered === '1'
+    if (!covered && time - hmiAt > 0.25) { hmiAt = time; hmiDraw(time) }
     if (covered !== pageCovered.value) {
       pageCovered.value = covered
       if (covered) onChamberLeave()
@@ -1234,6 +1234,7 @@ onMounted(() => {
     }
 
     lenis.raf(time * 1000)
+    if (covered) return // the 3D scene is hidden under the sections: none of the scene updates below are visible
 
     // Interactive Three Graces Spotlight
     if (mouseSpotLightRef.value) {
@@ -2031,26 +2032,8 @@ function buildScrollTimeline() {
 // behind a wall of synchronous compiles. The preloader waits for 'scene:ready' before it lifts.
 let warmRuns = 0
 let holdTimer = 0, origRender: any = null, warming = false
-// Held from the very first frame: until the scene is ready, nothing is drawn to the screen (Tres starts its loop before holdRender
-// can reach its renderer, and those first frames compiled shaders right in the middle of the preloader's logo).
+let reflList: any[] | null = null, reflAge = 0 // meshes the mirror pass may hide (rebuilt every ~1.5 s)
 if (location.pathname === '/' || !location.pathname.replace(/\/+$/, '')) (window as any).__sceneReady = false
-const protoRender = THREE.WebGLRenderer.prototype.render
-THREE.WebGLRenderer.prototype.render = function (this: any, sc: any, cam: any) {
-  if ((window as any).__sceneReady === false && !warming && this.getRenderTarget() === null) return
-  return protoRender.call(this, sc, cam)
-}
-const reflCache = new Map<any, any>()
-let reflList: any[] | null = null, reflAge = 0
-function reflMat(m: any) {
-  if (Array.isArray(m) || !(m?.isMeshStandardMaterial)) return null
-  let b = reflCache.get(m)
-  if (!b) {
-    b = new THREE.MeshBasicMaterial({ color: m.color.clone().multiplyScalar(m.name ? 0.16 : 0.006), side: m.side, transparent: m.transparent, opacity: m.opacity, fog: false })
-    if (m.emissiveMap || m.emissiveIntensity > 0 && (m.emissive.r + m.emissive.g + m.emissive.b) > 0.5) b.color.setRGB(0.35, 0.4, 0.5)
-    reflCache.set(m, b)
-  }
-  return b
-}
 function holdRender() {
   ;(window as any).__sceneReady = false
   let tries = 0
@@ -2060,12 +2043,14 @@ function holdRender() {
     // Tres restarts its own loop once its renderer is ready, so keep it stopped until releaseRender()
     origRender = r.render
     r.render = function (this: any, sc: any, cam: any) {
+      // once the sections cover the screen the landing scene is invisible: draw nothing, mirror pass included (it kept ~2000 calls/s going)
+      if (document.documentElement.dataset.covered === '1') return
       const rt = this.getRenderTarget()
       if (!(window as any).__sceneReady && !warming && rt === null) return
       // The mirror pass draws the scene into a render target, which would compile every material a second time (a different shader
       // variant). It is blurred and faint, so it draws with plain same-colour materials instead: same look, half the shader work.
       if (rt !== null && sc === ctx.scene.value && cam !== cameraRef.value && !location.search.includes("noovr")) {
-        if (!reflList || ++reflAge > 90) { reflList = []; reflAge = 0; sc.traverse((o: any) => { if (o.isMesh && reflMat(o.material)) reflList!.push(o) }) } // rebuilt every ~1.5 s
+        if (!reflList || ++reflAge > 90) { reflList = []; reflAge = 0; sc.traverse((o: any) => { if (o.isMesh && o.material?.isMeshStandardMaterial) reflList!.push(o) }) } // rebuilt every ~1.5 s
         // tunnel walls / ceiling are near-black, so leaving them out of the mirror changes nothing visible (and saves their shaders);
         // the chambers keep their real materials so the reflection stays smooth (flat stand-ins broke it into cells)
         const vis = reflList.map((o: any) => o.visible)

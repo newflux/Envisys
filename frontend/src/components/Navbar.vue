@@ -514,11 +514,13 @@ function showNav() {
   gsap.fromTo(navLines(), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.04, ease: 'power2.out', delay: 0.12, clearProps: 'transform,opacity' })
 }
 // Once the page scrolls, a band fades in behind the logo / burger in the colour of whatever is under it, so no text runs into them.
-let scrolled = false, bandTick = 0
+let scrolled = false, bandTick = 0, bandY = -1e9
 function updateBand(y: number) {
   const on = y > 60 && window.innerWidth <= 800
   if (on !== scrolled) { scrolled = on; document.documentElement.toggleAttribute('data-scrolled', on) }
-  if (!on || ++bandTick % 10) return
+  // re-read only after a real scroll distance: reading styles mid-frame forces the browser to recompute layout
+  if (!on || Math.abs(y - bandY) < 90 || ++bandTick % 6) return
+  bandY = y
   // the section's own colour just below the header line, read at the screen edge (away from text and photos); gradients count
   const pick = (x: number) => {
     let e = document.elementFromPoint(x, 84) as HTMLElement | null

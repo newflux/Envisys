@@ -1770,7 +1770,7 @@ function buildScrollTimeline() {
         scroller: "#scroller",
         start: "top top",
         end: "bottom bottom",
-        scrub: 1.5, // 1.5s physical smoothing delay (Awwwards heavy physics)
+        scrub: window.matchMedia('(pointer: coarse)').matches ? 0.2 : 1.5, // desktop: 1.5 s heavy physics; touch: follows the thumb (a 1.5 s lag felt like the page would not move)
       }
     })
 
@@ -2001,16 +2001,25 @@ function buildScrollTimeline() {
     // Phones: no spec pan, telemetry or fleet. The hero leads straight into the dive: 10..104 is cut, everything after moves up 94 units,
     // and the page gets shorter to match (same vh per unit, so the pace is unchanged).
     const phone = window.matchMedia('(max-width: 800px)').matches, CUT = 94
+    let phoneDur = 581
     if (phone) {
       for (const c of tl.getChildren(false, true, true)) {
         const st = c.startTime(), en = st + c.totalDuration(), v = (c as any).vars ?? {}
         if ((st >= 0.5 && st < 104) || (st < 0.5 && en > 20) || 'cloneAx' in v || 'cloneFade' in v) tl.remove(c)
         else if (st >= 104) c.startTime(st - CUT)
       }
-      ;(document.querySelector('.layout__page') as HTMLElement).style.minHeight = `${100 + (773 - CUT) * 3.9007}vh`
+      // the column of sections follows the thumb 1:1 (a fixed-length tween moved it slower than the finger, so swipes felt stuck)
+      const colTw = tl.getChildren(false, true, false).find((c: any) => c.targets?.().some?.((t: any) => t?.classList?.contains('tr-scroll'))) as any
+      const col = document.querySelector('.tr-scroll') as HTMLElement
+      const unitPx = 3.9007 * window.innerHeight / 100
+      phoneDur = Math.max(120, (col.offsetHeight + window.innerHeight * 0.1) / unitPx)
+      colTw?.duration(phoneDur)
+      for (const c of tl.getChildren(false, true, false)) { const t0 = (c as any).targets?.()[0]; if (Math.abs(c.startTime() - (772 - CUT)) < 0.5 && t0 && t0.constructor === Object && Object.keys(t0).every(k => k === '_gsap')) tl.remove(c) } // the old end marker
+      tl.to({}, { duration: 1 }, 192 - CUT + phoneDur)
+      ;(document.querySelector('.layout__page') as HTMLElement).style.minHeight = `${100 + (192 - CUT + phoneDur + 1) * 3.9007}vh`
       ScrollTrigger.refresh()
     }
-    ;(window as any).__envTl = phone ? { start: 192 - CUT, dur: 581, end: 773 - CUT } : { start: 192, dur: 581, end: 773 } // read by utils/columnScroll
+    ;(window as any).__envTl = phone ? { start: 192 - CUT, dur: phoneDur, end: 192 - CUT + phoneDur } : { start: 192, dur: 581, end: 773 } // read by utils/columnScroll
     ;(window as any).__envMainTl = tl // read by utils/scrollTop
     if (import.meta.env.DEV) (window as any).__tresCtx = tresCanvasRef.value?.context // dev: renderer stats for perf checks
 

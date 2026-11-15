@@ -181,4 +181,6 @@ onUnmounted(() => {
   .pr-prod { width: 70vw; margin-left: -35vw; height: 40vh; bottom: 24vh; }
   .pr-nav { gap: 14px; overflow-x: auto; }
 }
+/* phones: a shorter pin, so the page never feels stuck under a thumb */
+@media (max-width: 800px) { .pr-root { height: 200vh; } }
 </style>

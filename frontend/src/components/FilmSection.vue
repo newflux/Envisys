@@ -89,4 +89,6 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .fm-placeholder span { font-family: var(--font-display); font-size: clamp(28px, 4vw, 72px); letter-spacing: -0.04em; color: rgba(255, 255, 255, 0.85); }
 .fm-placeholder small { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
 .fm-cap { position: absolute; left: 5vw; right: 5vw; bottom: 5vh; display: flex; justify-content: space-between; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); opacity: 0; }
+/* phones: a shorter pin, so the page never feels stuck under a thumb */
+@media (max-width: 800px) { .fm-root { height: 160vh; } }
 </style>

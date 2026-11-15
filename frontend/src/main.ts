@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import Clarity from '@microsoft/clarity'
 import './assets/icomat.css'
 import './assets/style.css'
 import './assets/tokens.css'
@@ -12,6 +13,9 @@ const pages: Record<string, () => Promise<typeof import('./App.vue')>> = {
   '/resources': () => import('./pages/ResourcesPage.vue'),
   '/in-stock': () => import('./pages/InStockPage.vue')
 }
+// Microsoft Clarity (heatmaps, scroll depth, recordings): live site only, so local testing never shows up in the data
+if (import.meta.env.PROD && location.hostname !== 'localhost') Clarity.init('zdlb48i7f7')
+
 const path = location.pathname.replace(/\/+$/, '') || '/'
 const product = path.startsWith('/products/')
 const vertical = path.startsWith('/verticals/')

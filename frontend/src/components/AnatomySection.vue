@@ -428,4 +428,6 @@ onUnmounted(() => {
   .an-steps { width: 80vw; }
   .an-count { display: none; }
 }
+/* phones: shorter pin, and no part labels (they crowd a narrow screen) */
+@media (max-width: 800px) { .an-root { height: 190vh; } .an-labels, .an-leaders { display: none; } }
 </style>

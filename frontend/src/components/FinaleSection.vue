@@ -155,4 +155,6 @@ onUnmounted(() => gsap.ticker.remove(tick))
   .fn-bento { grid-template-columns: 1fr; }
   .fn-tiles { grid-template-columns: 1fr; }
 }
+/* phones: a normal-sized button that stays inside the screen */
+@media (max-width: 900px) { .fn-big { width: 100%; min-width: 0; box-sizing: border-box; height: 68px; margin-top: 6vh; padding: 0 24px; transform: none !important; } }
 </style>

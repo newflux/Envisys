@@ -4,3 +4,14 @@
   --font-body: 'AkkuratMono', ui-monospace, monospace;
   --ember: #ff6a1a;
 }
+
+/* Phones: no scroll-driven text reveals (words rising or lighting up one by one): on a thumb they read as choppy, so the text
+   simply sits there, fully shown. Desktop keeps the effects. */
+@media (max-width: 800px) {
+  .bs-w, .cs-word, .fn-w, .vp-big > span, [data-words] i { opacity: 1 !important; transform: none !important; }
+}
+
+/* iPhone: keep text at its set size in landscape, and keep the header clear of the notch / Dynamic Island */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html .Header_topBar__t3Nfy, html .Header_header__qBw1J { padding-top: max(24.7px, env(safe-area-inset-top)); }
+@media (max-width: 800px) { html .Header_topBar__t3Nfy::before { height: calc(78px + env(safe-area-inset-top)); } }

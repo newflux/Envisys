@@ -117,4 +117,6 @@ onUnmounted(() => { gsap.ticker.remove(tick); wipe?.kill() })
 .in-tabs button i { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: #fff; transform-origin: left; transform: scaleX(0); }
 
 @media (max-width: 800px) { .in-head { max-width: 80vw; } }
+/* phones: a shorter pin */
+@media (max-width: 800px) { .in-root { height: 130vh; } }
 </style>

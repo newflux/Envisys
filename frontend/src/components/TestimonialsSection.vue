@@ -64,7 +64,10 @@ const smooth = (a: number) => a * a * (3 - 2 * a)
 const mix = (a: number[], b: number[], k: number) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',')})`
 const INK = [13, 35, 64], HI = [246, 249, 252], LO = [142, 154, 167]
 
+// phones: no pin, no wave: a plain dark section with every review shown (a 3-screen pin felt stuck under a thumb)
+const phone = window.matchMedia('(max-width: 900px)').matches
 function tick() {
+  if (phone) return
   const root = rootRef.value, stage = stageRef.value
   if (!root || !stage) return
   const H = window.innerHeight, W = window.innerWidth
@@ -226,15 +229,24 @@ onUnmounted(() => {
 .ts-card.on blockquote { opacity: 1; transform: none; }
 .ts-card.on cite { opacity: 0.55; }
 
+/* desktop on shorter screens: the open card used to run off the bottom; trim the space above the quote */
+@media (min-width: 901px) and (max-height: 900px) {
+  .ts-card header { height: 54px; }
+  .ts-inner blockquote { padding-top: 5vh; }
+}
+/* phones: no pin and no wave; a plain dark section with every review, scrolling like the rest of the page */
 @media (max-width: 900px) {
-  /* phones: title on top, one card below it (the scroll swaps which), never stacked over the title */
-  .ts-bar, .ts-trusted { display: none; }
-  .ts-title { top: 14vh; transform: none; font-size: 30px; }
-  .ts-cards { width: 90vw; right: 5vw; top: auto; bottom: 7vh; }
-  .ts-card:not(.on) { display: none; }
-  .ts-card { padding: 0 18px; }
-  .ts-card header { height: 48px; font-size: 11px; }
-  .ts-inner blockquote { padding: 16px 0 16px; font-size: 18px; }
-  .ts-inner cite { margin-bottom: 16px; }
+  .ts-root { height: auto; background: #000; color: #f4f6f8; padding: 12vh 0 10vh; }
+  .ts-stage { position: relative; height: auto; overflow: visible; transform: none !important; }
+  .ts-wave, .ts-bar, .ts-trusted { display: none; }
+  .ts-content { position: relative; inset: auto; padding: 0 6vw; }
+  .ts-title { position: static; transform: none; font-size: 30px; }
+  .ts-line { --hi: #f6f9fc; --lo: #8e9aa7; opacity: 1 !important; transform: none !important; }
+  .ts-cards { position: static; width: auto; margin-top: 5vh; gap: 12px; }
+  .ts-card, .ts-cards.dark .ts-card, .ts-cards.dark .ts-card.on { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.1); color: #f4f6f8; padding: 0 18px; cursor: default; }
+  .ts-card header { height: 46px; font-size: 11px; }
+  .ts-open { grid-template-rows: 1fr; }
+  .ts-inner blockquote { padding: 4px 0 14px; font-size: 17px; opacity: 1; transform: none; }
+  .ts-inner cite { margin-bottom: 18px; opacity: 0.55; }
 }
 </style>

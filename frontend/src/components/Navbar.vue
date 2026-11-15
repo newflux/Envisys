@@ -519,8 +519,20 @@ function updateBand(y: number) {
   const on = y > 60 && window.innerWidth <= 800
   if (on !== scrolled) { scrolled = on; document.documentElement.toggleAttribute('data-scrolled', on) }
   if (!on || ++bandTick % 10) return
-  let e = document.elementFromPoint(window.innerWidth / 2, 72) as HTMLElement | null, rgb = ''
-  while (e && !rgb) { const m = getComputedStyle(e).backgroundColor.match(/rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/); if (m && (m[4] === undefined || +m[4] > 0.5)) rgb = `${m[1]}, ${m[2]}, ${m[3]}`; e = e.parentElement }
+  // the section's own colour just below the header line, read at the screen edge (away from text and photos); gradients count
+  const pick = (x: number) => {
+    let e = document.elementFromPoint(x, 84) as HTMLElement | null
+    while (e) {
+      const cs = getComputedStyle(e)
+      const m = cs.backgroundColor.match(/rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/)
+      if (m && (m[4] === undefined || +m[4] > 0.5)) return `${m[1]}, ${m[2]}, ${m[3]}`
+      const g = cs.backgroundImage.match(/rgba?\((\d+), (\d+), (\d+)/)
+      if (g && cs.backgroundImage.includes('gradient')) return `${g[1]}, ${g[2]}, ${g[3]}`
+      e = e.parentElement
+    }
+    return ''
+  }
+  const rgb = pick(6) || pick(window.innerWidth - 6)
   document.documentElement.style.setProperty('--band', rgb || '5, 6, 9')
 }
 function watchScroll() {
@@ -1129,10 +1141,11 @@ defineExpose({
   .Header_header__qBw1J.is-mobile-open .Nav_contactBtn__pdvQU .line { font-family: 'Geist Mono', monospace; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.1em; }
 }
 
-/* phones only: the header is frosted glass tinted with the scene under it: content blurs away beneath it, the scene still shows.
+/* phones only: an invisible line under the logo: the strip above it takes the exact colour of the section behind, so content
+   simply slides away under the header and the logo always reads clean. No tint, no blur.
    Desktop keeps its finished header untouched. */
 @media (max-width: 800px) {
-  .Header_topBar__t3Nfy::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 78px; z-index: -1; pointer-events: none; opacity: 0; background: rgba(var(--band, 5, 6, 9), 0.42); -webkit-backdrop-filter: blur(18px) saturate(1.3); backdrop-filter: blur(18px) saturate(1.3); transition: opacity 0.25s ease, background-color 0.25s ease; }
+  .Header_topBar__t3Nfy::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 78px; z-index: -1; pointer-events: none; opacity: 0; background: rgb(var(--band, 5, 6, 9)); transition: opacity 0.2s ease; }
   html[data-scrolled] .Header_topBar__t3Nfy::before { opacity: 1; }
   html[data-mnav] .Header_topBar__t3Nfy::before { opacity: 0; }
 }

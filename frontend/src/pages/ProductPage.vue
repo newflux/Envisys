@@ -13,16 +13,6 @@
           <span v-for="(ch, k) in p.name.toUpperCase()" :key="k" :style="{ '--k': k }">{{ ch === ' ' ? '\u00a0' : ch }}</span>
         </h2>
         <div class="pd-shot" ref="shotRef"><img class="pd-photo" :class="{ photo: p.photo }" :src="img(p, 'hero')" :alt="p.name" fetchpriority="high" />
-          <!-- tap a numbered point to read about that part of the chamber -->
-          <div v-if="p.hotspots" class="pd-hs">
-            <button v-for="(h, k) in p.hotspots" :key="h[2]" class="pd-hp" :class="{ on: hs === k }" :style="{ left: h[0] + '%', top: h[1] + '%' }" :aria-label="h[2]" :aria-expanded="hs === k" data-cursor="" @click="hs = hs === k ? -1 : k"><span>{{ k + 1 }}</span></button>
-            <div v-if="hs >= 0" class="pd-hcard" :class="{ flip: p.hotspots[hs][0] > 50 }" :style="{ left: p.hotspots[hs][0] + '%', top: p.hotspots[hs][1] + '%' }" role="dialog" :aria-label="p.hotspots[hs][2]">
-              <button class="pd-hx" aria-label="Close" @click="hs = -1">×</button>
-              <small>{{ String(hs + 1).padStart(2, '0') }} / {{ String(p.hotspots.length).padStart(2, '0') }}</small>
-              <b>{{ p.hotspots[hs][2] }}</b>
-              <p>{{ p.hotspots[hs][3] }}</p>
-            </div>
-          </div>
         </div>
 
         <div class="pd-card">
@@ -65,6 +55,25 @@
         </div>
       </section>
 
+      <!-- explore: the chamber with numbered points beside a list of what they are (one point highlighted at a time) -->
+      <section v-if="p.hotspots" id="explore" class="pd-sec pd-ex">
+        <div class="pd-top rv hl"><span>(00)</span><span>Explore the chamber</span><span>{{ p.hotspots.length }} details</span></div>
+        <div class="pd-ex-row">
+          <div class="pd-ex-pic rv">
+            <div class="pd-ex-img">
+              <img :src="img(p, 'hero')" :alt="p.name" />
+              <button v-for="(h, k) in p.hotspots" :key="h[2]" class="pd-hp" :class="{ on: hs === k }" :style="{ left: h[0] + '%', top: h[1] + '%' }" :aria-label="h[2]" data-cursor="" @mouseenter="hs = k" @click="hs = k"><span>{{ k + 1 }}</span></button>
+            </div>
+          </div>
+          <ol class="pd-ex-list">
+            <li v-for="(h, k) in p.hotspots" :key="'l' + h[2]" class="rv" :class="{ on: hs === k }" :style="{ '--d': k * 0.05 + 's' }" @mouseenter="hs = k" @click="hs = k">
+              <i>{{ String(k + 1).padStart(2, '0') }}</i>
+              <div><b>{{ h[2] }}</b><p>{{ h[3] }}</p></div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
       <!-- 3 · the specification, straight after what it is -->
       <SpecStudio v-if="studio" :s="studio" :lineup="detail?.lineup" :features="p.features" :group="p.group" :series="p.name" :brochure="p.brochure" :sel="sel" @pick="sel = $event" @ask="contact()" />
       <section v-else id="specification" class="pd-sec pd-spec">
@@ -87,6 +96,7 @@
         </div>
       </section>
 
+      <SpecCompare v-if="studio && studio.models.length > 1" :s="studio" :series="p.name" :brochure="p.brochure" num="03" />
       <SpecDetail v-if="detail" :d="detail" :brochure="p.brochure" @ask="contact()" />
 
       <!-- last · the photographs (after the specification, which is what buyers come for): the section pins and slides them sideways as you scroll, each moving a little inside its
@@ -123,6 +133,7 @@ import NextUp from '../components/NextUp.vue'
 import SpecDetail from '../components/SpecDetail.vue'
 import SpecStudio from '../components/SpecStudio.vue'
 import { details } from '../config/details'
+import SpecCompare from '../components/SpecCompare.vue'
 import { products, bySlug, img, quotesFor, scenePhotos } from '../config/products'
 
 const slug = decodeURIComponent(location.pathname.replace(/\/+$/, '').split('/').pop() ?? '')
@@ -139,7 +150,7 @@ const hitItem = p?.models.flatMap((m) => m.items).find((it) => asked && norm(it)
 const sel = ref(hitItem ?? '')
 
 // the explore bar: which sections exist, which one is being read, and whether the bar shows at all
-const hs = ref(-1) // the open hotspot card, -1 when none
+const hs = ref(0) // the highlighted point in Explore
 const detail = p ? details[p.slug] : undefined // the full technical file, where the series has one
 const studio = detail?.studio // the redesigned specification (ET first); the rest still use the plain list
 const navs = [{ id: 'overview', t: 'Overview' }, { id: 'specification', t: 'Specification' }, ...(detail?.headline || detail?.chart ? [{ id: 'performance', t: 'Performance' }] : []), ...(detail?.lineup ? [{ id: 'models', t: 'Models' }] : []), ...(detail?.tables ? [{ id: 'technical', t: 'Data' }] : []), ...(detail?.build ? [{ id: 'build', t: 'Build' }] : []), ...(shots.length > 1 ? [{ id: 'photographs', t: 'Photographs' }] : [])]
@@ -336,22 +347,29 @@ onUnmounted(() => gsap.ticker.remove(tick))
   .pd-keys dd small { margin-left: 4px; font-family: var(--font-body); font-size: 12px; opacity: 0.6; }
 }
 
-/* hotspots: numbered rings on the photo, one small card at a time */
-.pd-hs { position: absolute; inset: 0; z-index: 2; }
-.pd-hp { position: absolute; display: grid; place-items: center; line-height: 1; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 1.5px solid #0d2340; border-radius: 50%; background: rgba(255, 255, 255, 0.92); color: #0d2340; font-family: 'Geist Mono', monospace; font-size: 12px; cursor: pointer; box-shadow: 0 4px 14px rgba(13, 35, 64, 0.18); transition: background 0.25s ease, color 0.25s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1); }
-.pd-hp::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(255, 106, 26, 0.7); animation: pd-hp 2.4s ease-out infinite; }
-.pd-hp:hover, .pd-hp.on { background: #ff6a1a; border-color: #ff6a1a; color: #fff; transform: scale(1.08); }
-.pd-hp.on::after { animation: none; opacity: 0; }
-@keyframes pd-hp { from { transform: scale(0.8); opacity: 0.9; } to { transform: scale(1.5); opacity: 0; } }
-.pd-hcard { position: absolute; z-index: 3; width: 270px; margin: 22px 0 0 22px; padding: 18px 20px 20px; border-radius: 14px; background: #fff; color: #0d2340; box-shadow: 0 18px 50px rgba(13, 35, 64, 0.22); }
-.pd-hcard.flip { margin-left: -292px; }
-.pd-hcard small { display: block; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #ff6a1a; }
-.pd-hcard b { display: block; margin: 8px 0 6px; font-family: var(--font-display); font-weight: 400; font-size: 19px; letter-spacing: -0.03em; }
-.pd-hcard p { margin: 0; font-family: 'Geist', sans-serif; font-size: 15px; line-height: 1.5; opacity: 0.85; }
-.pd-hx { position: absolute; top: 10px; right: 12px; border: 0; background: none; color: inherit; font-size: 20px; line-height: 1; cursor: pointer; opacity: 0.6; }
+/* explore: the photo with numbered rings, beside the list; hovering either highlights the pair */
+.pd-ex { padding: 14vh 2.2vw 4vh; color: #0d2340; }
+.pd-ex-row { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 5vw; align-items: center; margin-top: 7vh; }
+.pd-ex-pic { display: flex; justify-content: center; padding: 4vh 0; border-radius: 22px; background: radial-gradient(ellipse 60% 55% at 50% 55%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.25) 70%, transparent); }
+.pd-ex-img { position: relative; height: min(70vh, 640px); }
+.pd-ex-img img { display: block; height: 100%; width: auto; object-fit: contain; filter: drop-shadow(0 26px 30px rgba(13, 35, 64, 0.22)); }
+.pd-hp { position: absolute; display: grid; place-items: center; line-height: 1; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 1.5px solid #0d2340; border-radius: 50%; background: rgba(255, 255, 255, 0.94); color: #0d2340; font-family: 'Geist Mono', monospace; font-size: 12px; cursor: pointer; box-shadow: 0 4px 14px rgba(13, 35, 64, 0.18); transition: background 0.25s ease, color 0.25s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.pd-hp::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(255, 106, 26, 0.7); opacity: 0; }
+.pd-hp.on { background: #ff6a1a; border-color: #ff6a1a; color: #fff; transform: scale(1.12); }
+.pd-hp.on::after { animation: pd-hp 2s ease-out infinite; }
+@keyframes pd-hp { from { transform: scale(0.8); opacity: 0.9; } to { transform: scale(1.6); opacity: 0; } }
+.pd-ex-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid rgba(13, 35, 64, 0.15); }
+.pd-ex-list li { display: grid; grid-template-columns: 48px 1fr; gap: 14px; padding: 2.4vh 0; border-bottom: 1px solid rgba(13, 35, 64, 0.15); cursor: pointer; opacity: 0.55; transition: opacity 0.3s ease; }
+.pd-ex-list li.on { opacity: 1; }
+.pd-ex-list i { font-style: normal; font-family: 'Geist Mono', monospace; font-size: 13px; color: #ff6a1a; padding-top: 5px; }
+.pd-ex-list b { display: block; font-family: var(--font-display); font-weight: 400; font-size: clamp(18px, 1.5vw, 24px); letter-spacing: -0.03em; }
+.pd-ex-list p { margin: 0; max-height: 0; overflow: hidden; font-family: 'Geist', sans-serif; font-size: 16px; line-height: 1.55; transition: max-height 0.5s cubic-bezier(0.2, 0.9, 0.2, 1), margin 0.5s ease; }
+.pd-ex-list li.on p { max-height: 9em; margin-top: 8px; }
 @media (prefers-reduced-motion: reduce) { .pd-hp::after { animation: none; } }
-@media (max-width: 640px) {
+@media (max-width: 800px) {
+  .pd-ex { padding: 9vh 5vw 2vh; }
+  .pd-ex-row { grid-template-columns: 1fr; gap: 4vh; }
+  .pd-ex-img { height: 46svh; }
   .pd-hp { width: 26px; height: 26px; margin: -13px 0 0 -13px; font-size: 11px; }
-  .pd-hcard, .pd-hcard.flip { left: 50% !important; top: auto !important; bottom: 100%; width: 86vw; margin: 0 0 14px -43vw; } /* opens in the free space above the chamber */
 }
 </style>

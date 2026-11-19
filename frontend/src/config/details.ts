@@ -36,6 +36,15 @@ export interface Studio {
   options?: string[]
   standards?: string[]
   downloads?: { kind: 'drawing' | 'manual' | 'other'; label: string; href: string }[]
+  perModel?: Record<string, [string, string][]>                      // extra rows known for one model only (its technical sheet), by model name
+  envelope?: Envelope                                                // the operating envelope, drawn from this series' own ranges
+}
+/** An operating envelope: what the chamber can hold, as regions on two real axes (nothing is drawn that is not in the spec). */
+export interface Envelope {
+  x: { label: string; unit: string; min: number; max: number; ticks: number[] }
+  y: { label: string; unit: string; min: number; max: number; ticks: number[]; log?: boolean; top?: string; tickLabels?: Record<number, string> }
+  regions: { x0: number; x1: number; y0: number; y1: number; label: string; tone: 'cold' | 'main' | 'ext' }[]
+  note?: string
 }
 
 export interface Detail {
@@ -180,6 +189,27 @@ export const details: Record<string, Detail> = {
         { name: 'ET1400', volume: '1400 L', w: 1400, d: 1350, h: 950 },
         { name: 'ET3000', volume: '3000 L', w: 1400, d: 1500, h: 1400 }
       ],
+      perModel: {
+        ET150: [
+          ['Temperature fluctuation', '± 1.2 °C, up to 150 °C'], ['Temperature gradient', '1.5 °C'],
+          ['Heating and cooling rate', '3 K/min standard; 5, 10, 15 or 20 K/min optional (IEC 60068-3-5)'],
+          ['Humidity range', '10 to 98 % RH, between 20 and 85 °C'], ['Humidity fluctuation', '± 3 % RH'], ['Humidity gradient', '5 % RH'],
+          ['Current', '13 A or 19 A'], ['Supply', '415 V AC ± 5 %, 3 phase + N + E, plus instrumentation earth, 50/60 Hz'],
+          ['Trays', '6 slots; 1 SS 304 tray supplied, more on request'], ['Floor and tray load', '50 kg floor, 20 kg per tray (evenly spread)'],
+          ['Viewing window', '360 × 460 mm'], ['Air circulation', '12-inch, 450 CFM fan, ½ HP'], ['Access ports', '2 × 115 mm, more on request'],
+          ['Models', '40T / 70T, 40H / 70H, 40T-5K / 40H-5K (5 K/min)']
+        ]
+      },
+      envelope: {
+        x: { label: 'Temperature', unit: '°C', min: -80, max: 200, ticks: [-80, -40, 0, 40, 80, 120, 160, 200] },
+        y: { label: 'Relative humidity', unit: '% RH', min: 0, max: 100, ticks: [0, 20, 40, 60, 80, 100] },
+        regions: [
+          { x0: -70, x1: -40, y0: 0, y1: 6, label: '70T / 70H', tone: 'cold' },
+          { x0: -40, x1: 180, y0: 0, y1: 6, label: 'Temperature range', tone: 'ext' },
+          { x0: 20, x1: 85, y0: 10, y1: 98, label: 'Humidity control (H models)', tone: 'main' }
+        ],
+        note: 'ET150 technical sheet: −40 / −70 to 180 °C; 10 to 98 % RH between 20 and 85 °C.'
+      },
       common: [['Temperature', '−40 / −70 to 180 °C'], ['Humidity', '10 to 95 % RH (H variants)'], ['Ramp rate', '3 to 20 °C per minute, optional'], ['Supply', '415 V AC, 3 phase, 50/60 Hz, changed to suit the destination country']]
     },
     lineup: [{
@@ -193,18 +223,6 @@ export const details: Record<string, Detail> = {
         ['ET3000-40T/70T & 40H/70H', '−40 / −70 to 180 °C', '10 to 95 % RH', '1400 × 1500 × 1400']
       ],
       notes: ['Power supply: 415 V AC, 3 phase, 50/60 Hz, customisable to the destination country.', 'Temperature ramp rates are optional, from 3 °C to 20 °C per minute.']
-    }],
-    tables: [{
-      title: 'ET150 in detail',
-      rows: [],
-      groups: [
-        { title: 'Models', rows: [['ET150-40T / 70T', 'Temperature only, −40 / −70 to 180 °C'], ['ET150-40H / 70H', 'Temperature and humidity, −40 / −70 to 180 °C'], ['ET150-40T-5K / 40H-5K', 'Faster ramp, 5 K/min']] },
-        { title: 'Temperature', rows: [['Fluctuation', '± 1.2 °C, up to 150 °C'], ['Gradient', '1.5 °C'], ['Heating and cooling rate', '3 K/min standard; 5, 10, 15 or 20 K/min optional (IEC 60068-3-5)']] },
-        { title: 'Humidity (H models)', rows: [['Range', '10 to 98 % RH, between 20 and 85 °C'], ['Fluctuation', '± 3 % RH'], ['Gradient', '5 % RH']] },
-        { title: 'Size and weight', rows: [['Interior, W × D × H', '550 × 400 × 700 mm'], ['Chamber weight', '530 kg (780 kg packed)']] },
-        { title: 'Electrical', rows: [['Connected load', '6 kW or 7.5 kW'], ['Current', '13 A or 19 A'], ['Supply', '415 V AC ± 5 %, 3 phase + neutral + earth, plus instrumentation earth, 50/60 Hz']] },
-        { title: 'Inside the chamber', rows: [['Trays', '6 tray slots; 1 SS 304 square-tube tray supplied, more on request'], ['Load', '50 kg on the floor, 20 kg per tray (evenly spread)'], ['Viewing window', '360 × 460 mm'], ['Air circulation', 'One 12-inch, 450 CFM fan, ½ HP motor'], ['Access ports', '2 side ports, 115 mm, more on request']] }
-      ]
     }],
     build: [{ title: 'Construction', points: ['Robust block construction with stainless-steel interiors', 'Powder-coated outer panels', 'LED-lit viewing window and durable shelving', 'Double sealing, heavy-duty hinges and locks', 'Through-wall cable ports', 'Laid out around an easy-access control desk'] }]
   },
@@ -376,6 +394,15 @@ export const details: Record<string, Detail> = {
         { name: "EA950", volume: "950 L", w: 1000, d: 1000, h: 950 },
         { name: "EA1400", volume: "1400 L", w: 1100, d: 1350, h: 950 }
       ],
+      envelope: {
+        x: { label: 'Temperature', unit: '°C', min: -80, max: 200, ticks: [-80, -40, 0, 40, 80, 120, 160, 200] },
+        y: { label: 'Pressure', unit: 'mbar', min: 10, max: 1013, log: true, ticks: [10, 30, 100, 300, 1013], top: 'sea level', tickLabels: { 10: '10 · ≈ 31 km', 100: '100 · ≈ 16 km', 300: '300 · ≈ 9 km', 1013: '1013 · ground' } },
+        regions: [
+          { x0: -70, x1: -40, y0: 10, y1: 1013, label: '70T', tone: 'cold' },
+          { x0: -40, x1: 180, y0: 10, y1: 1013, label: 'Altitude with temperature', tone: 'main' }
+        ],
+        note: 'Combined altitude and temperature down to 10 mbar (about 31 km); altitude figures are the standard atmosphere.'
+      },
       common: [["Temperature", "−40 / −70 to 180 °C"], ["Humidity", "10 to 95 % RH (H variants)"], ["Altitude", "Down to 10 mbar"], ["Supply", "415 V AC, 3 phase, 50/60 Hz, changed to suit the destination country"]]
     },
     lineup: [{

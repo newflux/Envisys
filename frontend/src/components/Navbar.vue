@@ -620,8 +620,6 @@ defineExpose({
 .Header_brandLogo__AXo7t .lg-ink, .Header_brandLogo__AXo7t .lg-blue { transition: opacity 0.25s ease; }
 .Header_brandLogo__AXo7t:hover .lg-ink, .Header_brandLogo__AXo7t:hover .lg-blue { opacity: 0.85; }
 .nav-brand { width: 132px; }
-/* the registered logo has no reversed version, so on any background it sits on its own white plate, colours untouched */
-.Header_brandLogo__AXo7t { padding: 7px 11px 6px; border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgba(0, 20, 60, 0.12); }
 
 /* Mobile Hamburger Button */
 .mobile-hamburger {
@@ -1118,9 +1116,15 @@ defineExpose({
 </style>
 
 <style>
+/* the official logo, colours untouched, with a hairline white keyline traced around its shapes: it reads on dark scenes and
+   disappears on light ones (stroke painted under the fill, so the shapes themselves are not thinned) */
+.Header_brandLogo__AXo7t .lg path { stroke: #fff; stroke-width: 1.5px; stroke-linejoin: round; paint-order: stroke fill; vector-effect: non-scaling-stroke; }
+.Header_brandLogo__AXo7t .lg .lg-tag { stroke-width: 0.5px; }
+
 /* In stock is live inventory: a small orange dot that breathes */
-.nav-live { position: relative; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #ff6a1a; vertical-align: middle; flex: none; }
-.nav-live::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: 1px solid #ff6a1a; animation: nav-live 1.8s ease-out infinite; }
+.Nav_link__Vx_8M:has(.nav-live) { position: relative; }
+.nav-live { position: absolute; top: -6px; right: 7px; width: 5px; height: 5px; border-radius: 50%; background: #ff6a1a; pointer-events: none; } /* top-right of the label */
+.nav-live::after { content: ''; position: absolute; inset: -2.5px; border-radius: 50%; border: 1px solid #ff6a1a; animation: nav-live 1.8s ease-out infinite; }
 @keyframes nav-live { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(1.9); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .nav-live::after { animation: none; } }
 

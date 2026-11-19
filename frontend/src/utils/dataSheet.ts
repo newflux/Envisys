@@ -15,11 +15,12 @@ export function openDataSheet(o: { series: string; s: Studio; m: StudioModel; br
     ['Model', m.name],
     [`${s.space ?? 'Interior'}, W × D × H`, `${m.w} × ${m.d} × ${m.h} mm`],
     ['Nominal volume', m.volume],
-    ...s.common,
+    ...s.common.filter(([l]) => !s.perModel?.[m.name]?.some((r) => r[0] === l)),
+    ...(s.perModel?.[m.name] ?? []),
     ...PER_MODEL.map((p) => [p.label, m[p.key] ?? 'On request'] as [string, string]),
     ...Object.entries(s.extra ?? {}).map(([k, v]) => [({ door: 'Door opening and swing', shelves: 'Shelves', ports: 'Cable ports', utilities: 'Drain, water and air', floor: 'Floor loading', clearance: 'Clearance', ambient: 'Ambient limits', heat: 'Heat to the room' } as Record<string, string>)[k] ?? k, v as string] as [string, string])
   ]
-  const logo = `<svg viewBox="${LOGO.viewNav}" width="150" xmlns="http://www.w3.org/2000/svg"><g fill="#0d2340">${LOGO.ink.letters.map((l) => `<path d="${l.d}"/>`).join('')}<path d="${LOGO.ink.dot.d}"/></g><g fill="#0a8cff">${LOGO.blue.letters.map((l) => `<path d="${l.d}"/>`).join('')}${LOGO.blue.dots.map((d) => `<path d="${d.d}"/>`).join('')}</g></svg>`
+  const logo = `<svg viewBox="${LOGO.viewFull}" width="160" xmlns="http://www.w3.org/2000/svg"><g fill="#002868">${LOGO.ink.letters.map((l) => `<path d="${l.d}"/>`).join('')}<path d="${LOGO.ink.dot.d}"/><path d="${LOGO.tag.d}" fill-rule="evenodd"/><path d="${LOGO.reg.d}" fill-rule="evenodd"/></g><g fill="#08d0e0">${LOGO.blue.letters.map((l) => `<path d="${l.d}"/>`).join('')}${LOGO.blue.dots.map((d) => `<path d="${d.d}"/>`).join('')}</g></svg>`
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(m.name)} data sheet · Envisys</title>
 <style>
   @page { size: A4; margin: 16mm 15mm }

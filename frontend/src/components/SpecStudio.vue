@@ -10,6 +10,8 @@
       <div v-for="(h, i) in s.headline" :key="h[0]" class="rv" :style="{ '--d': i * 0.06 + 's' }"><dt>{{ h[0] }}</dt><dd>{{ h[1] }}<small>{{ h[2] }}</small></dd></div>
     </dl>
 
+    <EnvelopeChart v-if="s.envelope" :e="s.envelope" />
+
     <div class="ss-bar2 rv">
       <h3>Models</h3>
       <div class="ss-views" role="tablist" aria-label="How to see the models">
@@ -109,7 +111,7 @@
       <ul><li v-for="f in features" :key="f">{{ f }}</li></ul>
     </div>
 
-    <div v-if="cards.length" class="ss-pend">
+    <div v-if="cards.length && showTodo" class="ss-pend">
       <div class="ss-pend-h rv"><b>Still to come</b><span>Not in the brochure yet. Each card lists the exact data to add for this series.</span></div>
       <div class="ss-cards">
         <article v-for="(p, i) in cards" :key="p.title" class="ss-tbc rv" :style="{ '--d': (i % 3) * 0.06 + 's' }">
@@ -127,6 +129,7 @@ import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import LineChart from './LineChart.vue'
 import { PER_MODEL, pendingCards } from '../config/details'
+import EnvelopeChart from './EnvelopeChart.vue'
 import type { Studio, Lineup } from '../config/details'
 import { openDataSheet } from '../utils/dataSheet'
 
@@ -173,6 +176,7 @@ onBeforeUnmount(() => tw?.kill())
 
 // what is still missing, and the extra facts that have arrived
 const cards = computed(() => pendingCards(props.s))
+const showTodo = location.search.includes('todo') // the "still to come" checklist is for the team (?todo), not for visitors
 const EXTRA: Record<string, string> = { door: 'Door opening and swing', shelves: 'Shelves', ports: 'Cable ports', utilities: 'Drain, water and air', floor: 'Floor loading', clearance: 'Clearance', ambient: 'Ambient limits', heat: 'Heat to the room' }
 const extraRows = computed(() => Object.entries(props.s.extra ?? {}).map(([k, v]) => [EXTRA[k] ?? k, v as string]))
 </script>

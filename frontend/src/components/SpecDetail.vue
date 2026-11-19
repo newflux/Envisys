@@ -82,13 +82,13 @@ const num = (id: string) => `(${String(3 + parts.value.indexOf(id)).padStart(2, 
 .sd-head div { display: flex; flex-direction: column; gap: 10px; padding: 3.2vh 0; border-top: 1px solid rgba(13, 35, 64, 0.2); }
 .sd-head dt { font-family: var(--font-body); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
 .sd-head dd { margin: 0; font-family: var(--font-display); font-size: clamp(30px, 3.4vw, 60px); line-height: 1; letter-spacing: -0.05em; }
-.sd-head dd small { margin-left: 8px; font-family: var(--font-body); font-size: 15px; letter-spacing: 0; opacity: 0.7; }
+.sd-head dd small { margin-left: 8px; font-family: 'Geist', sans-serif; font-size: 15px; letter-spacing: 0; opacity: 0.7; }
 
 /* the model range: a real table, large type, scrolls sideways on a phone */
 .sd-lineup { margin-top: 6vh; }
 .sd-lineup h3 { margin: 0 0 2vh; font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, 2vw, 34px); letter-spacing: -0.045em; }
 .sd-scroll { overflow-x: auto; border-radius: 16px; background: rgba(255, 255, 255, 0.5); }
-.sd-lineup table { width: 100%; min-width: 640px; border-collapse: collapse; font-family: var(--font-body); font-size: 16px; line-height: 1.4; }
+.sd-lineup table { width: 100%; min-width: 640px; border-collapse: collapse; font-family: 'Geist', sans-serif; font-size: 16px; line-height: 1.4; }
 .sd-lineup thead th { position: sticky; top: 0; padding: 16px 18px; background: #0d2340; color: #fff; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; font-weight: 500; }
 .sd-lineup td { padding: 15px 18px; border-top: 1px solid rgba(13, 35, 64, 0.12); }
 .sd-lineup td:first-child { font-weight: 600; white-space: nowrap; }
@@ -103,8 +103,8 @@ const num = (id: string) => `(${String(3 + parts.value.indexOf(id)).padStart(2, 
 .sd-table dl { margin: 0; }
 .sd-table dl div { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr); gap: 2vw; padding: 1.6vh 0; border-top: 1px solid rgba(13, 35, 64, 0.16); }
 .sd-table dl div:last-child { border-bottom: 1px solid rgba(13, 35, 64, 0.16); }
-.sd-table dt { font-family: var(--font-body); font-size: 15px; line-height: 1.45; opacity: 0.75; }
-.sd-table dd { margin: 0; font-family: var(--font-body); font-size: 17px; line-height: 1.45; }
+.sd-table dt { font-family: 'Geist', sans-serif; font-size: 15px; line-height: 1.45; opacity: 0.75; }
+.sd-table dd { margin: 0; font-family: 'Geist', sans-serif; font-size: 17px; line-height: 1.45; }
 .sd-table:first-child { grid-row: span 2; }
 
 /* how it is built: a card per subsystem */
@@ -112,7 +112,7 @@ const num = (id: string) => `(${String(3 + parts.value.indexOf(id)).padStart(2, 
 .sd-build article { padding: 3.2vh 2vw 3.6vh; border-radius: 20px; background: rgba(255, 255, 255, 0.5); }
 .sd-build h3 { margin: 0 0 2vh; font-family: var(--font-display); font-weight: 400; font-size: clamp(20px, 1.6vw, 28px); letter-spacing: -0.045em; }
 .sd-build ul, .sd-notes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1.2vh; }
-.sd-build li, .sd-notes li { position: relative; padding-left: 20px; font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+.sd-build li, .sd-notes li { position: relative; padding-left: 20px; font-family: 'Geist', sans-serif; font-size: 16px; line-height: 1.5; }
 .sd-build li::before, .sd-notes li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; }
 .sd-notes { margin-top: 5vh; max-width: 60em; }
 .sd-docs { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 28px; margin: 6vh 0 4vh; }

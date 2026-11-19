@@ -12,7 +12,7 @@
         @click.prevent="onLogoClick"
       >
         <!-- the Envisys logo: its letters rise into place on load and when you click back to the top -->
-        <BrandMark ref="brandRef" mono class="nav-brand" />
+        <BrandMark ref="brandRef" full class="nav-brand" />
       </a>
 
       <!-- Mobile Hamburger Button -->
@@ -98,6 +98,7 @@
               @mouseenter="onItemEnter(5)"
             >
               <a class="Nav_link__Vx_8M" href="/in-stock">
+                <i class="nav-live" aria-label="Live"></i>
                 <span class="Nav_label__EHdHO">
                   <div class="line-mask"><div class="line">in stock</div></div>
                 </span>
@@ -618,7 +619,9 @@ defineExpose({
 /* hover dims the two layers themselves: opacity on the link would stop the ink layer blending with the page */
 .Header_brandLogo__AXo7t .lg-ink, .Header_brandLogo__AXo7t .lg-blue { transition: opacity 0.25s ease; }
 .Header_brandLogo__AXo7t:hover .lg-ink, .Header_brandLogo__AXo7t:hover .lg-blue { opacity: 0.85; }
-.nav-brand { width: 112px; }
+.nav-brand { width: 132px; }
+/* the registered logo has no reversed version, so on any background it sits on its own white plate, colours untouched */
+.Header_brandLogo__AXo7t { padding: 7px 11px 6px; border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgba(0, 20, 60, 0.12); }
 
 /* Mobile Hamburger Button */
 .mobile-hamburger {
@@ -1115,6 +1118,12 @@ defineExpose({
 </style>
 
 <style>
+/* In stock is live inventory: a small orange dot that breathes */
+.nav-live { position: relative; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #ff6a1a; vertical-align: middle; flex: none; }
+.nav-live::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: 1px solid #ff6a1a; animation: nav-live 1.8s ease-out infinite; }
+@keyframes nav-live { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(1.9); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .nav-live::after { animation: none; } }
+
 .mnav-sub { display: none; }
 @media (max-width: 768px) {
   .Header_header__qBw1J.is-mobile-open .Nav_submenu__EKbU9 { display: none !important; }

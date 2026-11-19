@@ -216,7 +216,6 @@ let logoLight = false
 function logoTone() {
   const hit = document.elementsFromPoint(72, 48).find((e) => !e.closest('.navbar-root') && e.closest('.lt, .dk'))
   const light = !!hit?.closest('.lt')
-  if (light !== logoLight) { logoLight = light; document.documentElement.style.setProperty('--logo-ink', light ? '#0d2340' : '#fff') }
 }
 
 function tick() {
@@ -408,7 +407,6 @@ onMounted(() => {
 onUnmounted(() => {
   gsap.ticker.remove(lenisTick)
   gsap.ticker.remove(tick)
-  document.documentElement.style.removeProperty('--logo-ink')
   window.removeEventListener('pointermove', onMove)
   io?.disconnect()
   lenis?.destroy()
@@ -419,7 +417,6 @@ onUnmounted(() => {
 .ab-root { --lt: #f4f4f2; --ink: #0a0a0c; --ease: cubic-bezier(0.2, 0.9, 0.2, 1); position: fixed; inset: 0; background: #000; color: #f3f6fa; }
 #scroller { background: #000 !important; }
 /* the logo stays legible over the white sections (its lettering is switched to navy there, see logoTone) */
-.ab-root :deep(.Header_brandLogo__AXo7t .lg-ink) { transition: fill 0.4s ease; }
 .layout__page { position: relative; }
 
 /* the cover lifts off the footer (see SiteFooter); clip, not hidden, so sticky children still stick */

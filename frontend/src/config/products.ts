@@ -24,6 +24,7 @@ export interface Product {
   photo?: boolean            // the hero is a photograph, not a cut-out
   hud?: [string, string, string][]    // main products only: the readouts on the showcase, [label, value, unit], all taken from `specs` or `models`
   brochure?: string
+  hotspots?: [number, number, string, string][] // points on the hero photo: [x %, y %, title, text] (chambers with a 3D model first)
 }
 
 const B = 'https://www.envisystech.com/wp-content/themes/tecobytes/media/brochure-2020/'
@@ -45,7 +46,15 @@ export const products: Product[] = [
     specs: [['Standard volumes', '150, 300, 600, 950, 1400 and 3000 L'], ['Temperature', '−40 / −70 °C to 180 °C, ±1 °C'], ['Relative humidity', '10% to 95%, ±3%'], ['Ramp rate', '3 °C/min standard; 5, 10, 15 or 20 °C/min optional']],
     models: [{ label: 'Models', items: ['ET150', 'ET300', 'ET600', 'ET950', 'ET1400', 'ET3000'] }, { label: 'Variants', items: ['40T / 70T (temperature)', '40H / 70H (temperature and humidity)'] }],
     keywords: ['climatic', 'temperature', 'humidity', 'rh', 'thermal cycling', 'cold', 'hot', 'reach-in', 'et series', 'environmental'],
-    brochure: B + 'environmental-test-chambers-brochure.pdf'
+    brochure: B + 'environmental-test-chambers-brochure.pdf',
+    hotspots: [
+      [50, 32, 'Viewing window', 'Multi-pane vacuum glass with de-fog heaters and an LED-lit work space, so the test can be watched without opening the door. 360 × 460 mm on the ET150.'],
+      [50, 50.5, 'Touch controller', '99 programs, graphical programming and a built-in web server for remote monitoring. RS-232, RS-485, USB and Ethernet.'],
+      [92, 35, 'Door and seals', 'Double silicone rubber seal with die-cast aluminium locks and hinges, built for years of daily opening.'],
+      [5, 43, 'Access ports', 'Through-wall ports on either side for cables to the product under test. Two 115 mm ports on the ET150, more on request.'],
+      [50, 74, 'Machine bay', 'Refrigeration, heating and air circulation sit in the base, serviceable from the front.'],
+      [12, 95, 'Castors', 'Heavy-duty castors to move the chamber into place, with locks to hold it there.']
+    ]
   },
   {
     hud: [['Hot zone', '200', '°C'], ['Cold zone', '−70', '°C'], ['Transfer', '< 10', 's'], ['Accuracy', '± 1', '°C']],
@@ -72,7 +81,15 @@ export const products: Product[] = [
     specs: [['Available range', '600, 950 and 1400 L'], ['Temperature', '−40 / −70 °C to 180 °C'], ['Relative humidity', '10% to 95% (optional)'], ['Altitude', 'up to 10 mbar']],
     models: [{ label: 'Models', items: ['EA300', 'EA600', 'EA950', 'EA1400'] }, { label: 'Variants', items: ['40T / 70T (temperature)', '40H / 70H (temperature and humidity)'] }],
     keywords: ['altitude', 'pressure', 'vacuum', 'low pressure', 'aerospace', 'avionics', 'cath', 'aircraft', 'height'],
-    brochure: B + 'altitude-chambers-brochure.pdf'
+    brochure: B + 'altitude-chambers-brochure.pdf',
+    hotspots: [
+      [49, 19.5, 'Live readout', 'Temperature and pressure shown on the door, readable from across the lab.'],
+      [49, 28.5, 'Viewing window', 'A pressure-rated window into the lit test space.'],
+      [49, 49, 'Touch controller', 'Runs combined altitude, temperature and humidity (CATH) profiles from one screen.'],
+      [94, 21, 'Door locking', 'A locking mechanism that holds the door sealed while the chamber is pumped down to 10 mbar.'],
+      [49, 78, 'Vacuum and refrigeration', 'The pump-down and cooling plant, with the humidity butterfly valve and feed-through connectors for the product under test.'],
+      [50, 95, 'Factory tested', 'Every chamber is run and checked in Bengaluru before dispatch.']
+    ]
   },
   {
     hud: [['Models', '14', ''], ['Bench', '2', 'models'], ['Floor', '12', 'models'], ['Sizes', '30 – 100', 'EM']],

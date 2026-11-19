@@ -10,18 +10,6 @@
       <div v-for="(h, i) in s.headline" :key="h[0]" class="rv" :style="{ '--d': i * 0.06 + 's' }"><dt>{{ h[0] }}</dt><dd>{{ h[1] }}<small>{{ h[2] }}</small></dd></div>
     </dl>
 
-    <div v-if="s.bars.length" class="ss-bars">
-      <div v-for="(b, i) in s.bars" :key="b.label" class="ss-bar rv" :style="{ '--d': i * 0.08 + 's' }">
-        <div class="ss-bar-h"><b>{{ b.label }}</b><span>{{ fmt(b.from) }} to {{ fmt(b.to) }} {{ b.unit }}</span></div>
-        <div class="ss-track">
-          <i v-if="b.ext" class="ss-ext" :style="span(b, b.ext[0], b.ext[1])"></i>
-          <i class="ss-fill" :style="span(b, b.from, b.to)"></i>
-          <u v-for="t in b.ticks" :key="t" :style="{ left: pct(b, t) + '%' }"><em>{{ fmt(t) }}</em></u>
-        </div>
-        <p v-if="b.note">{{ b.note }}</p>
-      </div>
-    </div>
-
     <div class="ss-bar2 rv">
       <h3>Models</h3>
       <div class="ss-views" role="tablist" aria-label="How to see the models">
@@ -200,13 +188,13 @@ const extraRows = computed(() => Object.entries(props.s.extra ?? {}).map(([k, v]
 .ss-fig div { display: flex; flex-direction: column; gap: 12px; padding: 3.2vh 0; border-top: 1px solid rgba(13, 35, 64, 0.22); }
 .ss-fig dt { font-family: var(--font-body); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
 .ss-fig dd { margin: 0; font-family: var(--font-display); font-size: clamp(26px, 2.9vw, 52px); line-height: 1; letter-spacing: -0.05em; }
-.ss-fig dd small { display: block; margin-top: 10px; font-family: var(--font-body); font-size: 15px; letter-spacing: 0; opacity: 0.7; }
+.ss-fig dd small { display: block; margin-top: 10px; font-family: 'Geist', sans-serif; font-size: 15px; letter-spacing: 0; opacity: 0.7; }
 
 /* 2 · the ranges */
 .ss-bars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5vh 4vw; margin-top: 7vh; }
 .ss-bar-h { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 26px; }
 .ss-bar-h b { font-weight: 400; font-family: var(--font-display); font-size: clamp(20px, 1.8vw, 30px); letter-spacing: -0.04em; }
-.ss-bar-h span { font-family: var(--font-body); font-size: 16px; }
+.ss-bar-h span { font-family: 'Geist', sans-serif; font-size: 16px; }
 .ss-track { position: relative; height: 16px; border-radius: 8px; background: rgba(13, 35, 64, 0.1); margin-bottom: 38px; }
 .ss-fill, .ss-ext { position: absolute; top: 0; bottom: 0; border-radius: 8px; transform: scaleX(0); transform-origin: 0 50%; transition: transform 1.3s cubic-bezier(0.6, 0, 0.2, 1) 0.2s; }
 .ss-fill { background: #0d2340; }
@@ -214,7 +202,7 @@ const extraRows = computed(() => Object.entries(props.s.extra ?? {}).map(([k, v]
 .ss-bar[data-in] .ss-fill, .ss-bar[data-in] .ss-ext { transform: none; }
 .ss-track u { position: absolute; top: 100%; width: 0; height: 8px; border-left: 1px solid rgba(13, 35, 64, 0.35); text-decoration: none; }
 .ss-track u em { position: absolute; top: 12px; left: 0; transform: translateX(-50%); font-style: normal; font-family: var(--font-body); font-size: 14px; opacity: 0.75; white-space: nowrap; }
-.ss-bar p { margin: 0; font-family: var(--font-body); font-size: 15px; opacity: 0.75; }
+.ss-bar p { margin: 0; font-family: 'Geist', sans-serif; font-size: 15px; opacity: 0.75; }
 
 /* 3 · the models: Visual / Table */
 .ss-bar2 { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 9vh; }
@@ -228,7 +216,7 @@ const extraRows = computed(() => Object.entries(props.s.extra ?? {}).map(([k, v]
 .ss-list .ss-eye { padding: 0 12px; }
 .ss-list button { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 14px 14px; border: 0; border-radius: 12px; background: transparent; color: inherit; text-align: left; cursor: pointer; transition: background 0.25s ease, color 0.25s ease; }
 .ss-list button b { font-weight: 400; font-family: var(--font-display); font-size: clamp(17px, 1.4vw, 22px); letter-spacing: -0.04em; }
-.ss-list button span { font-family: var(--font-body); font-size: 15px; opacity: 0.65; white-space: nowrap; }
+.ss-list button span { font-family: 'Geist', sans-serif; font-size: 15px; opacity: 0.65; white-space: nowrap; }
 .ss-list button:hover { background: rgba(13, 35, 64, 0.06); }
 .ss-list button.on { background: #0d2340; color: #fff; }
 .ss-list button.on span { opacity: 0.85; }
@@ -244,8 +232,8 @@ const extraRows = computed(() => Object.entries(props.s.extra ?? {}).map(([k, v]
 .ss-data .ss-eye { margin-bottom: 8px; font-family: var(--font-display); font-size: clamp(22px, 2vw, 32px); letter-spacing: -0.045em; text-transform: none; opacity: 1; }
 .ss-rows { margin: 0; }
 .ss-rows div { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr); gap: 1.4vw; padding: 9px 0; border-top: 1px solid rgba(13, 35, 64, 0.14); }
-.ss-rows dt { font-family: var(--font-body); font-size: 14px; line-height: 1.4; opacity: 0.72; }
-.ss-rows dd { margin: 0; font-family: var(--font-body); font-size: 16px; line-height: 1.4; }
+.ss-rows dt { font-family: 'Geist', sans-serif; font-size: 14px; line-height: 1.4; opacity: 0.72; }
+.ss-rows dd { margin: 0; font-family: 'Geist', sans-serif; font-size: 16px; line-height: 1.4; }
 .ss-rows .tbc dd { font-style: italic; opacity: 0.55; }
 .ss-rows .tbc dd::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 10px; border-radius: 50%; border: 1.5px dashed #ff6a1a; }
 
@@ -254,14 +242,14 @@ const extraRows = computed(() => Object.entries(props.s.extra ?? {}).map(([k, v]
 .ss-tabl + .ss-tabl { margin-top: 5vh; }
 .ss-tabl h4 { margin: 0 0 2vh; font-weight: 400; font-family: var(--font-display); font-size: clamp(20px, 1.7vw, 28px); letter-spacing: -0.045em; }
 .ss-scroll { overflow-x: auto; border-radius: 14px; background: rgba(255, 255, 255, 0.6); }
-.ss-tabl table { width: 100%; min-width: 640px; border-collapse: collapse; font-family: var(--font-body); font-size: 16px; line-height: 1.4; }
+.ss-tabl table { width: 100%; min-width: 640px; border-collapse: collapse; font-family: 'Geist', sans-serif; font-size: 16px; line-height: 1.4; }
 .ss-tabl thead th { padding: 15px 18px; background: #0d2340; color: #fff; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; font-weight: 500; }
 .ss-tabl td { padding: 14px 18px; border-top: 1px solid rgba(13, 35, 64, 0.12); }
 .ss-tabl td:first-child { font-weight: 600; white-space: nowrap; }
 .ss-tabl tbody tr:not(.grp):hover td { background: rgba(255, 106, 26, 0.08); }
 .ss-tabl tr.grp th { padding: 14px 18px 10px; text-align: left; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.75; font-weight: 600; border-top: 1px solid rgba(13, 35, 64, 0.2); }
 .ss-notes { margin: 2.4vh 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1vh; }
-.ss-notes li, .ss-inc li, .ss-tbc li, .ss-lists li { position: relative; padding-left: 20px; font-family: var(--font-body); font-size: 15.5px; line-height: 1.5; }
+.ss-notes li, .ss-inc li, .ss-tbc li, .ss-lists li { position: relative; padding-left: 20px; font-family: 'Geist', sans-serif; font-size: 15.5px; line-height: 1.5; }
 .ss-notes li::before, .ss-inc li::before, .ss-tbc li::before, .ss-lists li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; }
 
 /* Ask · Download · Brochure, side by side */
@@ -278,12 +266,12 @@ const extraRows = computed(() => Object.entries(props.s.extra ?? {}).map(([k, v]
 .ss-curves { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 9vh; }
 .ss-extra { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 4vw; margin: 8vh 0 0; }
 .ss-extra div { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr); gap: 2vw; padding: 1.6vh 0; border-top: 1px solid rgba(13, 35, 64, 0.16); }
-.ss-extra dt { font-family: var(--font-body); font-size: 15px; opacity: 0.72; }
-.ss-extra dd { margin: 0; font-family: var(--font-body); font-size: 17px; }
+.ss-extra dt { font-family: 'Geist', sans-serif; font-size: 15px; opacity: 0.72; }
+.ss-extra dd { margin: 0; font-family: 'Geist', sans-serif; font-size: 17px; }
 .ss-lists { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4vw; margin-top: 8vh; }
 .ss-lists h3, .ss-inc h3, .ss-pend-h b { margin: 0 0 2.2vh; font-weight: 400; font-family: var(--font-display); font-size: clamp(22px, 2vw, 34px); letter-spacing: -0.045em; display: block; }
 .ss-lists ul, .ss-inc ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1vh; }
-.ss-lists p { margin: 0 0 1vh; font-family: var(--font-body); font-size: 16px; }
+.ss-lists p { margin: 0 0 1vh; font-family: 'Geist', sans-serif; font-size: 16px; }
 .ss-lists a { color: inherit; }
 
 .ss-inc { margin-top: 9vh; }
@@ -293,7 +281,7 @@ const extraRows = computed(() => Object.entries(props.s.extra ?? {}).map(([k, v]
 /* what is still to come: dashed, so it reads as a placeholder, not as a finished card */
 .ss-pend { margin-top: 10vh; }
 .ss-pend-h { margin-bottom: 3vh; }
-.ss-pend-h span { font-family: var(--font-body); font-size: 15px; opacity: 0.7; }
+.ss-pend-h span { font-family: 'Geist', sans-serif; font-size: 15px; opacity: 0.7; }
 .ss-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .ss-tbc { position: relative; padding: 3vh 1.8vw 3.4vh; border: 1.5px dashed rgba(13, 35, 64, 0.4); border-radius: 20px; background: rgba(255, 255, 255, 0.3); }
 .ss-tag { display: inline-block; margin-bottom: 14px; padding: 5px 12px; border-radius: 999px; background: rgba(255, 106, 26, 0.14); color: #b8460c; font-family: var(--font-body); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }

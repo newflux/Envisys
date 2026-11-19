@@ -12,7 +12,18 @@
         <h2 class="pd-giant" ref="giantRef" aria-hidden="true" :style="{ fontSize: giantSize }">
           <span v-for="(ch, k) in p.name.toUpperCase()" :key="k" :style="{ '--k': k }">{{ ch === ' ' ? '\u00a0' : ch }}</span>
         </h2>
-        <div class="pd-shot" ref="shotRef"><img class="pd-photo" :class="{ photo: p.photo }" :src="img(p, 'hero')" :alt="p.name" fetchpriority="high" /></div>
+        <div class="pd-shot" ref="shotRef"><img class="pd-photo" :class="{ photo: p.photo }" :src="img(p, 'hero')" :alt="p.name" fetchpriority="high" />
+          <!-- tap a numbered point to read about that part of the chamber -->
+          <div v-if="p.hotspots" class="pd-hs">
+            <button v-for="(h, k) in p.hotspots" :key="h[2]" class="pd-hp" :class="{ on: hs === k }" :style="{ left: h[0] + '%', top: h[1] + '%' }" :aria-label="h[2]" :aria-expanded="hs === k" data-cursor="" @click="hs = hs === k ? -1 : k"><span>{{ k + 1 }}</span></button>
+            <div v-if="hs >= 0" class="pd-hcard" :class="{ flip: p.hotspots[hs][0] > 50 }" :style="{ left: p.hotspots[hs][0] + '%', top: p.hotspots[hs][1] + '%' }" role="dialog" :aria-label="p.hotspots[hs][2]">
+              <button class="pd-hx" aria-label="Close" @click="hs = -1">×</button>
+              <small>{{ String(hs + 1).padStart(2, '0') }} / {{ String(p.hotspots.length).padStart(2, '0') }}</small>
+              <b>{{ p.hotspots[hs][2] }}</b>
+              <p>{{ p.hotspots[hs][3] }}</p>
+            </div>
+          </div>
+        </div>
 
         <div class="pd-card">
           <nav class="pd-crumb"><a href="/products" data-cursor="">Products</a><i>/</i><span>{{ p.group }}</span></nav>
@@ -128,6 +139,7 @@ const hitItem = p?.models.flatMap((m) => m.items).find((it) => asked && norm(it)
 const sel = ref(hitItem ?? '')
 
 // the explore bar: which sections exist, which one is being read, and whether the bar shows at all
+const hs = ref(-1) // the open hotspot card, -1 when none
 const detail = p ? details[p.slug] : undefined // the full technical file, where the series has one
 const studio = detail?.studio // the redesigned specification (ET first); the rest still use the plain list
 const navs = [{ id: 'overview', t: 'Overview' }, { id: 'specification', t: 'Specification' }, ...(detail?.headline || detail?.chart ? [{ id: 'performance', t: 'Performance' }] : []), ...(detail?.lineup ? [{ id: 'models', t: 'Models' }] : []), ...(detail?.tables ? [{ id: 'technical', t: 'Data' }] : []), ...(detail?.build ? [{ id: 'build', t: 'Build' }] : []), ...(shots.length > 1 ? [{ id: 'photographs', t: 'Photographs' }] : [])]
@@ -241,7 +253,7 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .pd-top > span { opacity: 0.6; }
 .pd-about-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 1vw; margin-top: 6vh; align-items: start; }
 .pd-about h2 { grid-column: 1 / span 7; margin: 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 3.6vw, 66px); line-height: 1.02; letter-spacing: -0.055em; }
-.pd-about p { grid-column: 9 / span 4; margin: 0.6em 0 0; font-family: var(--font-body); font-size: clamp(16px, 1.2vw, 20px); line-height: 1.6; }
+.pd-about p { grid-column: 9 / span 4; margin: 0.6em 0 0; font-family: 'Geist', sans-serif; font-size: clamp(16px, 1.2vw, 20px); line-height: 1.6; }
 
 /* the pinned gallery */
 .pd-gal { position: relative; margin-top: 14vh; }
@@ -261,9 +273,9 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .pd-spec dt { font-family: var(--font-body); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; align-self: center; }
 .pd-spec dd { margin: 0; font-family: var(--font-display); font-size: clamp(18px, 1.5vw, 24px); letter-spacing: -0.035em; line-height: 1.25; overflow-wrap: anywhere; }
 .pd-spec ul { grid-column: 9 / span 4; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.6vh; }
-.pd-spec li { position: relative; padding-left: 18px; font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.pd-spec li { position: relative; padding-left: 18px; font-family: 'Geist', sans-serif; font-size: 16px; line-height: 1.6; }
 .pd-spec li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; }
-.pd-note { grid-column: 1 / span 7; margin: 0; font-family: var(--font-body); font-size: 16px; opacity: 0.6; }
+.pd-note { grid-column: 1 / span 7; margin: 0; font-family: 'Geist', sans-serif; font-size: 16px; opacity: 0.6; }
 
 .pd-spec { padding-bottom: 14vh; }
 .pd-mrow { display: grid; grid-template-columns: 8.333vw 1fr; gap: 2vw; padding: 3vh 0; border-bottom: 1px solid rgba(13, 35, 64, 0.18); }
@@ -322,5 +334,24 @@ onUnmounted(() => gsap.ticker.remove(tick))
   .pd-keys dt { font-family: var(--font-body); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
   .pd-keys dd { margin: 0; font-family: var(--font-display); font-size: 20px; letter-spacing: -0.03em; }
   .pd-keys dd small { margin-left: 4px; font-family: var(--font-body); font-size: 12px; opacity: 0.6; }
+}
+
+/* hotspots: numbered rings on the photo, one small card at a time */
+.pd-hs { position: absolute; inset: 0; z-index: 2; }
+.pd-hp { position: absolute; display: grid; place-items: center; line-height: 1; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 1.5px solid #0d2340; border-radius: 50%; background: rgba(255, 255, 255, 0.92); color: #0d2340; font-family: 'Geist Mono', monospace; font-size: 12px; cursor: pointer; box-shadow: 0 4px 14px rgba(13, 35, 64, 0.18); transition: background 0.25s ease, color 0.25s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.pd-hp::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(255, 106, 26, 0.7); animation: pd-hp 2.4s ease-out infinite; }
+.pd-hp:hover, .pd-hp.on { background: #ff6a1a; border-color: #ff6a1a; color: #fff; transform: scale(1.08); }
+.pd-hp.on::after { animation: none; opacity: 0; }
+@keyframes pd-hp { from { transform: scale(0.8); opacity: 0.9; } to { transform: scale(1.5); opacity: 0; } }
+.pd-hcard { position: absolute; z-index: 3; width: 270px; margin: 22px 0 0 22px; padding: 18px 20px 20px; border-radius: 14px; background: #fff; color: #0d2340; box-shadow: 0 18px 50px rgba(13, 35, 64, 0.22); }
+.pd-hcard.flip { margin-left: -292px; }
+.pd-hcard small { display: block; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #ff6a1a; }
+.pd-hcard b { display: block; margin: 8px 0 6px; font-family: var(--font-display); font-weight: 400; font-size: 19px; letter-spacing: -0.03em; }
+.pd-hcard p { margin: 0; font-family: 'Geist', sans-serif; font-size: 15px; line-height: 1.5; opacity: 0.85; }
+.pd-hx { position: absolute; top: 10px; right: 12px; border: 0; background: none; color: inherit; font-size: 20px; line-height: 1; cursor: pointer; opacity: 0.6; }
+@media (prefers-reduced-motion: reduce) { .pd-hp::after { animation: none; } }
+@media (max-width: 640px) {
+  .pd-hp { width: 26px; height: 26px; margin: -13px 0 0 -13px; font-size: 11px; }
+  .pd-hcard, .pd-hcard.flip { left: 50% !important; top: auto !important; bottom: 100%; width: 86vw; margin: 0 0 14px -43vw; } /* opens in the free space above the chamber */
 }
 </style>

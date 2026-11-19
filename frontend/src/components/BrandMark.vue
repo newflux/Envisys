@@ -69,12 +69,14 @@ defineExpose({ play, root })
 </script>
 
 <style scoped>
-.lg { position: relative; display: block; width: 100%; aspect-ratio: 2110 / 536; }
-.lg.full { aspect-ratio: 2110 / 640; }
+.lg { position: relative; display: block; width: 100%; aspect-ratio: 2130 / 568; }
+.lg.full { aspect-ratio: 2130 / 676; }
 .lg svg { display: block; width: 100%; height: auto; overflow: visible; }
 .lg-blue { position: absolute; left: 0; top: 0; }
-.lg-ink { fill: var(--logo-ink, #fff); }
-.lg-blue { fill: var(--logo-blue, #0a8cff); }
+/* the registered mark, in its official colours only: navy ENVI, block, tagline and (R); cyan SYS and two blocks. Never recoloured,
+   inverted or blended by the page (!important also beats inline styles). */
+.lg-ink { fill: #002868 !important; filter: none !important; mix-blend-mode: normal !important; }
+.lg-blue { fill: #08d0e0 !important; filter: none !important; mix-blend-mode: normal !important; }
 /* the blocks and the (R) scale about their own centres */
 .lg-dot, .lg-reg { transform-box: fill-box; transform-origin: center; }
 </style>

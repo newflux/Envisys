@@ -173,7 +173,7 @@ export const details: Record<string, Detail> = {
         { label: 'Humidity', unit: '% RH', min: 0, max: 100, from: 10, to: 95, ticks: [0, 20, 40, 60, 80, 100], note: 'Controlled humidity on the 40H and 70H variants.' }
       ],
       models: [
-        { name: 'ET150', volume: '150 L', w: 550, d: 400, h: 750 },
+        { name: 'ET150', volume: '150 L', w: 550, d: 400, h: 700, weight: '530 kg (780 kg packed)', load: '6 kW or 7.5 kW (13 A / 19 A)' }, // ET150 technical sheet
         { name: 'ET300', volume: '300 L', w: 650, d: 600, h: 800 },
         { name: 'ET600', volume: '600 L', w: 800, d: 850, h: 900 },
         { name: 'ET950', volume: '950 L', w: 1000, d: 1000, h: 950 },
@@ -185,7 +185,7 @@ export const details: Record<string, Detail> = {
     lineup: [{
       title: 'ET series, models', cols: ['Model', 'Temperature', 'Humidity', 'Interior, W × D × H (mm)'],
       rows: [
-        ['ET150-40T/70T & 40H/70H', '−40 / −70 to 180 °C', '10 to 95 % RH', '550 × 400 × 750'],
+        ['ET150-40T/70T & 40H/70H', '−40 / −70 to 180 °C', '10 to 98 % RH', '550 × 400 × 700'],
         ['ET300-40T/70T & 40H/70H', '−40 / −70 to 180 °C', '10 to 95 % RH', '650 × 600 × 800'],
         ['ET600-40T/70T & 40H/70H', '−40 / −70 to 180 °C', '10 to 95 % RH', '800 × 850 × 900'],
         ['ET950-40T/70T & 40H/70H', '−40 / −70 to 180 °C', '10 to 95 % RH', '1000 × 1000 × 950'],
@@ -193,6 +193,18 @@ export const details: Record<string, Detail> = {
         ['ET3000-40T/70T & 40H/70H', '−40 / −70 to 180 °C', '10 to 95 % RH', '1400 × 1500 × 1400']
       ],
       notes: ['Power supply: 415 V AC, 3 phase, 50/60 Hz, customisable to the destination country.', 'Temperature ramp rates are optional, from 3 °C to 20 °C per minute.']
+    }],
+    tables: [{
+      title: 'ET150 in detail',
+      rows: [],
+      groups: [
+        { title: 'Models', rows: [['ET150-40T / 70T', 'Temperature only, −40 / −70 to 180 °C'], ['ET150-40H / 70H', 'Temperature and humidity, −40 / −70 to 180 °C'], ['ET150-40T-5K / 40H-5K', 'Faster ramp, 5 K/min']] },
+        { title: 'Temperature', rows: [['Fluctuation', '± 1.2 °C, up to 150 °C'], ['Gradient', '1.5 °C'], ['Heating and cooling rate', '3 K/min standard; 5, 10, 15 or 20 K/min optional (IEC 60068-3-5)']] },
+        { title: 'Humidity (H models)', rows: [['Range', '10 to 98 % RH, between 20 and 85 °C'], ['Fluctuation', '± 3 % RH'], ['Gradient', '5 % RH']] },
+        { title: 'Size and weight', rows: [['Interior, W × D × H', '550 × 400 × 700 mm'], ['Chamber weight', '530 kg (780 kg packed)']] },
+        { title: 'Electrical', rows: [['Connected load', '6 kW or 7.5 kW'], ['Current', '13 A or 19 A'], ['Supply', '415 V AC ± 5 %, 3 phase + neutral + earth, plus instrumentation earth, 50/60 Hz']] },
+        { title: 'Inside the chamber', rows: [['Trays', '6 tray slots; 1 SS 304 square-tube tray supplied, more on request'], ['Load', '50 kg on the floor, 20 kg per tray (evenly spread)'], ['Viewing window', '360 × 460 mm'], ['Air circulation', 'One 12-inch, 450 CFM fan, ½ HP motor'], ['Access ports', '2 side ports, 115 mm, more on request']] }
+      ]
     }],
     build: [{ title: 'Construction', points: ['Robust block construction with stainless-steel interiors', 'Powder-coated outer panels', 'LED-lit viewing window and durable shelving', 'Double sealing, heavy-duty hinges and locks', 'Through-wall cable ports', 'Laid out around an easy-access control desk'] }]
   },

@@ -6,19 +6,9 @@
     </section>
 
     <template v-else>
-      <!-- 1 · the photograph, read like an inspection image: frame marks, tagged points with their pixel coordinates, a scan line -->
+      <!-- 1 · the photograph, clean: just the name, the line and the action -->
       <section class="vp-hero" ref="heroRef">
         <figure class="vp-photo" ref="photoRef"><img :src="v.img" :alt="v.name" fetchpriority="high" :style="{ '--fx': focus + '%' }" /></figure>
-        <div class="vp-hud" aria-hidden="true">
-          <i class="vp-c tl"></i><i class="vp-c tr"></i><i class="vp-c bl"></i><i class="vp-c br"></i>
-          <i class="vp-scanline"></i>
-          <span class="vp-meta">fig. 0{{ i + 1 }} · {{ v.img.split('/').pop() }} · 2000 × 1125</span>
-          <div v-for="(t, k) in v.tags" :key="t[2]" class="vp-tagpt" :class="{ flip: t[0] > 62 }" :style="{ left: t[0] + '%', top: t[1] + '%', '--k': k }">
-            <i class="vp-dot"></i>
-            <svg class="vp-ld" viewBox="0 0 150 46"><path d="M0 46 L40 6 H150" pathLength="1" /></svg>
-            <span class="vp-lb">{{ t[2] }}<small>x: {{ px(t[0], 2000) }} y: {{ px(t[1], 1125) }}</small></span>
-          </div>
-        </div>
         <nav class="vp-crumb"><a href="/verticals" data-cursor="">Verticals</a><i>/</i><span>0{{ i + 1 }}</span></nav>
         <div class="vp-hl">
           <h1 class="vp-h" :class="{ long: lines.some((l) => l.length > 11) }"><span v-for="(w, k) in lines" :key="k" class="vp-ln"><span :style="{ '--k': k }" v-html="hy(w)"></span></span></h1>
@@ -29,14 +19,13 @@
         </div>
       </section>
 
-      <!-- 2 · one sentence, lit word by word, beside the vertical's own drawing in a figure frame -->
+      <!-- 2 · one sentence, lit word by word -->
       <section class="vp-intro" ref="leadRef">
         <p class="vp-big"><span v-for="(w, k) in words" :key="k" :style="{ opacity: lit(k) }" v-html="hy(w)"></span></p>
-        <figure class="vp-fig rv"><i class="vp-c tl"></i><i class="vp-c tr"></i><i class="vp-c bl"></i><i class="vp-c br"></i><VMotif :kind="v.motif" /><figcaption>fig. 0{{ i + 1 }}b · {{ v.motif }}</figcaption></figure>
       </section>
 
       <!-- the second photograph, where there is one -->
-      <section v-if="v.img2" class="vp-band rv"><img :src="v.img2" alt="" /><span>fig. 0{{ i + 1 }}c · {{ v.img2.split('/').pop() }}</span></section>
+      <section v-if="v.img2" class="vp-band rv"><img :src="v.img2" alt="" /></section>
 
       <!-- 3 · each vertical's own section -->
       <section class="vp-own">
@@ -146,7 +135,6 @@ const words = v ? v.text.split(' ') : []
 const lit = (k: number) => Math.min(1, Math.max(0.14, (leadP.value * (words.length + 3) - k) / 3)).toFixed(3)
 // where the subject sits across the photograph: a narrow screen crops to it
 const focus = ({ testing: 24, rentals: 44, aftersales: 64, refurb: 40 } as Record<string, number>)[id] ?? 50
-const px = (pc: number, n: number) => String(Math.round((pc / 100) * n)).padStart(4, '0')
 const clamp = (x: number) => Math.min(1, Math.max(0, x))
 // the header logo turns white while the hero photograph is under it (PageShell reads html.hx-dark)
 const under = (el: Element | null | undefined) => { if (!el) return false; const r = el.getBoundingClientRect(); return r.top < 44 && r.bottom > 44 }
@@ -182,24 +170,8 @@ onUnmounted(() => { gsap.ticker.remove(tick); document.documentElement.classList
 .vp-photo img { width: 100%; height: 100%; object-fit: cover; animation: vp-in 2.4s cubic-bezier(0.2, 0.9, 0.2, 1) both; }
 .vp-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6, 16, 31, 0.45), transparent 30%, transparent 50%, rgba(6, 16, 31, 0.85)), linear-gradient(90deg, rgba(6, 16, 31, 0.55), transparent 55%); }
 @keyframes vp-in { from { opacity: 0; transform: scale(1.12); filter: blur(8px); } }
-.vp-hud { position: absolute; inset: 0; pointer-events: none; }
-.vp-c { position: absolute; width: 22px; height: 22px; border: 1.5px solid currentColor; opacity: 0.8; }
-.vp-hud .vp-c.tl { left: 3vw; top: 13vh; } .vp-hud .vp-c.tr { right: 3vw; top: 13vh; } .vp-hud .vp-c.bl { left: 3vw; bottom: 4vh; } .vp-hud .vp-c.br { right: 3vw; bottom: 4vh; }
-.vp-c.tl { border-right: 0; border-bottom: 0; } .vp-c.tr { border-left: 0; border-bottom: 0; } .vp-c.bl { border-right: 0; border-top: 0; } .vp-c.br { border-left: 0; border-top: 0; }
-.vp-scanline { position: absolute; left: 3vw; right: 3vw; top: 13vh; height: 1px; background: linear-gradient(90deg, transparent, #ff8a4a, transparent); box-shadow: 0 0 18px rgba(255, 106, 26, 0.7); animation: vp-scan 2.6s cubic-bezier(0.6, 0, 0.3, 1) 0.6s both; }
-@keyframes vp-scan { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(80vh); opacity: 0; } }
-.vp-meta { position: absolute; right: calc(3vw + 34px); top: calc(13vh + 4px); font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.06em; opacity: 0.75; animation: vp-fade 1s ease 1s both; }
-.vp-tagpt { position: absolute; width: 0; height: 0; }
-.vp-dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border: 1.5px solid #fff; animation: vp-pop 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both; animation-delay: calc(1.2s + var(--k) * 0.35s); }
-.vp-dot::after { content: ''; position: absolute; inset: 3px; background: #ff6a1a; }
 @keyframes vp-pop { from { transform: scale(0); } }
-.vp-ld { position: absolute; left: 0; top: -46px; width: 150px; height: 46px; overflow: visible; }
-.vp-ld path { fill: none; stroke: rgba(255, 255, 255, 0.85); stroke-width: 1; stroke-dasharray: 1; stroke-dashoffset: 1; animation: vp-draw 0.8s ease both; animation-delay: calc(1.4s + var(--k) * 0.35s); vector-effect: non-scaling-stroke; }
 @keyframes vp-draw { to { stroke-dashoffset: 0; } }
-.vp-lb { position: absolute; left: 44px; top: -74px; display: flex; flex-direction: column; gap: 3px; padding: 6px 10px; background: rgba(6, 16, 31, 0.55); border: 1px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); font-family: 'Geist Mono', monospace; font-size: 13px; white-space: nowrap; animation: vp-fade 0.6s ease both; animation-delay: calc(1.9s + var(--k) * 0.35s); }
-.vp-lb small { font-size: 11px; opacity: 0.65; }
-.vp-tagpt.flip .vp-ld { left: -150px; transform: scaleX(-1); }
-.vp-tagpt.flip .vp-lb { left: auto; right: 44px; }
 .vp-crumb { position: absolute; left: calc(3vw + 34px); top: calc(13vh + 4px); z-index: 2; display: flex; gap: 12px; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; animation: vp-fade 1s ease 0.4s both; }
 .vp-crumb a { color: inherit; text-decoration: none; border-bottom: 1px solid rgba(244, 248, 253, 0.5); }
 .vp-crumb a:hover { color: #ff8a4a; border-color: #ff8a4a; }
@@ -216,13 +188,9 @@ onUnmounted(() => { gsap.ticker.remove(tick); document.documentElement.classList
 .vp-row .ps-pill { padding: 16px 24px; font-size: 12px; }
 
 /* 2 · intro */
-.vp-intro { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 5vw; align-items: center; padding: 20vh 5vw 12vh; color: #0d2340; }
+.vp-intro { display: grid; grid-template-columns: minmax(0, 1fr); max-width: 1180px; gap: 5vw; align-items: center; padding: 20vh 5vw 12vh; color: #0d2340; }
 .vp-big { margin: 0; font-family: var(--font-display); font-size: clamp(28px, 3.6vw, 68px); line-height: 1.08; letter-spacing: -0.05em; }
 .vp-big span { display: inline-block; margin-right: 0.24em; transition: opacity 0.25s linear; }
-.vp-fig { position: relative; margin: 0; padding: 4vh 2.4vw 3vh; color: #0d2340; }
-.vp-fig .vp-c { opacity: 0.5; }
-.vp-fig .vp-c.tl { left: 0; top: 0; } .vp-fig .vp-c.tr { right: 0; top: 0; } .vp-fig .vp-c.bl { left: 0; bottom: 0; } .vp-fig .vp-c.br { right: 0; bottom: 0; }
-.vp-fig figcaption { margin-top: 2vh; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.06em; opacity: 0.6; }
 .vp-band { position: relative; margin: 0 5vw; height: 70vh; border-radius: 24px; overflow: hidden; }
 .vp-band img { width: 100%; height: 100%; object-fit: cover; }
 .vp-band span { position: absolute; left: 20px; bottom: 18px; padding: 6px 10px; background: rgba(6, 16, 31, 0.6); color: #f4f8fd; font-family: 'Geist Mono', monospace; font-size: 12px; }
@@ -322,9 +290,7 @@ onUnmounted(() => { gsap.ticker.remove(tick); document.documentElement.classList
 
 @media (max-width: 900px) {
   .vp-intro { grid-template-columns: 1fr; gap: 6vh; padding-top: 12vh; }
-  .vp-tagpt { display: none; } /* the crop no longer matches the tagged points */
   .vp-photo img { object-position: var(--fx) 50%; }
-  .vp-meta { display: none; }
   .vp-band { height: 44vh; margin: 0 4vw; }
   .vp-two, .vp-tests, .vp-cols, .vp-care, .vp-three { grid-template-columns: 1fr; gap: 16px; }
   .vp-grid { grid-template-columns: 1fr 1fr; gap: 12px; }

@@ -2,10 +2,11 @@
 // The word builds out from the I and its three blocks; each new letter first appears as an environment it tests (cold, heat,
 // humidity, vibration, altitude, temperature) and resolves into the letter. Hold. Then the lower cyan block stretches into a bar
 // that opens onto real footage. render(t) is a pure function of time (async only to wait for footage frames).
-/* global PARTS, W, H, FOOT */
+/* global PARTS, W, H, FOOT, HOLE */
+// HOLE: '' shows the demo footage in the window; 'clear' leaves it transparent (any video can go behind); 'green' fills it for chroma key
 const cv = document.getElementById('c'); cv.width = W; cv.height = H
 const g = cv.getContext('2d')
-const DUR = 7.2
+const DUR = 6.6
 const T = { build: 0.7, step: 0.19, tag: 2.15, reg: 2.6, exit: 4.75 }
 const NAVY = '#002868', CYAN = '#08d0e0'
 
@@ -155,13 +156,23 @@ async function frame(t, shot) {
     g.save(); g.beginPath(); P.forEach(([x, y], k) => (k ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath()
     g.fillStyle = CYAN; g.fill(); g.clip()
     const fk = seg(t, T.exit + 0.35, 0.35)
-    if (shot && fk > 0) { g.globalAlpha = fk; const sc = 1.12 - 0.08 * seg(t, T.exit, DUR - T.exit); const w = W * sc, h = (shot.height / shot.width) * w; g.drawImage(shot, (W - w) / 2, (H - h) / 2, w, h) }
+    if (!HOLE && shot && fk > 0) { g.globalAlpha = fk; const sc = 1.12 - 0.08 * seg(t, T.exit, DUR - T.exit); const w = W * sc, h = (shot.height / shot.width) * w; g.drawImage(shot, (W - w) / 2, (H - h) / 2, w, h) }
     g.restore()
   }
   // grain over everything, changing 24 times a second like film
   g.save(); g.globalCompositeOperation = 'overlay'; g.globalAlpha = 0.11
   const f = Math.floor(t * 24), ox = (f * 173) % 512, oy = (f * 311) % 512
   g.translate(-ox, -oy); g.fillStyle = g.createPattern(grain, 'repeat'); g.fillRect(0, 0, W + 512, H + 512); g.restore()
+  // the window, cut last so no grain lands in it: transparent, or flat green for keying
+  if (HOLE && t >= T.exit) {
+    const P = barPoly(t, off), fk = seg(t, T.exit + 0.35, 0.35)
+    if (fk > 0) {
+      g.save(); g.beginPath(); P.forEach(([x, y], k) => (k ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath()
+      g.globalAlpha = fk
+      if (HOLE === 'clear') { g.globalCompositeOperation = 'destination-out'; g.fillStyle = '#000' } else g.fillStyle = '#00b140'
+      g.fill(); g.restore()
+    }
+  }
 }
 
 const acc = document.createElement('canvas'); acc.width = W; acc.height = H
@@ -171,7 +182,7 @@ window.render = async (t, fps = 60, sub = 6) => {
   const shot = fi >= 0 && fi < FOOT ? await loadFrame(fi) : fi >= FOOT ? await loadFrame(FOOT - 1) : null
   ac.clearRect(0, 0, W, H)
   for (let i = 0; i < sub; i++) { await frame(t + (i / sub) * (0.5 / fps), shot); ac.globalAlpha = 1 / (i + 1); ac.drawImage(cv, 0, 0) }
-  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.drawImage(acc, 0, 0)
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, W, H); g.drawImage(acc, 0, 0)  // cleared first so the transparent window stays transparent
 }
 window.DUR = DUR
 window.ready = true

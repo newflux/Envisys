@@ -32,8 +32,8 @@ function parts() {
   const pg = await b.newPage()
   await pg.setViewport({ width: W, height: H, deviceScaleFactor: 1 })
   const foot = fs.existsSync(path.join(__dirname, 'foot')) ? fs.readdirSync(path.join(__dirname, 'foot')).length : 0
-  const html = `<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style><canvas id="c"></canvas>
-<script>const W=${W},H=${H},FOOT=${foot},PARTS=${JSON.stringify(parts())};</script><script>${fs.readFileSync(path.join(__dirname, SCENE), 'utf8')}</script>`
+  const html = `<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:transparent;overflow:hidden}canvas{display:block}</style><canvas id="c"></canvas>
+<script>const W=${W},H=${H},FOOT=${foot},HOLE=${JSON.stringify(process.env.HOLE || '')},PARTS=${JSON.stringify(parts())};</script><script>${fs.readFileSync(path.join(__dirname, SCENE), 'utf8')}</script>`
   // served from this folder (same origin), so footage frames can be drawn into the canvas and read back
   const srv = http.createServer((q, r) => { if (q.url === '/') { r.setHeader('content-type', 'text/html'); return r.end(html) } const f = path.join(__dirname, decodeURIComponent(q.url.split('?')[0])); if (!f.startsWith(__dirname) || !fs.existsSync(f)) { r.statusCode = 404; return r.end() } r.end(fs.readFileSync(f)) }).listen(0)
   pg.on('pageerror', (e) => console.log('pageerror', e.message))
@@ -50,7 +50,9 @@ function parts() {
   }
   const args = ['-y', '-f', 'image2pipe', '-framerate', String(FPS), '-i', '-']
   if (audio) args.push('-itsoffset', String(aoff), '-i', audio)
-  args.push('-c:v', 'libx264', '-preset', 'slow', '-crf', '14', '-pix_fmt', 'yuv420p', '-movflags', '+faststart')
+  // CODEC=prores keeps the alpha channel (transparent window), for editors; default is a plain H.264 mp4
+  if (process.env.CODEC === 'prores') args.push('-c:v', 'prores_ks', '-profile:v', '4444', '-pix_fmt', 'yuva444p10le', '-vendor', 'apl0')
+  else args.push('-c:v', 'libx264', '-preset', 'slow', '-crf', '14', '-pix_fmt', 'yuv420p', '-movflags', '+faststart')
   if (audio) args.push('-c:a', 'aac', '-b:a', '256k', '-af', `afade=t=out:st=${dur - 0.6}:d=0.6`, '-shortest')
   args.push(out)
   const ff = spawn(ffmpeg, args, { stdio: ['pipe', 'ignore', 'pipe'] })

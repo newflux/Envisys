@@ -9,7 +9,7 @@
       </div>
       <div v-if="p.standards?.length" class="pf-col rv" style="--d: 0.06s">
         <h3>Test standards</h3>
-        <ul class="pf-tags"><li v-for="s in p.standards" :key="s"><a :href="`/products?std=${encodeURIComponent(stdFamily(s))}`" data-cursor="">{{ s }}</a></li></ul>
+        <ul class="pf-tags"><li v-for="s in p.standards" :key="s"><a :href="standardUrl(s)" data-cursor="">{{ s }}</a></li></ul>
         <small>Tell us your standard and clause; we confirm the set-up before you order.</small>
       </div>
       <div v-if="p.options?.length" class="pf-col rv" style="--d: 0.12s">
@@ -21,7 +21,8 @@
 </template>
 
 <script setup lang="ts">
-import { stdFamily, type Product } from '../config/products'
+import type { Product } from '../config/products'
+import { standardUrl } from '../config/standards'
 defineProps<{ p: Product; num: string }>()
 </script>
 

@@ -8,19 +8,30 @@
         <div class="so-in">
           <button class="so-x" aria-label="Close search" @click="$emit('close')"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.2" fill="none" /></svg></button>
 
-          <h2 class="so-h">What are you looking for?</h2>
+          <h2 class="so-h">Find your chamber</h2>
           <label class="so-field">
             <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4" /><path d="M13 13l5 5" stroke="currentColor" stroke-width="1.4" /></svg>
-            <input ref="inp" v-model="q" type="text" placeholder="Chamber, model code or test, e.g. ET950, salt spray, −70 °C" autocomplete="off" spellcheck="false" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" @keydown.enter.prevent="go(sel)" />
+            <input ref="inp" v-model="q" type="text" placeholder="Describe your test, or type a model or standard: damp heat, ET950, IEC 60529" autocomplete="off" spellcheck="false" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" @keydown.enter.prevent="go(sel)" />
             <kbd>Esc</kbd>
           </label>
 
-          <div v-if="!q.trim()" class="so-try">
-            <span>Try these searches</span>
-            <button v-for="s in suggestions" :key="s" data-cursor="" @click="q = s">{{ s }}</button>
+          <!-- with nothing typed: a guided pick (what you test, and to which standard). The box above is where an AI assistant
+               will answer in plain words later; the guided pick and the results list stay as they are under it. -->
+          <div v-if="!q.trim()" class="so-find">
+            <span class="so-lab">Or pick what you test</span>
+            <div class="so-chips">
+              <button v-for="t in tests" :key="t.t" :class="{ on: test === t.t }" :aria-pressed="test === t.t" data-cursor="" @click="test = test === t.t ? '' : t.t">{{ t.t }}</button>
+            </div>
+            <label class="so-std"><span class="so-lab">To a standard</span>
+              <select v-model="std" data-cursor=""><option value="">Any standard</option><option v-for="f in stdFamilies" :key="f" :value="f">{{ f }}</option></select>
+            </label>
+            <div v-if="!test && !std" class="so-try">
+              <span>Or try a search</span>
+              <button v-for="s in suggestions" :key="s" data-cursor="" @click="q = s">{{ s }}</button>
+            </div>
           </div>
 
-          <ul v-else class="so-res">
+          <ul v-if="q.trim() || test || std" class="so-res">
             <li v-for="(h, i) in hits" :key="h.product.slug" :class="{ on: sel === i }" @mouseenter="sel = i" @click="go(i)" data-cursor="">
               <div class="so-th"><img :src="img(h.product, 'hero')" alt="" /></div>
               <div class="so-tx">
@@ -31,7 +42,7 @@
               </div>
               <svg class="so-ar" viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.2" /></svg>
             </li>
-            <li v-if="!hits.length" class="so-none">Nothing matches “{{ q }}”. Try a chamber type, like salt spray or thermal shock, or a model code like ET950.</li>
+            <li v-if="!hits.length" class="so-none">{{ q.trim() ? `Nothing matches “${q}”. Try a chamber type, like salt spray or thermal shock, or a model code like ET950.` : 'No standard chamber for that pair yet. We build to order: tell us the test.' }}</li>
           </ul>
 
           <a class="so-all" href="/products" data-cursor="">Browse all products <span>→</span></a>
@@ -43,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
-import { searchProducts, suggestions, img } from '../config/products'
+import { searchProducts, suggestions, img, products, stdFamilies, stdFamily } from '../config/products'
 
 const props = defineProps<{ open: boolean }>()
 defineEmits<{ (e: 'close'): void }>()
@@ -51,11 +62,25 @@ defineEmits<{ (e: 'close'): void }>()
 const q = ref('')
 const sel = ref(0)
 const inp = ref<HTMLInputElement | null>(null)
-const hits = computed(() => searchProducts(q.value).slice(0, 7))
-watch(q, () => { sel.value = 0 })
+// the guided pick: what is tested, mapped to the series built for it
+const tests = [
+  { t: 'Temperature and humidity', s: ['et', 'mini', 'walk-in', 'solar-pv'] },
+  { t: 'Fast hot-to-cold', s: ['ets'] },
+  { t: 'Altitude', s: ['eta', 'vacuum'] },
+  { t: 'Water and dust', s: ['rain', 'dust'] },
+  { t: 'Corrosion', s: ['salt-spray'] },
+  { t: 'Vibration and drops', s: ['vibration-chambers', 'vibration-shakers', 'drop-test'] },
+  { t: 'Batteries and EVs', s: ['battery', 'e-motor'] },
+  { t: 'Sunlight and UV', s: ['solar-radiation', 'uv'] }
+]
+const test = ref('')
+const std = ref('')
+const picked = computed(() => products.filter((p) => (!test.value || tests.find((t) => t.t === test.value)!.s.includes(p.slug)) && (!std.value || p.standards?.some((s) => stdFamily(s) === std.value))))
+const hits = computed(() => (q.value.trim() ? searchProducts(q.value) : test.value || std.value ? picked.value.map((product) => ({ product, score: 0, models: [] as string[] })) : []).slice(0, 7))
+watch([q, test, std], () => { sel.value = 0 })
 watch(() => props.open, async (v) => {
   const l = (window as any).lenisInstance
-  if (v) { l?.stop(); await nextTick(); setTimeout(() => inp.value?.focus(), 250) } else { l?.start(); q.value = '' }
+  if (v) { l?.stop(); await nextTick(); setTimeout(() => inp.value?.focus(), 250) } else { l?.start(); q.value = ''; test.value = ''; std.value = '' }
 })
 const move = (d: number) => { if (hits.value.length) sel.value = (sel.value + d + hits.value.length) % hits.value.length }
 function go(i: number) {
@@ -84,7 +109,15 @@ function go(i: number) {
 .so-field input::placeholder { color: rgba(244, 244, 242, 0.38); }
 .so-field kbd { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em; padding: 5px 8px; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); opacity: 0.55; }
 
-.so-try { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 4vh; }
+.so-find { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 4vh; }
+.so-lab { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5; }
+.so-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.so-chips button { padding: 11px 18px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.22); background: transparent; color: inherit; font: 15px 'Geist', sans-serif; cursor: pointer; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+.so-chips button:hover { border-color: rgba(255, 255, 255, 0.6); }
+.so-chips button.on { background: #ff6a1a; border-color: #ff6a1a; color: #0a0a0c; }
+.so-std { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+.so-std select { padding: 9px 14px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.22); background: #101013; color: inherit; font: 15px 'Geist', sans-serif; }
+.so-try { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 2vh; }
 .so-try span { width: 100%; text-align: center; margin-bottom: 4px; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5; }
 .so-try button { padding: 10px 16px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; color: inherit; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.08em; cursor: pointer; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
 .so-try button:hover { background: #f4f4f2; color: #0a0a0c; border-color: #f4f4f2; }

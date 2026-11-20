@@ -8,7 +8,7 @@
 
     <!-- the newest post, large -->
     <section v-if="lead" class="rs-lead rv">
-      <a class="rs-lead-a" :href="lead.url" target="_blank" rel="noopener" data-cursor="READ">
+      <a class="rs-lead-a" :href="lead.url" data-cursor="READ">
         <div class="rs-lead-img"><img decoding="async" :src="lead.img" :alt="lead.title" /></div>
         <div class="rs-lead-tx">
           <span class="rs-meta">{{ lead.cat }} · {{ lead.date }}</span>
@@ -28,7 +28,7 @@
         </div>
       </div>
       <TransitionGroup name="card" tag="div" class="rs-grid">
-        <a v-for="b in rest" :key="b.url" class="rs-card" :href="b.url" target="_blank" rel="noopener" data-cursor="READ">
+        <a v-for="b in rest" :key="b.url" class="rs-card" :href="b.url" data-cursor="READ">
           <div class="rs-ph"><img :src="b.img" :alt="b.title" /></div>
           <span class="rs-meta">{{ b.cat }} · {{ b.date }}</span>
           <b>{{ b.title }}</b>
@@ -38,11 +38,11 @@
     </section>
 
     <!-- brochures -->
-    <section class="rs-bro">
+    <section id="downloads" class="rs-bro">
       <div class="rs-bro-l">
-        <span class="ps-label rv"><i>+</i> Brochures</span>
-        <h2 class="rs-h2 rv" style="--d: 0.06s">The data sheets.</h2>
-        <p class="rv" style="--d: 0.1s">Every range, as a PDF, hosted by Envisys.</p>
+        <span class="ps-label rv"><i>+</i> Downloads</span>
+        <h2 class="rs-h2 rv" style="--d: 0.06s">Brochures and data sheets.</h2>
+        <p class="rv" style="--d: 0.1s">Every range as a PDF brochure. A data sheet for each model is on its chamber page, under Technical data; drawings and manuals are added here as they are released.</p>
       </div>
       <ul class="rs-list">
         <li v-for="(b, i) in brochures" :key="b.url" class="rv" :style="{ '--d': (i % 5) * 0.04 + 's' }">

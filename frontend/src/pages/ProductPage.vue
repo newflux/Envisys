@@ -32,7 +32,7 @@
         </div>
 
         <div class="pd-act">
-          <button class="ps-pill" data-cursor="" @click="contact()"><span>{{ sel ? `Ask about ${sel}` : 'Request a quote' }}</span><svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.3" /></svg></button>
+          <button class="ps-pill" data-cursor="" @click="contact(ask())"><span>{{ sel ? `Ask about ${sel}` : 'Request a quote' }}</span><svg viewBox="0 0 10 10"><path d="M1 9L9 1M3 1h6v6" fill="none" stroke="currentColor" stroke-width="1.3" /></svg></button>
           <a v-if="p.brochure" :href="p.brochure" target="_blank" rel="noopener" data-cursor="">Brochure</a>
           <a :href="`/products/${next.slug}`" data-cursor="">Next · {{ next.name }}</a>
         </div>
@@ -79,7 +79,7 @@
       <RampChart v-if="studio?.ramp" :r="studio.ramp" flip />
 
       <!-- 3 · the specification, straight after what it is -->
-      <SpecStudio v-if="studio" :s="studio" :lineup="detail?.lineup" :features="p.features" :group="p.group" :series="p.name" :brochure="p.brochure" :sel="sel" @pick="sel = $event" @ask="contact()" />
+      <SpecStudio v-if="studio" :s="studio" :lineup="detail?.lineup" :features="p.features" :group="p.group" :series="p.name" :brochure="p.brochure" :sel="sel" @pick="sel = $event" @ask="contact(ask())" />
       <section v-else id="specification" class="pd-sec pd-spec">
         <div class="pd-top rv hl"><span>(02)</span><span>Specification</span><span></span></div>
         <div class="pd-spec-row">
@@ -101,7 +101,7 @@
       </section>
 
       <SpecCompare v-if="studio && studio.models.length > 1" :s="studio" :series="p.name" :brochure="p.brochure" num="03" />
-      <SpecDetail v-if="detail" :d="detail" :brochure="p.brochure" @ask="contact()" />
+      <SpecDetail v-if="detail" :d="detail" :brochure="p.brochure" @ask="contact(ask())" />
       <ProductFacts :p="p" :num="num(0)" />
 
       <!-- last · the photographs (after the specification, which is what buyers come for): the section pins and slides them sideways as you scroll, each moving a little inside its
@@ -123,11 +123,11 @@
       <!-- the sections, a pill at the foot of the screen once the hero has gone (after the "Explore" bar on nvidia.com) -->
       <nav class="pd-nav" :class="{ on: navOn }" aria-label="On this page">
         <button v-for="n in navs" :key="n.id" :class="{ on: navAt === n.id }" data-cursor="" @click="goTo(n.id)">{{ n.t }}</button>
-        <button class="pd-nav-q" data-cursor="" @click="contact()">{{ sel ? `Ask about ${sel}` : 'Quote' }}</button>
+        <button class="pd-nav-q" data-cursor="" @click="contact(ask())">{{ sel ? `Ask about ${sel}` : 'Quote' }}</button>
       </nav>
 
       <!-- phones: the quote stays in reach -->
-      <button class="ps-pill pd-sticky" data-cursor="" @click="contact()"><span>{{ sel ? `Ask about ${sel}` : 'Request a quote' }}</span></button>
+      <button class="ps-pill pd-sticky" data-cursor="" @click="contact(ask())"><span>{{ sel ? `Ask about ${sel}` : 'Request a quote' }}</span></button>
     </template>
   </PageShell>
 </template>
@@ -159,6 +159,7 @@ const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
 const asked = norm(new URLSearchParams(location.search).get('m') ?? '')
 const hitItem = p?.models.flatMap((m) => m.items).find((it) => asked && norm(it) === asked)
 const sel = ref(hitItem ?? '')
+const ask = () => (p ? `Quote for the ${sel.value ? `${sel.value} (${p.name})` : p.name}. ` : '')
 
 // the explore bar: which sections exist, which one is being read, and whether the bar shows at all
 const hs = ref(0) // the highlighted point in Explore

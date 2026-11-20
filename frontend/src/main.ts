@@ -11,7 +11,8 @@ const pages: Record<string, () => Promise<typeof import('./App.vue')>> = {
   '/verticals': () => import('./pages/VerticalsPage.vue'),
   '/industries': () => import('./pages/IndustriesPage.vue'),
   '/resources': () => import('./pages/ResourcesPage.vue'),
-  '/in-stock': () => import('./pages/InStockPage.vue')
+  '/in-stock': () => import('./pages/InStockPage.vue'),
+  '/standards': () => import('./pages/StandardsPage.vue')
 }
 // Microsoft Clarity (heatmaps, scroll depth, recordings): live site only, so local testing never shows up in the data
 if (import.meta.env.PROD && location.hostname !== 'localhost') Clarity.init('zdlb48i7f7')
@@ -19,6 +20,8 @@ if (import.meta.env.PROD && location.hostname !== 'localhost') Clarity.init('zdl
 const path = location.pathname.replace(/\/+$/, '') || '/'
 const product = path.startsWith('/products/')
 const vertical = path.startsWith('/verticals/')
+if (path.startsWith('/standards/')) pages[path] = () => import('./pages/StandardsPage.vue')
+if (path.startsWith('/blog/')) pages[path] = () => import('./pages/BlogPage.vue')
 // the express factory has a page of its own; the other verticals share one
 if (path === '/verticals/express') pages[path] = () => import('./pages/ExpressPage.vue')
 else if (vertical) pages[path] = () => import('./pages/VerticalPage.vue')

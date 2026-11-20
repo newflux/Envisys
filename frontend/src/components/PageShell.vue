@@ -1,16 +1,16 @@
 <template>
   <!-- Common frame for the inner pages: smooth scroll, nav, cursor, contact panel, and the shutter footer under a light cover.
-       Anything inside .rv fades up once as it enters view. Pages get `contact()` from the slot to open the contact panel. -->
+       Anything inside .rv fades up once as it enters view. Pages get `contact(text?)` from the slot to open the contact panel, optionally with the message started. -->
   <div class="ps-root" :class="{ ready }">
     <div id="scroller" class="layout" ref="scrollerRef">
       <main class="layout__page" ref="pageRef">
-        <div class="ps-cover" :class="{ dark, blue }"><slot :contact="() => (contactOpen = true)" /></div>
+        <div class="ps-cover" :class="{ dark, blue }"><slot :contact="openContact" /></div>
         <SiteFooter @build="contactOpen = true" />
       </main>
     </div>
     <Navbar ref="navbarRef" @build-click="contactOpen = true" />
     <ScrollBar />
-    <ContactPanel :open="contactOpen" @close="contactOpen = false" />
+    <ContactPanel :open="contactOpen" :prefill="prefill" @close="contactOpen = false" />
     <ReticleCursor />
   </div>
 </template>
@@ -34,6 +34,9 @@ const toneTick = () => {
 }
 const ready = ref(false)
 const contactOpen = ref(false)
+// pages can open the quote with a first line already written (the model, the standard), so the visitor only adds the rest
+const prefill = ref('')
+const openContact = (text?: string) => { prefill.value = text ?? ''; contactOpen.value = true }
 const scrollerRef = ref<HTMLElement | null>(null)
 const pageRef = ref<HTMLElement | null>(null)
 const navbarRef = ref<any>(null)
@@ -45,6 +48,8 @@ onMounted(async () => {
   document.title = `${props.title} · Envisys Technologies`
   lenis = new Lenis({ wrapper: scrollerRef.value!, content: pageRef.value!, eventsTarget: window, lerp: 0.085, smoothWheel: true })
   ;(window as any).lenisInstance = lenis
+  // links like /resources#downloads: the page scrolls in its own container, so the browser cannot jump to the anchor itself
+  if (location.hash.length > 1) setTimeout(() => { const el = document.getElementById(location.hash.slice(1)); if (el) lenis?.scrollTo(el, { duration: 1.4 }) }, 700)
   gsap.ticker.add(lenisTick)
   if (props.blue) gsap.ticker.add(toneTick)
   io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); e.target.setAttribute('data-in', ''); io!.unobserve(e.target) } }, { threshold: 0.12 })

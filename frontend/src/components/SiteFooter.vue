@@ -89,9 +89,9 @@ function tick() {
 
 // Footer content. Phone, email and address are from envisystech.com/contact-us; page links are placeholders.
 const cols: { h: string; links: { t: string; href?: string; build?: boolean }[] }[] = [
-  { h: 'Products', links: [{ t: 'Environmental', href: '/environmental-test-chambers' }, { t: 'Thermal shock', href: '/thermal-shock-chambers' }, { t: 'Altitude', href: '/altitude-test-chambers' }, { t: 'Salt spray', href: '/salt-spray-chambers' }, { t: 'Walk-in', href: '/environmental-walkin-chambers' }] },
+  { h: 'Products', links: [{ t: 'Environmental', href: '/products/et' }, { t: 'Thermal shock', href: '/products/ets' }, { t: 'Altitude', href: '/products/eta' }, { t: 'Salt spray', href: '/products/salt-spray' }, { t: 'Walk-in', href: '/products/walk-in' }, { t: 'Test standards', href: '/standards' }] },
   { h: 'Services', links: [{ t: 'Testing lab', href: VISTARA_URL || '/verticals/testing' }, { t: 'Rentals', href: '/verticals/rentals' }, { t: 'After-sales', href: '/verticals/aftersales' }, { t: 'Express factory', href: '/verticals/express' }] },
-  { h: 'Company', links: [{ t: 'About', href: '/about' }, { t: 'Industries', href: '/industries' }, { t: 'Careers', href: 'mailto:hrd@envisystech.com' }, { t: 'Contact', build: true }] },
+  { h: 'Company', links: [{ t: 'About', href: '/about' }, { t: 'Industries', href: '/industries' }, { t: 'Downloads', href: '/resources#downloads' }, { t: 'Careers', href: 'mailto:hrd@envisystech.com' }, { t: 'Contact', build: true }] },
   { h: 'Reach us', links: [{ t: '+91 99000 14150', href: 'tel:+919900014150' }, { t: '+91 80283 77888 (office)', href: 'tel:+918028377888' }, { t: 'WhatsApp us', href: 'https://wa.me/919900014150' }, { t: 'enquiry@envisystech.com', href: 'mailto:enquiry@envisystech.com' }, { t: 'Peenya, Bengaluru 560058' }] }
 ]
 const socials = [

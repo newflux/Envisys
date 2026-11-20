@@ -1,7 +1,7 @@
 [
  {
   "title": "Factors Affecting Environmental Chamber Rental Price",
-  "url": "https://www.envisystech.com/blog/factors-affecting-environmental-chamber-rental-price/",
+  "url": "/blog/factors-affecting-environmental-chamber-rental-price",
   "date": "28 Oct 2026",
   "cat": "Test Chambers Rental",
   "excerpt": "Learn the key factors affecting environmental chamber rental prices, including chamber type, rental duration, testing requirements and more to plan your budget.",
@@ -9,7 +9,7 @@
  },
  {
   "title": "Thermal Shock Chamber Rental: Quick Buyer Guide",
-  "url": "https://www.envisystech.com/blog/thermal-shock-chamber-rental/",
+  "url": "/blog/thermal-shock-chamber-rental",
   "date": "26 Oct 2026",
   "cat": "Test Chambers Rental",
   "excerpt": "Explore thermal shock chamber rental options, key specifications, testing requirements, and factors to consider when choosing the right chamber for your needs.",
@@ -17,7 +17,7 @@
  },
  {
   "title": "Automotive Battery Environmental Testing Explained",
-  "url": "https://www.envisystech.com/blog/automotive-battery-environmental-testing/",
+  "url": "/blog/automotive-battery-environmental-testing",
   "date": "24 Oct 2026",
   "cat": "Battery Testing Chambers",
   "excerpt": "Learn how automotive battery environmental testing evaluates performance, safety and durability under extreme temperatures, humidity, vibration & other conditions.",
@@ -25,7 +25,7 @@
  },
  {
   "title": "Aerospace Altitude Test Chambers for Reliable Testing",
-  "url": "https://www.envisystech.com/blog/aerospace-altitude-test-chambers/",
+  "url": "/blog/aerospace-altitude-test-chambers",
   "date": "15 Oct 2026",
   "cat": "Altitude Test Chambers",
   "excerpt": "Explore how aerospace altitude test chambers simulate high-altitude conditions to test aircraft components, verify performance, and ensure reliable operation.",
@@ -33,7 +33,7 @@
  },
  {
   "title": "What are the Key Features of a Vacuum Environment Test Chamber",
-  "url": "https://www.envisystech.com/blog/what-are-the-key-features-of-a-vacuum-environment-test-chamber/",
+  "url": "/blog/what-are-the-key-features-of-a-vacuum-environment-test-chamber",
   "date": "14 Oct 2026",
   "cat": "Environmental Test Chambers",
   "excerpt": "Explore the key features of a vacuum environment test chamber, from pressure control and temperature range to materials, sensors, and safety systems.",
@@ -41,7 +41,7 @@
  },
  {
   "title": "Where Can I Rent a Climatic Test Chamber for Short-term Testing",
-  "url": "https://www.envisystech.com/blog/where-can-i-rent-a-climatic-test-chamber-for-short-term-testing/",
+  "url": "/blog/where-can-i-rent-a-climatic-test-chamber-for-short-term-testing",
   "date": "13 Oct 2026",
   "cat": "Test Chambers Rental",
   "excerpt": "Looking to rent a climatic test chamber for short-term testing? Learn where to find rental options, what to check before booking, and how to choose.",
@@ -49,7 +49,7 @@
  },
  {
   "title": "High Altitude Test Chamber Explained",
-  "url": "https://www.envisystech.com/blog/high-altitude-test-chamber/",
+  "url": "/blog/high-altitude-test-chamber",
   "date": "12 Oct 2026",
   "cat": "Altitude Test Chambers",
   "excerpt": "Learn how a high altitude test chamber simulates low pressure and temperature to test product performance, its key components, applications, and standards.",
@@ -57,7 +57,7 @@
  },
  {
   "title": "Aerospace Temperature Controlled Chambers: Complete Guide",
-  "url": "https://www.envisystech.com/blog/aerospace-temperature-controlled-chambers/",
+  "url": "/blog/aerospace-temperature-controlled-chambers",
   "date": "07 Oct 2026",
   "cat": "Aerospace Industry",
   "excerpt": "Explore aerospace temperature controlled chambers: types, key specs, testing standards, and how to choose the right chamber for aircraft component validation.",
@@ -65,7 +65,7 @@
  },
  {
   "title": "Environmental Test Chamber Rental vs Buying vs Testing Labs",
-  "url": "https://www.envisystech.com/blog/environmental-test-chamber-rental-vs-buying-vs-testing-labs/",
+  "url": "/blog/environmental-test-chamber-rental-vs-buying-vs-testing-labs",
   "date": "18 May 2026",
   "cat": "Environmental Test Chambers",
   "excerpt": "Environmental Test Chamber Rental vs Buying vs Testing Labs: Explore the pros, flexibility, and ideal use cases to choose the right testing solution.",
@@ -73,10 +73,154 @@
  },
  {
   "title": "Economics of Environmental Testing: The Do’s and Don’ts",
-  "url": "https://www.envisystech.com/blog/economics-of-environmental-testing/",
+  "url": "/blog/economics-of-environmental-testing",
   "date": "27 Jan 2026",
   "cat": "R&D- TECHNICAL PAPERS",
   "excerpt": "Economics of Environmental Testing – The Do’s and Don’ts guides you on managing costs, avoiding mistakes, and making smarter testing decisions.",
   "img": "/blog/blog-10.webp"
+ },
+ {
+  "title": "Understanding Knowledge and Training Gaps in Environmental Testing: Evidence from a Multi-Industry Survey in India",
+  "url": "/blog/understanding-knowledge-and-training-gaps-in-environmental-testing",
+  "date": "27 Jan 2026",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Environmental Testing is done to ensure product reliability and compliance to test standards under conditions of extreme temperature, relative humidity, corrosion, ingress,…",
+  "img": "/blog/img/77834e872b77.webp"
+ },
+ {
+  "title": "How Environmental Testing Shapes Product Reliability in the Automotive Industry",
+  "url": "/blog/how-environmental-testing-shapes-product-reliability-in-the-automotive-industry",
+  "date": "03 Dec 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "The automotive industry works around absolutes. A vehicle either starts on a winter morning at -40°C or it doesn&#x27;t. Electronic control units either function flawlessly…",
+  "img": "/blog/img/0cda0af79305.jpeg"
+ },
+ {
+  "title": "Strategic Shift To R449A Refrigerant",
+  "url": "/blog/strategic-shift-to-r449a-refrigerant",
+  "date": "03 Dec 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "ENHANCING ENVIRONMENTAL AND PERFORMANCE STANDARDS: 1) BACKGROUND Envisys Technologies Pvt. Ltd., a leader in environmental test chambers in India, has consistently demonstrated a…",
+  "img": "/blog/img/3314f669b818.jpeg"
+ },
+ {
+  "title": "One-Stop Solution with T-A-A-S Model",
+  "url": "/blog/one-stop-solution-with-t-a-a-s-model",
+  "date": "13 Nov 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Introduction: This white paper presents the strategic transformation of Envisys Technologies Pvt. Ltd., one of India’s leading manufacturers and service providers of environmental…",
+  "img": "/blog/img/eee37d224699.jpeg"
+ },
+ {
+  "title": "Why Salt Spray Chambers Are a Necessity for Corrosion Testing",
+  "url": "/blog/why-salt-spray-chambers-are-a-necessity-for-corrosion-testing",
+  "date": "06 Nov 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Corrosion is the quiet destroyer of industrial machinery, infrastructure, and consumer goods. It&#x27;s a billion-dollar pain for industries every year in replacements, repairs,…",
+  "img": "/blog/img/583e685ecaa3.jpeg"
+ },
+ {
+  "title": "How Industrial Chillers Support Process Temperature Stability",
+  "url": "/blog/how-industrial-chillers-support-process-temperature-stability",
+  "date": "10 Oct 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Discussions about industrial chillers are generally centered around cooling capacity, but the competitive edge is really found in something much more fundamental: process…",
+  "img": "/blog/img/c8304ea2c1a5.webp"
+ },
+ {
+  "title": "What Is a Solar Panel Testing Chamber and Why Is It Important?",
+  "url": "/blog/what-is-a-solar-panel-testing-chamber-and-why-is-it-important",
+  "date": "10 Oct 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Imagine this: your solar panel remains on the rooftop for 25 years, battling blistering summers, freezing winters, deluges of rain, and all that Mother Nature can serve up. How do…",
+  "img": "/blog/img/25f66253f306.webp"
+ },
+ {
+  "title": "Industrial Chillers: Applications Across Industries & Why They Are Important in 2026",
+  "url": "/blog/industrial-chillers-applications-across-industries-why-they-are-important-in-2025",
+  "date": "31 Jul 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "In the world of modern manufacturing and industrial operations, temperature control is no longer optional. It is a critical part of ensuring product quality, process consistency,…",
+  "img": "/blog/img/a2430049ee7b.png"
+ },
+ {
+  "title": "Features and Benefits of Dust Chambers",
+  "url": "/blog/features-and-benefits-of-dust-chambers-envisys-technologies",
+  "date": "17 Jun 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "In the intensely industrialised regions of North India, establishing resilience against extreme environmental conditions is a key requirement for manufacturers. Dust chambers as…",
+  "img": "/blog/img/c82a4a6116c5.webp"
+ },
+ {
+  "title": "What is an Environmental Test Chamber? Principles, Types, and Uses",
+  "url": "/blog/what-is-an-environmental-test-chamber-principles-types-and-uses",
+  "date": "13 Jun 2025",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Environmental test chambers are important assets for manufacturing, research, or quality assurance activities today. As a top manufacturer of testing devices in Northern India,…",
+  "img": "/blog/img/b191ce9a48f8.webp"
+ },
+ {
+  "title": "Utm Interface Environmental Test Chamber",
+  "url": "/blog/utm-interface-environmental-test-chamber",
+  "date": "19 Nov 2024",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "In modern material testing, the combination of mechanical testing and environmental conditioning is crucial for simulating real-world conditions and understanding material…",
+  "img": "/blog/img/9e427dd6a077.jpeg"
+ },
+ {
+  "title": "Dual Stack Battery Test Chamber",
+  "url": "/blog/dual-stack-battery-test-chamber",
+  "date": "19 Nov 2024",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Envisys dual-stack battery test chamber provides robust testing capabilities for high-performance battery cells, with a focus on safety, versatility, and efficient space…",
+  "img": "/blog/img/66d74b7bb2fd.jpeg"
+ },
+ {
+  "title": "Hydrogen Sensor Test Chamber",
+  "url": "/blog/hydrogen-sensor-test-chamber",
+  "date": "08 Nov 2024",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Envisys engineered a specialized climatic test chamber tailored for hydrogen sensor testing, incorporating stringent safety and control systems to meet high-performance…",
+  "img": "/blog/img/bec33f472528.jpeg"
+ },
+ {
+  "title": "Environmental Test Lab - Opening",
+  "url": "/blog/environmental-test-lab-opening",
+  "date": "21 Aug 2024",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "We are thrilled to announce the opening of our Environmental Test Lab VISTARA LABS - An initiavtive of Envisys - an exciting new vertical of Envisys Technologies Pvt Ltd. This new…",
+  "img": "/blog/img/3616640e44d4.jpeg"
+ },
+ {
+  "title": "Walk-in Climatic Test Chambers - New Version",
+  "url": "/blog/walk-climatic-test-chambers-new-version",
+  "date": "21 Oct 2020",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "A new version of Walk-in Climatic Test Chambers (Environmental Test Chambers) designed by Envisys with full front opening double doors with in-built viewing windows and user…",
+  "img": "/blog/img/b6ececbf3d98.jpeg"
+ },
+ {
+  "title": "Temperature Control Device For Electronic Chips",
+  "url": "/blog/temperature-control-device-electronic-chips",
+  "date": "16 Sep 2017",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Temperature Forcing System : A micro cooling unit designed to simulate the various working temperature conditions on the electronic chip board…",
+  "img": ""
+ },
+ {
+  "title": "Temp-Rh-Salt Fog Integrated Test System For Utm Interface",
+  "url": "/blog/temp-rh-salt-fog-integrated-test-system-utm-interface",
+  "date": "10 Sep 2017",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "Temperature-Relative Humidity-Salt Fog Integrated Test Apparatus for UTM Interface is designed to meet the specific test requirement of integration test, for this application,…",
+  "img": "/blog/img/399be27627fd.jpeg"
+ },
+ {
+  "title": "Automatic Ip Cleaner",
+  "url": "/blog/automatic-ip-cleaner",
+  "date": "11 Dec 2015",
+  "cat": "Environmental Test Chambers",
+  "excerpt": "As a part of its ongoing research and development work Envisys has recently developed an automated system for complete isopropanol based chemical cleaning of medical…",
+  "img": "/blog/img/a0124f267ce5.jpeg"
  }
 ]

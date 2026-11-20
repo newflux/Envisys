@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch, nextTick } from 'vue'
 
-const props = defineProps<{ open: boolean }>()
+const props = defineProps<{ open: boolean; prefill?: string }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
 const panelRef = ref<HTMLElement | null>(null)
 
@@ -75,6 +75,7 @@ const form = reactive<Record<Key, string>>({ name: '', company: '', email: '', p
 const errors = reactive<Partial<Record<Key, string>>>({})
 const picked = ref<string[]>([])
 const sent = ref(false)
+let lastPrefill = ''
 
 function toggle(c: string) {
   picked.value = picked.value.includes(c) ? picked.value.filter((x) => x !== c) : [...picked.value, c]
@@ -104,6 +105,8 @@ function close() {
 watch(() => props.open, async (o) => {
   const lenis = (window as any).lenisInstance
   if (o) {
+    // a new prefill replaces the old one, never what the visitor typed
+    if (props.prefill && (!form.message || form.message === lastPrefill)) form.message = lastPrefill = props.prefill
     lenis?.stop()
     await nextTick()
     panelRef.value?.focus()

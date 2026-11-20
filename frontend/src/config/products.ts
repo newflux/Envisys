@@ -25,6 +25,9 @@ export interface Product {
   hud?: [string, string, string][]    // main products only: the readouts on the showcase, [label, value, unit], all taken from `specs` or `models`
   brochure?: string
   hotspots?: [number, number, string, string][] // points on the hero photo: [x %, y %, title, text] (chambers with a 3D model first)
+  standards?: string[]       // test standards it runs (set in `extras` below)
+  uses?: string[]            // what it is used for
+  options?: string[]         // options and accessories, by name
 }
 
 const B = 'https://www.envisystech.com/wp-content/themes/tecobytes/media/brochure-2020/'
@@ -294,6 +297,86 @@ export const products: Product[] = [
   }
 ]
 
+// What each series is used for, the test standards it runs, and its options. Standards are the ones this type of chamber is
+// built to run; the company confirms the exact list (data-needed sheet, tab 6). Options only where the brochure or a sheet names them.
+const extras: Record<string, Pick<Product, 'standards' | 'uses' | 'options'>> = {
+  et: {
+    uses: ['Automotive electronics: ECUs, sensors, lamps, connectors', 'Defence and aerospace parts, qualified to MIL and IEC climates', 'Consumer electronics and PCBs: cold start, heat soak, damp heat', 'Materials and plastics ageing'],
+    standards: ['IEC 60068-2-1 (cold)', 'IEC 60068-2-2 (dry heat)', 'IEC 60068-2-14 (change of temperature)', 'IEC 60068-2-30 (damp heat, cyclic)', 'IEC 60068-2-78 (damp heat, steady)', 'IEC 60068-3-5 (chamber performance)', 'MIL-STD-810 Methods 501, 502, 507'],
+    options: ['Faster ramps: 5, 10, 15 or 20 °C per minute', 'Humidity control (40H / 70H)', 'Down to −70 °C (70T / 70H)', 'Extra trays (6 slots on the ET150)', 'Extra access ports', 'Power supply to suit the destination country']
+  },
+  ets: {
+    uses: ['Solder joints and PCB assemblies', 'Semiconductors and electronic modules', 'Automotive and EV components', 'Materials with different expansion rates bonded together'],
+    standards: ['IEC 60068-2-14 Test Na (rapid change of temperature)', 'MIL-STD-810 Method 503', 'MIL-STD-883 Method 1010', 'JESD22-A104 (temperature cycling)']
+  },
+  eta: {
+    uses: ['Avionics and aircraft-hold equipment', 'Drones and UAV electronics', 'Batteries shipped by air', 'Defence equipment for high-altitude use'],
+    standards: ['MIL-STD-810 Method 500 (low pressure)', 'MIL-STD-810 Method 520 (combined environments)', 'RTCA DO-160 Section 4', 'IEC 60068-2-13 (low air pressure)', 'IEC 60068-2-39 (combined temperature and low pressure)'],
+    options: ['Humidity control (H variants)', 'Down to −70 °C (70T models)', 'Faster ramps: 3 to 20 °C per minute', 'Power supply to suit the destination country']
+  },
+  mini: {
+    uses: ['Single components and small assemblies', 'R&D labs and quality checks beside the line', 'Sensors, small PCBs and connectors'],
+    standards: ['IEC 60068-2-1 (cold)', 'IEC 60068-2-2 (dry heat)', 'IEC 60068-2-14 (change of temperature)', 'IEC 60068-2-30 (damp heat, cyclic)', 'IEC 60068-2-78 (damp heat, steady)']
+  },
+  'walk-in': {
+    uses: ['Whole vehicles, two-wheelers and large assemblies', 'Battery packs and racks', 'Solar inverters, telecom cabinets and panels', 'Many products tested at once'],
+    standards: ['IEC 60068-2-1 (cold)', 'IEC 60068-2-2 (dry heat)', 'IEC 60068-2-30 (damp heat, cyclic)', 'IEC 60068-2-78 (damp heat, steady)', 'MIL-STD-810 Methods 501, 502, 507']
+  },
+  battery: {
+    uses: ['EV cells, modules and packs', 'Energy-storage batteries', 'Consumer lithium-ion cells'],
+    standards: ['UN 38.3 T.2 (thermal test)', 'IEC 62133-2', 'IEC 62660-2', 'AIS-156']
+  },
+  'vibration-chambers': {
+    uses: ['Automotive parts under heat, cold and road vibration together', 'Defence and aerospace equipment', 'EV batteries and power electronics'],
+    standards: ['IEC 60068-2-6 (sine vibration)', 'IEC 60068-2-64 (random vibration)', 'MIL-STD-810 Method 520 (combined environments)', 'ISO 16750-3']
+  },
+  rain: {
+    uses: ['Automotive lamps, connectors and ECUs', 'Outdoor electronics and enclosures', 'Electrical fittings and luminaires'],
+    standards: ['IEC 60529 (IPX1 to IPX8)', 'ISO 20653 (IPX9K)', 'DIN 40050-9']
+  },
+  'vibration-shakers': {
+    uses: ['Automotive components and assemblies', 'Defence and aerospace qualification', 'Packaging and transport testing'],
+    standards: ['IEC 60068-2-6 (sine vibration)', 'IEC 60068-2-27 (shock)', 'IEC 60068-2-64 (random vibration)', 'MIL-STD-810 Method 514', 'ISO 16750-3']
+  },
+  dust: {
+    uses: ['Automotive lamps and enclosures', 'Outdoor electronics and enclosures', 'Defence equipment for desert use'],
+    standards: ['IEC 60529 (IP5X, IP6X)', 'ISO 20653', 'MIL-STD-810 Method 510']
+  },
+  'salt-spray': {
+    uses: ['Coatings, plating and painted parts', 'Automotive body and chassis parts', 'Fasteners and marine hardware'],
+    standards: ['ASTM B117', 'ISO 9227', 'IEC 60068-2-11 (salt mist)', 'IEC 60068-2-52 (salt mist, cyclic)', 'MIL-STD-810 Method 509'],
+    options: ['Remote refrigeration unit', 'Vertical down-spray header cycle', 'Immersion cycle for dipping components', 'Wall-wash and SO₂ gas dosing', 'De-humidifier', 'Multi-solution salt spray system', 'Drain treatment unit']
+  },
+  'solar-pv': {
+    uses: ['Solar panels and PV modules', 'Module materials: backsheets, encapsulants, junction boxes'],
+    standards: ['IEC 61215-2 MQT 11 (thermal cycling)', 'IEC 61215-2 MQT 12 (humidity freeze)', 'IEC 61215-2 MQT 13 (damp heat)', 'IEC 61730']
+  },
+  'drop-test': { uses: ['Packaged products and shipping cartons', 'Handheld electronics'], standards: ['IEC 60068-2-31 (rough handling)', 'ISTA 1A', 'ASTM D5276'] },
+  'solar-radiation': { uses: ['Automotive interiors and exterior parts', 'Outdoor equipment and materials'], standards: ['IEC 60068-2-5 (solar radiation)', 'MIL-STD-810 Method 505', 'DIN 75220'] },
+  uv: { uses: ['Paints, coatings and plastics', 'Outdoor materials and textiles'], standards: ['ISO 4892-3', 'ASTM G154', 'ASTM D4329'] }
+}
+for (const p of products) Object.assign(p, extras[p.slug])
+
+/** The family a standard belongs to, for the filter: 'IEC 60068-2-14 (cold)' gives 'IEC 60068', 'MIL-STD-810 Method 503' gives 'MIL-STD-810'. */
+export const stdFamily = (s: string) => {
+  const [a, b = ''] = s.split(' ')
+  return /\d/.test(a) ? a : `${a} ${/^\d/.test(b) ? b.split('-')[0] : b}`
+}
+export const stdFamilies = [...new Set(products.flatMap((p) => (p.standards ?? []).map(stdFamily)))].sort()
+
+/** Questions buyers ask, answered only from what the site already states for this series (no promised lead times or prices). */
+export function faqFor(p: Product): [string, string][] {
+  const f: [string, string][] = []
+  const temp = p.specs.find(([k]) => /temperature/i.test(k))
+  if (temp) f.push([`What temperature range does the ${p.name} cover?`, `${temp[1]}. The exact range depends on the model and variant; the technical data and data sheet give it model by model.`])
+  if (p.standards?.length) f.push(['Which test standards can it run?', `It is built for tests such as ${p.standards.slice(0, 4).join(', ')}${p.standards.length > 4 ? ' and more' : ''}. Tell us your standard and clause and we will confirm the set-up.`])
+  f.push(['Can it be built to a different size or specification?', 'Yes. Standard models come from the express factory; custom sizes, ranges and fixtures are built to your specification by the design team.'])
+  f.push(['Can I rent one, or have my product tested instead of buying?', 'Yes. Chambers are available on rent for short tests, and Vistara, our NABL-accredited lab in Peenya, Bengaluru, can run the test for you.'])
+  f.push(['Who services and calibrates it after the sale?', 'Envisys does, with engineers across India: calibration, AMCs, refurbishment, and buy-back when it is time to replace it.'])
+  f.push(['How quickly can it be delivered?', 'Standard models are kept in stock and shipped fast, across India and abroad. Ask us for the lead time on the model you need.'])
+  return f
+}
+
 export const mainProducts = products.filter((p) => p.tier === 'main')
 export const catalogue = products.filter((p) => p.tier === 'catalog')
 export const groups: Group[] = ['Climatic & thermal', 'Shock, altitude & vacuum', 'Vibration & mechanical', 'Ingress, corrosion & light', 'Energy & mobility']
@@ -358,10 +441,12 @@ export function searchProducts(q: string): Hit[] {
       if (p.group.toLowerCase().includes(w)) score += 8
       if (p.tagline.toLowerCase().includes(w) || p.intro.toLowerCase().includes(w)) score += 5
       if (p.specs.some(([a, b]) => (a + ' ' + b).toLowerCase().includes(w))) score += 9
+      if (w.length > 2 && p.standards?.some((x) => x.toLowerCase().includes(w))) score += 20
+      if (w.length > 3 && [...(p.uses ?? []), ...(p.options ?? [])].some((x) => x.toLowerCase().includes(w))) score += 6
     }
     if (score > 0) hits.push({ product: p, score, models: mm.slice(0, 4) })
   }
   return hits.sort((a, b) => b.score - a.score || (a.product.tier === 'main' ? -1 : 1))
 }
 
-export const suggestions = ['thermal shock', 'ET950', '-70 °C', 'battery', 'salt spray', 'IPX9K', 'walk-in', 'altitude']
+export const suggestions = ['thermal shock', 'ET950', '-70 °C', 'battery', 'salt spray', 'IPX9K', 'IEC 60068', 'MIL-STD-810']

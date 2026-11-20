@@ -552,6 +552,8 @@ function watchScroll() {
   if (hide === hidden) return
   hidden = hide
   hide ? hideNav() : showNav()
+  // inner pages: the logo goes with the nav while reading down, so it never sits on the text (the landing page keeps it)
+  document.documentElement.toggleAttribute('data-navhid', hide && location.pathname !== '/')
 }
 
 // anything on the page can open the search: the nav button, a field on the products page, or the keyboard
@@ -569,7 +571,7 @@ onMounted(() => {
   }
   gsap.ticker.add(watchScroll)
 })
-onUnmounted(() => { gsap.ticker.remove(watchScroll); document.documentElement.removeAttribute('data-scrolled') })
+onUnmounted(() => { gsap.ticker.remove(watchScroll); document.documentElement.removeAttribute('data-scrolled'); document.documentElement.removeAttribute('data-navhid') })
 
 defineExpose({
   animIn,
@@ -1117,6 +1119,8 @@ defineExpose({
 
 <style>
 /* the official logo, colours untouched; a soft light halo lifts the navy off dark scenes and is invisible on light pages */
+.Header_brandLogo__AXo7t { transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1); }
+@media (min-width: 801px) { html[data-navhid] .Header_brandLogo__AXo7t { opacity: 0; transform: translateY(-14px); pointer-events: none; } }  /* phones keep it: their colour band already sits behind it */
 .Header_brandLogo__AXo7t .lg { filter: drop-shadow(0 0 0.6px rgba(255, 255, 255, 0.55)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.22)); }
 
 

@@ -102,6 +102,7 @@
 
       <SpecCompare v-if="studio && studio.models.length > 1" :s="studio" :series="p.name" :brochure="p.brochure" num="03" />
       <SpecDetail v-if="detail" :d="detail" :brochure="p.brochure" @ask="contact()" />
+      <ProductFacts :p="p" :num="num(0)" />
 
       <!-- last · the photographs (after the specification, which is what buyers come for): the section pins and slides them sideways as you scroll, each moving a little inside its
            frame; phones swipe a plain strip -->
@@ -114,6 +115,8 @@
         </div>
       </section>
 
+
+      <ProductFaq :p="p" :num="num(2)" />
 
       <NextUp label="Next chamber" :title="next.name" :text="next.tagline" :href="`/products/${next.slug}`" />
 
@@ -138,6 +141,8 @@ import SpecDetail from '../components/SpecDetail.vue'
 import SpecStudio from '../components/SpecStudio.vue'
 import { details } from '../config/details'
 import SpecCompare from '../components/SpecCompare.vue'
+import ProductFacts from '../components/ProductFacts.vue'
+import ProductFaq from '../components/ProductFaq.vue'
 import EnvelopeChart from '../components/EnvelopeChart.vue'
 import RampChart from '../components/RampChart.vue'
 import { products, bySlug, img, quotesFor, scenePhotos } from '../config/products'
@@ -159,9 +164,11 @@ const sel = ref(hitItem ?? '')
 const hs = ref(0) // the highlighted point in Explore
 const detail = p ? details[p.slug] : undefined // the full technical file, where the series has one
 const studio = detail?.studio // the redesigned specification (ET first); the rest still use the plain list
-const navs = [{ id: 'overview', t: 'Overview' }, { id: 'specification', t: 'Specification' }, ...(detail?.headline || detail?.chart ? [{ id: 'performance', t: 'Performance' }] : []), ...(detail?.lineup ? [{ id: 'models', t: 'Models' }] : []), ...(detail?.tables ? [{ id: 'technical', t: 'Data' }] : []), ...(detail?.build ? [{ id: 'build', t: 'Build' }] : []), ...(shots.length > 1 ? [{ id: 'photographs', t: 'Photographs' }] : [])]
+const navs = [{ id: 'overview', t: 'Overview' }, { id: 'specification', t: 'Specification' }, ...(detail?.headline || detail?.chart ? [{ id: 'performance', t: 'Performance' }] : []), ...(detail?.lineup ? [{ id: 'models', t: 'Models' }] : []), ...(detail?.tables ? [{ id: 'technical', t: 'Data' }] : []), ...(detail?.build ? [{ id: 'build', t: 'Build' }] : []), ...(shots.length > 1 ? [{ id: 'photographs', t: 'Photographs' }] : []), { id: 'faq', t: 'FAQ' }]
 // the photographs come last, numbered after the technical sections
-const photoNum = `(${String(3 + (detail ? [detail.headline || detail.chart, detail.lineup, detail.tables, detail.build].filter(Boolean).length : 0)).padStart(2, '0')})`
+// sections after the specification count on from it: uses and standards, photographs, questions
+const num = (k: number) => `(${String(3 + k + (detail ? [detail.headline || detail.chart, detail.lineup, detail.tables, detail.build].filter(Boolean).length : 0)).padStart(2, '0')})`
+const photoNum = num(1)
 const navAt = ref('')
 const navOn = ref(false)
 const goTo = (id: string) => {

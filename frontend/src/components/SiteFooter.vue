@@ -46,6 +46,7 @@
         <button class="fn-a" @click="toTop">Top &uarr;</button>
       </div>
     </div>
+    <p class="fn-credit">Designed by <a href="https://santosh-v-portfolio.vercel.app/" target="_blank" rel="noopener">Santosh V</a></p>
   </footer>
 </template>
 
@@ -227,6 +228,9 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .fn-probe b { display: inline-block; min-width: 9ch; font-weight: 400; color: rgba(233, 238, 245, 0.5); transition: color 0.2s linear; }
 .fn-probe.on { color: rgba(233, 238, 245, 0.7); }
 .fn-base-r { display: flex; justify-content: flex-end; align-items: center; gap: 22px; }
+.fn-credit { position: relative; z-index: 2; margin: 1.2vh 0 0; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(233, 238, 245, 0.32); }
+.fn-credit a { color: rgba(233, 238, 245, 0.5); text-decoration: none; }
+.fn-credit a:hover { color: rgba(233, 238, 245, 0.85); }
 .fn-base-r .fn-a { color: rgba(233, 238, 245, 0.6); }
 .fn-social { display: inline-flex; gap: 14px; }
 .fn-social a { display: block; width: 14px; height: 14px; color: rgba(233, 238, 245, 0.6); transition: color 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.9, 0.2, 1); }

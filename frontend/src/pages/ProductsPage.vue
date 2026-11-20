@@ -99,10 +99,19 @@
       <section class="bx">
         <div class="ty-top rv"><span>(03)</span><span>The rest of the range</span><button data-cursor="" @click="openSearch">Search by model or test</button></div>
         <div class="ix-tabs rv" role="tablist">
-          <button v-for="g in ['All', ...groups]" :key="g" role="tab" :aria-selected="grp === g" :class="{ on: grp === g }" data-cursor="" @click="setGroup(g)">{{ g }}<sup>{{ g === 'All' ? catalogue.length : catalogue.filter((p) => p.group === g).length }}</sup></button>
+          <button v-for="g in ['All', ...groups]" :key="g" role="tab" :aria-selected="grp === g" :class="{ on: grp === g }" data-cursor="" @click="setGroup(g)">{{ g }}<sup>{{ pool.filter((p) => (g === 'All' || p.group === g) && match(p)).length }}</sup></button>
         </div>
+        <!-- narrow it down: by the standard you test to, or by any word (a test, a model code, an application); either one brings the five flagships in too -->
+        <div class="ix-filt rv">
+          <label><span>Standard</span>
+            <select v-model="std" data-cursor=""><option value="">Any standard</option><option v-for="f in stdFamilies" :key="f" :value="f">{{ f }}</option></select>
+          </label>
+          <label class="ix-q"><span>Filter</span><input v-model="fq" type="search" placeholder="Test, model or application, e.g. damp heat, ET950, EV battery" /></label>
+          <button v-if="std || fq" data-cursor="" @click="std = ''; fq = ''">Clear</button>
+        </div>
+        <p v-if="!pool.some((p) => (grp === 'All' || p.group === grp) && match(p))" class="ix-none">Nothing in the range matches that yet. We build chambers to order: <button data-cursor="" @click="contact()">tell us the test</button>.</p>
         <div class="bx-grid" ref="ixList">
-          <a v-for="p in catalogue" v-show="grp === 'All' || p.group === grp" :key="p.slug" class="bx-card" :class="{ photo: p.photo }" :href="`/products/${p.slug}`" data-cursor="OPEN">
+          <a v-for="p in pool" v-show="(grp === 'All' || p.group === grp) && match(p)" :key="p.slug" class="bx-card" :class="{ photo: p.photo }" :href="`/products/${p.slug}`" data-cursor="OPEN">
             <b class="bx-name" aria-hidden="true">{{ p.name }}</b>
             <div class="bx-img"><img :src="img(p, 'hero')" :alt="p.name" /></div>
             <span class="bx-cap"><b>{{ p.name }}</b><small>{{ p.group }}</small></span>
@@ -137,7 +146,7 @@ import VideoSlot from '../components/VideoSlot.vue'
 import { createChamberScene } from '../utils/chamberScene'
 ;(window as any).__pagePending = true // the smoke preloader holds until the 3D scene is ready (see Preloader)
 import { createSmoke } from '../utils/smokeWave'
-import { products, mainProducts, catalogue, img, models, quotesFor } from '../config/products'
+import { products, mainProducts, catalogue, img, models, quotesFor, stdFamilies, stdFamily, searchProducts, type Product } from '../config/products'
 
 // how tall each chamber stands, relative to the others, so a bench model reads smaller than a walk-in room
 const scale: Record<string, number> = { et: 0.9, ets: 0.9, eta: 0.84, mini: 0.74, 'walk-in': 0.7 } // eta: the EA600 is deep (2.6 m), so it stands a little smaller to clear the quotes
@@ -160,7 +169,7 @@ const cloudRef = ref<HTMLElement | null>(null)
 const cloudSmokeRef = ref<HTMLCanvasElement | null>(null)
 const plDone = ref(false)
 // the landing page's preloader smoke, without the logo, plays on arrival
-const onLoaded = () => { plDone.value = true; (window as any).lenisInstance?.start(); greet() }
+const onLoaded = () => { plDone.value = true; (window as any).lenisInstance?.start(); greet(); if (std.value) (window as any).lenisInstance?.scrollTo('.bx', { duration: 1.6 }) }
 // once the smoke has gone and the model is in, the chamber swings round to face you
 const greet = () => { if (plDone.value && loaded.value) chambers?.intro(cur.value) }
 const phRef = ref<HTMLElement | null>(null)
@@ -178,6 +187,11 @@ const openSearch = () => window.dispatchEvent(new Event('envisys:search'))
 gsap.registerPlugin(Flip)
 const groups = [...new Set(catalogue.map((p) => p.group))]
 const grp = ref('All')
+const std = ref(new URLSearchParams(location.search).get('std') ?? '')   // product pages link their standards here
+const fq = ref('')
+const pool = computed(() => (std.value || fq.value.trim() ? products : catalogue))
+const hits = computed(() => new Set(searchProducts(fq.value).map((h) => h.product.slug)))
+const match = (p: Product) => (!std.value || !!p.standards?.some((s) => stdFamily(s) === std.value)) && (!fq.value.trim() || hits.value.has(p.slug))
 const ixList = ref<HTMLElement | null>(null)
 async function setGroup(g: string) {
   if (g === grp.value) return
@@ -422,6 +436,17 @@ onUnmounted(() => { document.documentElement.classList.remove('hx-dark'); gsap.t
 .ix-tabs button:hover { border-color: rgba(255, 255, 255, 0.6); }
 .ix-tabs button.on { background: #eef3fa; color: #000; border-color: #eef3fa; }
 .bx-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ix-filt { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 24px; margin: -1vh 0 4vh; }
+.ix-filt label { display: flex; flex-direction: column; gap: 6px; }
+.ix-filt label span { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; }
+.ix-filt select, .ix-filt input { min-width: 200px; padding: 10px 0; border: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.35); background: transparent; color: inherit; font: 16px 'Geist', sans-serif; outline: none; }
+.ix-filt select option { color: #000; }
+.ix-filt .ix-q { flex: 1; max-width: 520px; }
+.ix-filt input::placeholder { color: rgba(233, 238, 245, 0.4); }
+.ix-filt select:focus, .ix-filt input:focus { border-bottom-color: #ff6a1a; }
+.ix-filt > button, .ix-none button { padding: 0; border: 0; background: none; color: #ff8a4a; font: 15px 'Geist', sans-serif; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.ix-filt > button { padding-bottom: 12px; }
+.ix-none { margin: 0 0 4vh; font: 17px/1.5 'Geist', sans-serif; opacity: 0.8; }
 .bx-card { position: relative; display: block; aspect-ratio: 4 / 4.3; border-radius: 22px; overflow: hidden; background: linear-gradient(180deg, #e9f0f8, #dde8f4); color: #0d2340; text-decoration: none; isolation: isolate; }
 /* the name: big, behind the chamber, up from below on hover */
 .bx-name { position: absolute; left: 7%; right: 7%; top: 11%; z-index: 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 3vw, 54px); line-height: 0.96; letter-spacing: -0.055em; text-align: center; opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.2, 0.9, 0.2, 1); }

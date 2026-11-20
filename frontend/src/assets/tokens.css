@@ -15,3 +15,6 @@
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 html .Header_topBar__t3Nfy, html .Header_header__qBw1J { padding-top: max(24.7px, env(safe-area-inset-top)); }
 @media (max-width: 800px) { html .Header_topBar__t3Nfy::before { height: calc(78px + env(safe-area-inset-top)); } }
+
+/* phones: no paragraph below 15 px (several landing sections set 11-13 px mono copy, too small for the people who read it) */
+@media (max-width: 640px) { #app p { font-size: max(15px, 1em); line-height: 1.55; } }

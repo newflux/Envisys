@@ -1096,7 +1096,6 @@ onMounted(() => {
   // ── 3D Text Video Textures (Dual Buffers for Seamless Continuous Crossfade Loop) ──
   const setupVideoEl = () => {
     const v = document.createElement('video')
-    v.src = '/videos/smoke.webm'
     v.crossOrigin = 'anonymous'
     v.muted = true
     v.playsInline = true
@@ -1109,7 +1108,9 @@ onMounted(() => {
 
   videoElA = setupVideoEl()
   videoElB = setupVideoEl()
-  videoElA.play().catch(e => console.warn('Video A play:', e))
+  // the two smoke videos (2 MB) are only seen much later; they load once the scene is up, so a phone's bandwidth goes to the model first
+  const giveSmoke = () => { for (const v of [videoElA!, videoElB!]) v.src = '/videos/smoke.webm'; videoElA!.play().catch(e => console.warn('Video A play:', e)) }
+  ;(window as any).__sceneReady ? giveSmoke() : window.addEventListener('scene:ready', giveSmoke, { once: true })
 
   const videoTexA = new THREE.VideoTexture(videoElA)
   videoTexA.minFilter = THREE.LinearFilter
@@ -1178,6 +1179,20 @@ onMounted(() => {
   // eventsTarget: window so wheel/touch still scrolls while the pointer is over the interactive overlay sections
   const lenis = new Lenis({ wrapper: scrollerEl, content: document.querySelector('.layout__page') as HTMLElement, eventsTarget: window, lerp: 0.08, smoothWheel: true, syncTouch: window.matchMedia('(pointer: coarse)').matches, syncTouchLerp: 0.1 }) // touch: the later sections live in a fixed layer outside the scroller, so a native swipe that starts on a card has nothing to scroll; Lenis drives touch itself
   ;(window as any).lenisInstance = lenis
+  // Touch fling: Lenis takes its momentum from the last frame's speed, which is often 0 on a phone (touch events and frames do not line
+  // up), so a hard flick stopped where the finger did. Measure the finger's own speed over its last 120 ms and glide on from there.
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    let pts: [number, number][] = []
+    addEventListener('touchstart', (e) => { pts = [[e.touches[0].clientY, e.timeStamp]] }, { passive: true })
+    addEventListener('touchmove', (e) => { pts.push([e.touches[0].clientY, e.timeStamp]); if (pts.length > 10) pts.shift() }, { passive: true })
+    addEventListener('touchend', (e) => {
+      const recent = pts.filter((q) => e.timeStamp - q[1] < 120)
+      if (recent.length < 2) return
+      const v = (recent[0][0] - recent[recent.length - 1][0]) / Math.max(16, recent[recent.length - 1][1] - recent[0][1]) // px/ms, + scrolls down
+      if (Math.abs(v) < 0.25) return
+      lenis.scrollTo((lenis as any).targetScroll + v * 420, { duration: 1 + Math.min(0.7, Math.abs(v) * 0.18), easing: (t: number) => 1 - Math.pow(1 - t, 3.5) })
+    }, { passive: true })
+  }
   
   lenis.on('scroll', (e: any) => {
     // Close panel on scroll start if pointer isn't inside it

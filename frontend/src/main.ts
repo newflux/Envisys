@@ -17,6 +17,10 @@ const pages: Record<string, () => Promise<typeof import('./App.vue')>> = {
 // Microsoft Clarity (heatmaps, scroll depth, recordings): live site only, so local testing never shows up in the data
 if (import.meta.env.PROD && location.hostname !== 'localhost') Clarity.init('zdlb48i7f7')
 
+// Big photos decoded on the scroll path froze scrolling for 150-350 ms as each came into view; async decoding lets the frame go
+// out first and the picture follow a frame later. Set on every <img> the pages add.
+new MutationObserver((ms) => { for (const m of ms) m.addedNodes.forEach((n) => { if (n instanceof Element) (n.tagName === 'IMG' ? [n] : n.querySelectorAll('img')).forEach((i) => ((i as HTMLImageElement).decoding = 'async')) }) }).observe(document.documentElement, { childList: true, subtree: true })
+
 const path = location.pathname.replace(/\/+$/, '') || '/'
 const product = path.startsWith('/products/')
 const vertical = path.startsWith('/verticals/')

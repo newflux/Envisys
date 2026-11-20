@@ -185,7 +185,7 @@
               <div class="mg-head"><b>{{ megaGroup }}</b><span>{{ groupLine[megaGroup] }}</span></div>
               <div class="mg-grid">
                 <a v-for="p in products.filter((q) => q.group === megaGroup)" :key="p.slug" class="mg-item" :href="`/products/${p.slug}`">
-                  <span class="mg-th"><img :src="img(p, 'hero')" alt="" /></span>
+                  <span class="mg-th"><img v-if="navSeen" :src="img(p, 'hero')" alt="" /></span>
                   <span class="mg-tx"><b>{{ p.name }}</b><small>{{ p.tagline }}</small></span>
                 </a>
               </div>
@@ -227,7 +227,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img decoding="async" src="/media/team.jpg" alt="" aria-hidden="true" style="object-position: 58% 40%" />
+                <img v-if="navSeen" decoding="async" src="/media/team.jpg" alt="" aria-hidden="true" style="object-position: 58% 40%" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">about us</div></div>
                   <small class="CompanySubmenuItem_sub">Our story, our team, our sites</small>
@@ -252,7 +252,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img decoding="async" src="/media/step-3.jpg" alt="" aria-hidden="true" />
+                <img v-if="navSeen" decoding="async" src="/media/step-3.jpg" alt="" aria-hidden="true" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">resources</div></div>
                   <small class="CompanySubmenuItem_sub">Guides and documents</small>
@@ -277,7 +277,7 @@
                 <div class="CompanySubmenuItem_submenuItemBackgroundInner__MIdIG"></div>
               </div>
               <div class="CompanySubmenuItem_left__OLqdH">
-                <img decoding="async" src="/media/site-aerial.jpg" alt="" aria-hidden="true" style="object-position: 52% 50%" />
+                <img v-if="navSeen" decoding="async" src="/media/site-aerial.jpg" alt="" aria-hidden="true" style="object-position: 52% 50%" />
                 <span class="CompanySubmenuItem_link__ZOT0M">
                   <div class="line-mask"><div class="line">contact</div></div>
                   <small class="CompanySubmenuItem_sub">Peenya, Bengaluru</small>
@@ -313,6 +313,8 @@ defineEmits<{
 // UI state
 const isCompanyOpen = ref(false)
 const isProductsOpen = ref(false)
+// the menus' photos (several MB with the product thumbnails) load the first time a menu opens, not on every page load
+const navSeen = ref(false)
 const megaGroup = ref<Group>(groups[0])
 // one plain line under each kind of test, in the products menu
 const groupLine: Record<Group, string> = {
@@ -323,6 +325,7 @@ const groupLine: Record<Group, string> = {
   'Energy & mobility': 'Batteries, electric motors and solar modules.'
 }
 const isMobileOpen = ref(false)
+watch([isCompanyOpen, isProductsOpen, isMobileOpen], (v) => { if (v.some(Boolean)) navSeen.value = true })
 const searchOpen = ref(false)
 const isContactHovered = ref(false)
 const activeIndex = ref<number | null>(null)

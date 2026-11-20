@@ -69,6 +69,10 @@ const config = {
 }
 
 @media (max-width: 800px) {
-  .p4-copy { width: 60vw; bottom: 8vh; }
+  /* phones: the copy reads at a normal size, across the screen, clear of the edges */
+  .p4-copy { left: 6vw; right: 6vw; width: auto; bottom: calc(7vh + env(safe-area-inset-bottom)); }
+  .p4-copy-title { font-size: 22px; line-height: 1.15; }
+  .p4-copy-body { font-size: 15.5px; line-height: 1.55; }
+  .p4-eyebrow { font-size: 12px; }
 }
 </style>

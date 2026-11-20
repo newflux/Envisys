@@ -84,8 +84,8 @@ const brochures = [...new Map(products.filter((p) => p.brochure).map((p) => [p.b
 .rs-lead { padding: 0 2.2vw 12vh; }
 .rs-lead-a { display: grid; grid-template-columns: 1.25fr 1fr; gap: 3vw; align-items: center; padding: 14px; border-radius: 24px; background: #f6f6f4; color: inherit; text-decoration: none; transition: background 0.4s ease; }
 .rs-lead-a:hover { background: #fff; }
-.rs-lead-img { aspect-ratio: 16 / 10; border-radius: 14px; overflow: hidden; background: #0a0a0c; }
-.rs-lead-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
+.rs-lead-img { aspect-ratio: 16 / 10; border-radius: 14px; overflow: hidden; background: radial-gradient(120% 90% at 50% 40%, #12305a 0%, #0b1f3a 55%, #071427 100%); }
+.rs-lead-img img { width: 100%; height: 100%; object-fit: contain; transition: transform 1.2s var(--ease); }
 .rs-lead-a:hover img { transform: scale(1.04); }
 .rs-lead-tx { display: flex; flex-direction: column; gap: 2vh; padding: 2vh 2vw 2vh 0; }
 .rs-meta { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; }
@@ -104,8 +104,8 @@ const brochures = [...new Map(products.filter((p) => p.brochure).map((p) => [p.b
 .rs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .rs-card { display: flex; flex-direction: column; gap: 10px; padding: 10px 10px 22px; border-radius: 18px; background: #f6f6f4; color: inherit; text-decoration: none; transition: background 0.4s ease, transform 0.6s var(--ease), box-shadow 0.5s ease; }
 .rs-card:hover { background: #fff; transform: translateY(-4px); box-shadow: 0 24px 40px rgba(10, 10, 12, 0.1); }
-.rs-ph { aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: #0a0a0c; margin-bottom: 6px; }
-.rs-ph img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease); }
+.rs-ph { aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: radial-gradient(120% 90% at 50% 40%, #12305a 0%, #0b1f3a 55%, #071427 100%); margin-bottom: 6px; }
+.rs-ph img { width: 100%; height: 100%; object-fit: contain; transition: transform 1s var(--ease); }
 .rs-card:hover img { transform: scale(1.05); }
 .rs-card .rs-meta, .rs-card b, .rs-card p { padding: 0 10px; }
 .rs-card b { font-weight: 400; font-family: var(--font-display); font-size: clamp(15px, 1.3vw, 22px); line-height: 1.15; letter-spacing: -0.04em; }

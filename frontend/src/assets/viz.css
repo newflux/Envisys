@@ -1,0 +1,18 @@
+/* one chart section: text and graph side by side, one screen tall; .flip puts the graph on the left */
+.vz { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 5vw; align-items: center; min-height: 100vh; padding: 10vh 2.2vw; box-sizing: border-box; color: #0d2340; }
+.vz.flip { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); }
+.vz.flip .vz-txt { order: 2; }
+.vz-eye { display: inline-flex; align-items: center; gap: 10px; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
+.vz-eye i { width: 8px; height: 8px; border-radius: 50%; background: #ff6a1a; }
+.vz-txt h3 { margin: 2.4vh 0 3vh; font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 3vw, 52px); line-height: 1.05; letter-spacing: -0.03em; }
+.vz-txt p { margin: 0 0 1.8vh; max-width: 34em; font-family: 'Geist', sans-serif; font-size: clamp(16px, 1.15vw, 19px); line-height: 1.6; opacity: 0; transform: translateY(14px); transition: opacity 0.7s ease var(--d, 0s), transform 0.7s ease var(--d, 0s); }
+.vz-txt p b { color: #ff6a1a; font-weight: 600; }
+.go .vz-txt p { opacity: 1; transform: none; }
+.vz-txt small { display: block; margin-top: 3vh; font-family: 'Geist', sans-serif; font-size: 13px; line-height: 1.5; opacity: 0.55; }
+.vz-fig { margin: 0; padding: 3.5vh 2vw 3vh; border-radius: 22px; background: rgba(255, 255, 255, 0.6); }
+.vz-fig svg { display: block; width: 100%; height: auto; max-height: 62vh; overflow: visible; }
+@media (max-width: 800px) {
+  .vz, .vz.flip { grid-template-columns: 1fr; gap: 4vh; min-height: 0; padding: 8vh 5vw; }
+  .vz.flip .vz-txt, .vz-txt { order: 2; }
+  .vz-fig { padding: 3vh 3vw; }
+}

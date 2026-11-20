@@ -38,13 +38,18 @@ export interface Studio {
   downloads?: { kind: 'drawing' | 'manual' | 'other'; label: string; href: string }[]
   perModel?: Record<string, [string, string][]>                      // extra rows known for one model only (its technical sheet), by model name
   envelope?: Envelope                                                // the operating envelope, drawn from this series' own ranges
+  ramp?: Ramp                                                        // how long a temperature change takes at each rated ramp rate
 }
+/** A temperature change drawn at each rated ramp rate (straight lines from the rate: nominal, not measured curves). */
+export interface Ramp { from: number; to: number; rates: number[]; std: number; title: string; explain: string[]; note: string }
 /** An operating envelope: what the chamber can hold, as regions on two real axes (nothing is drawn that is not in the spec). */
 export interface Envelope {
   x: { label: string; unit: string; min: number; max: number; ticks: number[] }
   y: { label: string; unit: string; min: number; max: number; ticks: number[]; log?: boolean; top?: string; tickLabels?: Record<number, string> }
   regions: { x0: number; x1: number; y0: number; y1: number; label: string; tone: 'cold' | 'main' | 'ext' }[]
   note?: string
+  title?: string
+  explain?: string[]                                     // plain words beside the graph: what it shows and how to read it
 }
 
 export interface Detail {
@@ -208,7 +213,23 @@ export const details: Record<string, Detail> = {
           { x0: -40, x1: 180, y0: 0, y1: 6, label: 'Temperature range', tone: 'ext' },
           { x0: 20, x1: 85, y0: 10, y1: 98, label: 'Humidity control (H models)', tone: 'main' }
         ],
-        note: 'ET150 technical sheet: −40 / −70 to 180 °C; 10 to 98 % RH between 20 and 85 °C.'
+        note: 'ET150 technical sheet: −40 / −70 to 180 °C; 10 to 98 % RH between 20 and 85 °C.',
+        title: 'Where it can take your product',
+        explain: [
+          'Left to right is temperature, bottom to top is humidity. Every coloured box is a climate the chamber can hold.',
+          'The long grey band: dry heat or cold, anywhere from −40 °C to +180 °C. The blue end reaches −70 °C on the 70T and 70H models.',
+          'The orange box is humid air: from 10 to 98 % humidity, between 20 °C and 85 °C, on the H models. That is where damp-heat and tropical tests run.'
+        ]
+      },
+      ramp: {
+        from: 20, to: -40, rates: [3, 5, 10, 15, 20], std: 3,
+        title: 'How fast it gets cold',
+        explain: [
+          'Each line is the chamber cooling from room temperature, 20 °C, down to −40 °C. The steeper the line, the faster it gets there.',
+          'As standard it changes 3 °C every minute: <b>about 20 minutes</b> for this drop. Faster ramps of 5, 10, 15 or 20 °C a minute are options, down to <b>about 3 minutes</b>.',
+          'Faster changes mean shorter tests, and are what thermal-shock and IEC 60068-3-5 profiles ask for.'
+        ],
+        note: 'Times worked out from the rated ramp rates on the ET150 technical sheet, empty chamber. Measured curves with your load are sent on request.'
       },
       common: [['Temperature', '−40 / −70 to 180 °C'], ['Humidity', '10 to 95 % RH (H variants)'], ['Ramp rate', '3 to 20 °C per minute, optional'], ['Supply', '415 V AC, 3 phase, 50/60 Hz, changed to suit the destination country']]
     },
@@ -401,7 +422,13 @@ export const details: Record<string, Detail> = {
           { x0: -70, x1: -40, y0: 10, y1: 1013, label: '70T', tone: 'cold' },
           { x0: -40, x1: 180, y0: 10, y1: 1013, label: 'Altitude with temperature', tone: 'main' }
         ],
-        note: 'Combined altitude and temperature down to 10 mbar (about 31 km); altitude figures are the standard atmosphere.'
+        note: 'Combined altitude and temperature down to 10 mbar (about 31 km); altitude figures are the standard atmosphere.',
+        title: 'Altitude and temperature, together',
+        explain: [
+          'Left to right is temperature. Bottom to top is air pressure: the higher you go, the thinner the air, so the top of the graph is the ground and the bottom is about 31 km up.',
+          'The orange box is everything the chamber can hold at once: any temperature from −40 °C to +180 °C at any height from the ground to 10 mbar.',
+          'That is how a part is proven for an aircraft hold or a drone: thin, cold air, or thin, hot air, in one test. The blue end reaches −70 °C on 70T models.'
+        ]
       },
       common: [["Temperature", "−40 / −70 to 180 °C"], ["Humidity", "10 to 95 % RH (H variants)"], ["Altitude", "Down to 10 mbar"], ["Supply", "415 V AC, 3 phase, 50/60 Hz, changed to suit the destination country"]]
     },

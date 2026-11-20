@@ -1116,10 +1116,9 @@ defineExpose({
 </style>
 
 <style>
-/* the official logo, colours untouched, with a hairline white keyline traced around its shapes: it reads on dark scenes and
-   disappears on light ones (stroke painted under the fill, so the shapes themselves are not thinned) */
-.Header_brandLogo__AXo7t .lg path { stroke: #fff; stroke-width: 1.5px; stroke-linejoin: round; paint-order: stroke fill; vector-effect: non-scaling-stroke; }
-.Header_brandLogo__AXo7t .lg .lg-tag { stroke-width: 0.5px; }
+/* the official logo, colours untouched; a soft light halo lifts the navy off dark scenes and is invisible on light pages */
+.Header_brandLogo__AXo7t .lg { filter: drop-shadow(0 0 0.6px rgba(255, 255, 255, 0.55)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.22)); }
+
 
 /* In stock is live inventory: a small orange dot that breathes */
 .Nav_link__Vx_8M:has(.nav-live) { position: relative; }

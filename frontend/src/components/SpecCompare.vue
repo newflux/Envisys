@@ -4,7 +4,7 @@
   <section id="technical" class="sc">
     <div class="sc-top rv"><span>({{ num }})</span><span>Technical data</span><span>Compare models</span></div>
     <div class="sc-wrap rv">
-      <table>
+      <table :style="{ '--n': cols.length }">
         <thead>
           <tr>
             <th class="sc-lab" scope="col"><span class="sr">Specification</span></th>
@@ -19,9 +19,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="r in rows" :key="r.label">
+          <tr v-for="r in shown" :key="r.label">
             <th scope="row">{{ r.label }}</th>
             <td v-for="(c, i) in cols" :key="i" :class="{ na: r.get(model(c)) === NA }">{{ r.get(model(c)) }}</td>
+          </tr>
+          <tr v-if="rows.length > KEY" class="sc-more">
+            <th scope="row"></th>
+            <td :colspan="cols.length"><button data-cursor="" :aria-expanded="all" @click="all = !all">{{ all ? 'Show fewer' : `Show all ${rows.length} specifications` }}</button></td>
           </tr>
           <tr class="sc-act">
             <th scope="row"></th>
@@ -40,7 +44,9 @@ import { openDataSheet } from '../utils/dataSheet'
 
 const props = defineProps<{ s: Studio; series: string; brochure?: string; num: string }>()
 const NA = 'On request'
-const cols = ref(props.s.models.slice(0, Math.min(3, props.s.models.length)).map((m) => m.name))
+const KEY = 8                                   // rows shown before "Show all", so the table fits one screen
+const all = ref(false)
+const cols = ref(props.s.models.slice(0, Math.min(matchMedia('(max-width: 640px)').matches ? 2 : 3, props.s.models.length)).map((m) => m.name))   // phones compare two
 const model = (name: string) => props.s.models.find((m) => m.name === name)!
 const per = (m: StudioModel, label: string) => props.s.perModel?.[m.name]?.find((r) => r[0] === label)?.[1]
 
@@ -63,26 +69,40 @@ const rows = computed(() => {
   ]
   return all.filter((r) => props.s.models.some((m) => r.get(m) !== NA))
 })
+const shown = computed(() => (all.value ? rows.value : rows.value.slice(0, KEY)))
 const sheet = (name: string) => openDataSheet({ series: props.series, s: props.s, m: model(name), brochure: props.brochure })
 </script>
 
 <style scoped>
-.sc { padding: 14vh 2.2vw 6vh; color: #0d2340; }
+.sc { padding: 12vh 2.2vw 6vh; color: #0d2340; }
 .sc-top { position: relative; display: grid; grid-template-columns: 8.333vw 1fr auto; gap: 2vw; padding-top: 14px; font-family: var(--font-body); font-size: 13px; letter-spacing: 0.08em; opacity: 0.7; }
 .sc-top::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: currentColor; opacity: 0.35; }
-.sc-wrap { margin-top: 6vh; overflow-x: auto; border-radius: 22px; background: rgba(255, 255, 255, 0.6); }
-table { width: 100%; min-width: 720px; border-collapse: collapse; font-family: 'Geist', sans-serif; }
-thead th { position: sticky; top: 0; padding: 22px 20px; background: rgba(13, 35, 64, 0.06); text-align: left; }
+.sc-wrap { margin-top: 4vh; overflow-x: auto; border-radius: 22px; background: rgba(255, 255, 255, 0.6); }
+table { width: 100%; min-width: 720px; table-layout: fixed; border-collapse: collapse; font-family: 'Geist', sans-serif; }
+thead th { position: sticky; top: 0; padding: 16px 20px; background: rgba(13, 35, 64, 0.06); text-align: left; }
 .sc-lab { width: 30%; }
 .sc-pick select { width: 100%; padding: 10px 34px 10px 0; border: 0; border-bottom: 1.5px solid #0d2340; background: transparent url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%230d2340' stroke-width='1.3'/></svg>") no-repeat right 4px center / 11px; color: #0d2340; font: 600 17px 'Geist', sans-serif; appearance: none; cursor: pointer; }
-tbody th { padding: 15px 20px; font-weight: 400; font-size: 15px; text-align: left; opacity: 0.72; vertical-align: top; }
-tbody td { padding: 15px 20px; font-size: 16px; line-height: 1.45; vertical-align: top; }
+tbody th { padding: 12px 20px; font-weight: 400; font-size: 15px; text-align: left; opacity: 0.72; vertical-align: top; }
+tbody td { padding: 12px 20px; font-size: 16px; line-height: 1.45; vertical-align: top; }
 tbody tr + tr th, tbody tr + tr td { border-top: 1px solid rgba(13, 35, 64, 0.12); }
 td.na { opacity: 0.45; }
-.sc-act td { padding-top: 22px; padding-bottom: 26px; }
+.sc-act td { padding-top: 18px; padding-bottom: 22px; }
+.sc-more button { padding: 0; border: 0; background: none; color: #e0560c; font: 600 15px 'Geist', sans-serif; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
 .sc-dl { display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; border: 0; border-radius: 40px; background: #0d2340; color: #fff; font: 13px 'Geist Mono', monospace; letter-spacing: 0.06em; cursor: pointer; }
 .sc-dl:hover { background: #ff6a1a; }
 .sc-dl svg { width: 10px; height: 10px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-@media (max-width: 640px) { .sc { padding: 9vh 4vw 4vh; } .sc-top { grid-template-columns: 14vw 1fr auto; } }
+@media (max-width: 640px) {
+  .sc { padding: 9vh 4vw 4vh; } .sc-top { grid-template-columns: 14vw 1fr auto; }
+  /* stacked: the label on its own line, the models side by side under it, so nothing scrolls sideways */
+  table { min-width: 0; }
+  tr { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+  thead th.sc-lab, .sc-act th, .sc-more th { display: none; }
+  tbody th { grid-column: 1 / -1; padding: 14px 16px 0; font-size: 14px; }
+  thead th, tbody td { padding: 6px 16px 14px; font-size: 16px; }
+  thead th { padding-top: 16px; }
+  tbody tr + tr td { border-top: 0; }
+  .sc-more td { grid-column: 1 / -1; }
+  .sc-dl { padding: 11px 14px; }
+}
 </style>

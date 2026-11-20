@@ -74,6 +74,10 @@
         </div>
       </section>
 
+      <!-- what it can do, as graphs anyone can read: text and graph alternate sides after Explore (picture left), one screen each -->
+      <EnvelopeChart v-if="studio?.envelope" :e="studio.envelope" />
+      <RampChart v-if="studio?.ramp" :r="studio.ramp" flip />
+
       <!-- 3 · the specification, straight after what it is -->
       <SpecStudio v-if="studio" :s="studio" :lineup="detail?.lineup" :features="p.features" :group="p.group" :series="p.name" :brochure="p.brochure" :sel="sel" @pick="sel = $event" @ask="contact()" />
       <section v-else id="specification" class="pd-sec pd-spec">
@@ -134,6 +138,8 @@ import SpecDetail from '../components/SpecDetail.vue'
 import SpecStudio from '../components/SpecStudio.vue'
 import { details } from '../config/details'
 import SpecCompare from '../components/SpecCompare.vue'
+import EnvelopeChart from '../components/EnvelopeChart.vue'
+import RampChart from '../components/RampChart.vue'
 import { products, bySlug, img, quotesFor, scenePhotos } from '../config/products'
 
 const slug = decodeURIComponent(location.pathname.replace(/\/+$/, '').split('/').pop() ?? '')
@@ -263,7 +269,7 @@ onUnmounted(() => gsap.ticker.remove(tick))
 .pd-top { position: relative; display: grid; grid-template-columns: 8.333vw 1fr auto; gap: 2vw; padding-top: 14px; font-family: var(--font-body); font-size: 13px; letter-spacing: 0.04em; }
 .pd-top > span { opacity: 0.6; }
 .pd-about-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 1vw; margin-top: 6vh; align-items: start; }
-.pd-about h2 { grid-column: 1 / span 7; margin: 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 3.6vw, 66px); line-height: 1.02; letter-spacing: -0.055em; }
+.pd-about h2 { grid-column: 1 / span 7; margin: 0; font-weight: 400; font-family: var(--font-display); font-size: clamp(26px, 3.2vw, 58px); line-height: 1.02; letter-spacing: -0.055em; }
 .pd-about p { grid-column: 9 / span 4; margin: 0.6em 0 0; font-family: 'Geist', sans-serif; font-size: clamp(16px, 1.2vw, 20px); line-height: 1.6; }
 
 /* the pinned gallery */

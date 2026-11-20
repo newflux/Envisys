@@ -33,7 +33,7 @@ export const products: Product[] = [
   {
     hud: [['Temperature', '−70 – 180', '°C'], ['Humidity', '10 – 95', '% RH'], ['Volume', '150 – 3000', 'L'], ['Ramp', '3 – 20', '°C/min']],
     slug: 'et', name: 'ET Chamber', code: 'ET', tier: 'main', group: 'Climatic & thermal', gallery: 4,
-    tagline: 'Temperature and humidity, held where you set them.',
+    tagline: 'Climate, held exactly.',
     intro: 'ET-Series environmental test chambers simulate a wide range of temperature and relative humidity for components and assemblies of many sizes, with the features other makers sell as add-ons already included.',
     features: [
       'LED-lit work space with a multi-pane vacuumised glass window and de-fog heaters',
@@ -59,7 +59,7 @@ export const products: Product[] = [
   {
     hud: [['Hot zone', '200', '°C'], ['Cold zone', '−70', '°C'], ['Transfer', '< 10', 's'], ['Accuracy', '± 1', '°C']],
     slug: 'ets', name: 'ETS Thermal Shock', code: 'ETS', tier: 'main', group: 'Shock, altitude & vacuum', gallery: 4,
-    tagline: 'Hot to cold in under ten seconds.',
+    tagline: 'Hot to cold in seconds.',
     intro: 'Thermal shock chambers move a product between a hot zone and a cold zone to find the point where materials and joints fail. A carrier basket transfers the test item between the two zones.',
     features: [
       'Two zones, hot and cold, with a product carrier basket between them',
@@ -75,7 +75,7 @@ export const products: Product[] = [
   {
     hud: [['Temperature', '−70 – 180', '°C'], ['Pressure', '10', 'mbar'], ['Humidity', '10 – 95', '% RH'], ['Volume', '600 – 1400', 'L']],
     slug: 'eta', name: 'ETA Altitude', code: 'EA', tier: 'main', group: 'Shock, altitude & vacuum', gallery: 4,
-    tagline: 'Low pressure and temperature together.',
+    tagline: 'Altitude meets temperature.',
     intro: 'Altitude chambers adjust temperature while exposing the product to low pressure, to simulate the conditions aircraft and their components meet. They suit avionics and any product that may be shipped by air.',
     features: ['Combined altitude, temperature and humidity (CATH) testing', 'Door locking mechanism, humidity butterfly valve, feed-through connectors', 'Factory tested before dispatch', 'Custom builds for specific altitude and temperature profiles'],
     specs: [['Available range', '600, 950 and 1400 L'], ['Temperature', '−40 / −70 °C to 180 °C'], ['Relative humidity', '10% to 95% (optional)'], ['Altitude', 'up to 10 mbar']],
@@ -94,7 +94,7 @@ export const products: Product[] = [
   {
     hud: [['Models', '14', ''], ['Bench', '2', 'models'], ['Floor', '12', 'models'], ['Sizes', '30 – 100', 'EM']],
     slug: 'mini', name: 'Mini Environmental', code: 'EM', tier: 'main', group: 'Climatic & thermal', gallery: 4,
-    tagline: 'A full climate, on a bench.',
+    tagline: 'Full climate, on a bench.',
     intro: 'EM-Series mini chambers are made for table or floor use with a small footprint, for component-level testing in laboratories short on space.',
     features: ['Mono-block construction with a user-access control desk', 'Full-front opening door with view window and LED lighting', 'Colour touch programmer or single / dual-loop controllers', 'Single or two-stage refrigeration with eco-friendly refrigerants', 'Optional stand for bench models'],
     specs: [['Formats', 'bench / desk and floor models'], ['Controller', 'programmable colour touch, or set-point controller']],
@@ -105,7 +105,7 @@ export const products: Product[] = [
   {
     hud: [['Temperature', '−65 – 180', '°C'], ['Humidity', '10 – 95', '% RH'], ['Volume', '10k – 22k', 'L'], ['Models', '6', '']],
     slug: 'walk-in', name: 'Walk-in Environmental', code: 'EWS', tier: 'main', group: 'Climatic & thermal', gallery: 2,
-    tagline: 'Room-sized climates for large specimens.',
+    tagline: 'Climates you walk into.',
     intro: 'EWS-Series walk-in chambers are built to order for large specimens. Mono-block rooms serve high-temperature work; pre-fabricated panel rooms serve low and medium temperatures.',
     features: ['Water- or air-cooled refrigeration with hermetic or semi-hermetic compressors', 'Integrated or remote refrigeration compartments and control panel', 'Colour touch programmer with RS-232, RS-485, USB and Ethernet', 'Height-adjustable specimen racks and cable ports', 'Built-in web server for remote monitoring', 'Optional remote control console'],
     specs: [['Volume', '10,000 to 22,000 L'], ['Temperature', '−35 / −65 °C to 180 °C'], ['Relative humidity', '10% to 95%']],
@@ -117,7 +117,7 @@ export const products: Product[] = [
   // ── catalogue ──
   {
     slug: 'battery', name: 'Battery Testing Chambers', code: 'ETB', tier: 'catalog', group: 'Energy & mobility', gallery: 4,
-    tagline: 'Safe testing of cells and packs against environmental stress.',
+    tagline: 'Cells and packs, tested safely.',
     intro: 'Battery testing chambers come in many sizes and configurations for different battery types, with safety systems built in for the risks of lithium-ion testing.',
     features: ['CO₂ fire suppression system', 'Automatic air exchange system', 'Mechanical locking and fire extinguisher system', 'Mechanical pressure relief port'],
     specs: [['Available range', '600, 950 and 1400 L'], ['Temperature', '−40 / −70 °C to 180 °C']],
@@ -127,7 +127,7 @@ export const products: Product[] = [
   },
   {
     slug: 'vibration-chambers', name: 'Vibration Chambers', code: 'ETV', tier: 'catalog', group: 'Vibration & mechanical', gallery: 2,
-    tagline: 'A climate chamber built around a shaker.',
+    tagline: 'Climate around a shaker.',
     intro: 'A vibration assembly with an environmental chamber, designed and built to the customer’s requirement and the international standard it must meet: chamber, shaker interface, and an HMI / PLC control system.',
     features: ['Environmental chamber with a vibration shaker interface', 'High-density, low-conduction mineral wool insulation to avoid thermal loss', 'Chamber moves vertically on hydraulic cylinders, or horizontally on rails', 'HMI / PC PLC based control'],
     specs: [['ETV150 work space', '550 × 400 × 700 mm']],
@@ -137,7 +137,7 @@ export const products: Product[] = [
   },
   {
     slug: 'rain', name: 'Rain Chambers', code: 'IPX', tier: 'catalog', group: 'Ingress, corrosion & light', gallery: 2,
-    tagline: 'Water ingress, from drip to high-pressure jet.',
+    tagline: 'Water, from drip to jet.',
     intro: 'Rain spray chambers test a product’s waterproofing by imitating rain, spray and dripping, for ingress-protection (IP) ratings and for the physical deterioration water causes. Walk-in and drive-in facilities and room conversions are available.',
     features: ['Industrial walk-in and drive-in rain facilities', 'Liquid-ingress protection test chambers', 'Room conversion into rain chambers'],
     specs: [['IP coverage', 'IPX1 up to IPX9K']],
@@ -147,7 +147,7 @@ export const products: Product[] = [
   },
   {
     slug: 'vibration-shakers', name: 'Vibration Shakers', code: 'EVS', tier: 'catalog', group: 'Vibration & mechanical', gallery: 1,
-    tagline: 'Electrodynamic shakers from low to high force.',
+    tagline: 'Shakers, low to high force.',
     intro: 'Electrodynamic vibration shaker systems, in low, medium and high-force ranges.',
     features: [],
     specs: [['Force classes', 'low, medium and high']],
@@ -176,7 +176,7 @@ export const products: Product[] = [
   },
   {
     slug: 'sub-zero', name: 'Sub-Zero & Razor Blade Treatment', code: 'ESC', tier: 'catalog', group: 'Climatic & thermal', gallery: 4,
-    tagline: 'Deep cold for treating blades and components.',
+    tagline: 'Deep cold, for blades.',
     intro: 'Sub-zero chambers use a cascade water-cooled refrigeration system with a high-efficiency plate heat exchanger. They are used for the sub-zero treatment of razor blades and for heat-treatment applications on automotive components.',
     features: ['Cascade water-cooled refrigeration', 'Vertical sub-zero chambers for automotive components', 'Sub-zero treatment chambers for razor blades'],
     specs: [],
@@ -185,7 +185,7 @@ export const products: Product[] = [
   },
   {
     slug: 'solar-pv', name: 'PV Module & Solar Panel Testing', code: 'ET', tier: 'catalog', group: 'Energy & mobility', gallery: 1,
-    tagline: 'Damp heat and thermal cycling for PV modules.',
+    tagline: 'Damp heat for PV modules.',
     intro: 'ET-Series environmental chambers sized for solar panels and PV modules, for the temperature and humidity tests the PV standards call for.',
     features: ['Humidity control during the temperature ramp, or none, as the test requires', 'Sized for variable panel dimensions'],
     specs: [['Standards', 'IEC 61215, IEC 61730, IEC 62108, UL 1703, ASTM E1171']],
@@ -225,7 +225,7 @@ export const products: Product[] = [
   },
   {
     slug: 'utm', name: 'Chambers for UTMs', code: 'UTM', tier: 'catalog', group: 'Vibration & mechanical', gallery: 1, photo: true,
-    tagline: 'Test the material under load, at temperature.',
+    tagline: 'Load, at temperature.',
     intro: 'Environmental chambers made to fit universal testing machines, so a specimen can be pulled, pressed or bent while held at temperature.',
     features: [],
     specs: [],

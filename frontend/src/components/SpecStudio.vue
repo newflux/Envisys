@@ -10,8 +10,6 @@
       <div v-for="(h, i) in s.headline" :key="h[0]" class="rv" :style="{ '--d': i * 0.06 + 's' }"><dt>{{ h[0] }}</dt><dd>{{ h[1] }}<small>{{ h[2] }}</small></dd></div>
     </dl>
 
-    <EnvelopeChart v-if="s.envelope" :e="s.envelope" />
-
     <div class="ss-bar2 rv">
       <h3>Models</h3>
       <div class="ss-views" role="tablist" aria-label="How to see the models">
@@ -129,7 +127,6 @@ import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import LineChart from './LineChart.vue'
 import { PER_MODEL, pendingCards } from '../config/details'
-import EnvelopeChart from './EnvelopeChart.vue'
 import type { Studio, Lineup } from '../config/details'
 import { openDataSheet } from '../utils/dataSheet'
 
